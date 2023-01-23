@@ -18,3 +18,10 @@ func InsertRangeRegister(accumulator uint32, current uint32, start uint8, length
 
 	return arch.AwooRegister(accumulator | current)
 }
+
+func FillSignBits(raw uint32, start uint8) arch.AwooRegister {
+	mask := uint32(1 << (32 - start - 1))
+	mask = mask << start
+
+	return arch.AwooRegister(raw | mask)
+}
