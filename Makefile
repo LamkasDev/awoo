@@ -1,4 +1,4 @@
-AWOOPLATFORM=awoo64
+AWOOPLATFORM=awoo32
 
 GOOS=windows
 GOARCH=amd64
@@ -8,10 +8,14 @@ GOTAGS=$(AWOOPLATFORM),awoodebug
 build:
 	@set GOOS=$(GOOS)
 	@set GOARCH=$(GOARCH)
-	@go build -o build/$(AWOOPLATFORM)/awoo-emu.exe -tags $(GOTAGS) cmd/main.go
+	@go build -o build/$(AWOOPLATFORM)/awoomu.exe -tags $(GOTAGS) cmd/awoomu/main.go
+	@go build -o build/$(AWOOPLATFORM)/awooll.exe -tags $(GOTAGS) cmd/awooll/main.go
 
-run: build
-	@./build/$(AWOOPLATFORM)/awoo-emu.exe
+runemu: build
+	@./build/$(AWOOPLATFORM)/awoomu.exe
+
+runll: build
+	@./build/$(AWOOPLATFORM)/awooll.exe
 
 clean:
 	@rmdir /S /Q build

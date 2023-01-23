@@ -1,3 +1,3 @@
 {
-    "go.buildTags": "awoo64,awoodebug"
+    "go.buildTags": "awoo32,awoodebug"
 }
