@@ -28,7 +28,7 @@ func Decode(table AwooInstructionTable, raw uint32) (AwooDecodedInstruction, err
 		return AwooDecodedInstruction{}, fmt.Errorf("unknown instruction %s", gchalk.Red(fmt.Sprintf("0x%x", code)))
 	}
 	format := instruction.AwooInstructionFormats[subtable.Format]
-	argument := instruction.ProcessExtendedRange(raw, format.Argument)
+	argument := instruction.ProcessExtendedRange(raw, format.Argument, false)
 	entry, ok := subtable.Subtable[(uint16)(argument)]
 	if !ok {
 		return AwooDecodedInstruction{}, fmt.Errorf("unknown instruction %s", gchalk.Red(fmt.Sprintf("0x%x", code)))
@@ -40,6 +40,6 @@ func Decode(table AwooInstructionTable, raw uint32) (AwooDecodedInstruction, err
 		SourceOne:   util.SelectRangeRegister(raw, format.SourceOne.Start, format.SourceOne.Length),
 		SourceTwo:   util.SelectRangeRegister(raw, format.SourceTwo.Start, format.SourceTwo.Length),
 		Destination: util.SelectRangeRegister(raw, format.Destination.Start, format.Destination.Length),
-		Immediate:   instruction.ProcessExtendedRange(raw, format.Immediate),
+		Immediate:   instruction.ProcessExtendedRange(raw, format.Immediate, true),
 	}, nil
 }

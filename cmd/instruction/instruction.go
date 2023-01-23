@@ -30,8 +30,8 @@ func ProcessExtendedRange(raw uint32, rangeExtended AwooInstructionRangeExtended
 		value = util.InsertRangeRegister((uint32)(value), (uint32)(currentRangeValue), offset, currentRange.Length)
 		offset += currentRange.Length
 	}
-	if offset < 32 {
-		util.InsertRangeRegister(value, 1, offset, 32-offset)
+	if extendSign && offset < 32 {
+		util.InsertRangeRegister((uint32)(value), 1, offset, 32-offset)
 	}
 
 	return value
