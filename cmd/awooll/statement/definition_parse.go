@@ -13,7 +13,7 @@ import (
 func ConstructStatementDefinition(context *parser_context.AwooParserContext, t lexer_token.AwooLexerToken, fetchToken ConstructStatementFetchToken) (AwooParserStatement, error) {
 	statementType := context.Lexer.Types.All[lexer_token.GetTokenTypeType(&t)]
 	statement := CreateStatementDefinition(node.CreateNodeType(t))
-	t, err := ExpectToken(fetchToken, token.TokenTypeIdentifier, "identifier")
+	t, err := ExpectToken(fetchToken, []uint16{token.TokenTypeIdentifier}, "identifier")
 	if err != nil {
 		return statement, err
 	}
@@ -25,11 +25,11 @@ func ConstructStatementDefinition(context *parser_context.AwooParserContext, t l
 		Name: identifier,
 	})
 	SetStatementDefinitionIdentifier(&statement, node.CreateNodeIdentifier(t))
-	_, err = ExpectToken(fetchToken, token.TokenOperatorEq, "=")
+	_, err = ExpectToken(fetchToken, []uint16{token.TokenOperatorEq}, "=")
 	if err != nil {
 		return statement, err
 	}
-	t, err = ExpectToken(fetchToken, token.TokenTypePrimitive, "primitive")
+	t, err = ExpectToken(fetchToken, []uint16{token.TokenTypePrimitive}, "primitive")
 	if err != nil {
 		return statement, err
 	}
@@ -38,7 +38,7 @@ func ConstructStatementDefinition(context *parser_context.AwooParserContext, t l
 		return statement, err
 	}
 	SetStatementDefinitionValue(&statement, primitiveNode)
-	_, err = ExpectToken(fetchToken, token.TokenOperatorEndStatement, ";")
+	_, err = ExpectToken(fetchToken, []uint16{token.TokenOperatorEndStatement}, ";")
 	if err != nil {
 		return statement, err
 	}

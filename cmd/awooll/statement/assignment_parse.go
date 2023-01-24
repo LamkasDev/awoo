@@ -9,16 +9,16 @@ import (
 
 func ConstructStatementAssignment(context *parser_context.AwooParserContext, t lexer_token.AwooLexerToken, fetchToken ConstructStatementFetchToken) (AwooParserStatement, error) {
 	statement := CreateStatementAssignment(node.CreateNodeIdentifier(t))
-	_, err := ExpectToken(fetchToken, token.TokenOperatorEq, "=")
+	_, err := ExpectToken(fetchToken, []uint16{token.TokenOperatorEq}, "=")
 	if err != nil {
 		return statement, err
 	}
-	t, err = ExpectToken(fetchToken, token.TokenTypePrimitive, "primitive")
+	t, err = ExpectToken(fetchToken, []uint16{token.TokenTypePrimitive}, "primitive")
 	if err != nil {
 		return statement, err
 	}
 	SetStatementAssignmentValue(&statement, node.CreateNodePrimitive(t))
-	_, err = ExpectToken(fetchToken, token.TokenOperatorEndStatement, ";")
+	_, err = ExpectToken(fetchToken, []uint16{token.TokenOperatorEndStatement}, ";")
 	if err != nil {
 		return statement, err
 	}

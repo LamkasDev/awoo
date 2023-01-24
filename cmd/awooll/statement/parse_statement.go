@@ -6,17 +6,18 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
+	"github.com/LamkasDev/awoo-emu/cmd/common/util"
 	"github.com/jwalton/gchalk"
 )
 
 type ConstructStatementFetchToken func() (lexer_token.AwooLexerToken, error)
 
-func ExpectToken(fetchToken ConstructStatementFetchToken, tokenType uint16, tokenName string) (lexer_token.AwooLexerToken, error) {
+func ExpectToken(fetchToken ConstructStatementFetchToken, tokenTypes []uint16, tokenName string) (lexer_token.AwooLexerToken, error) {
 	t, err := fetchToken()
 	if err != nil {
 		return t, err
 	}
-	if t.Type != tokenType {
+	if util.Contains(tokenTypes, t.Type) {
 		return t, fmt.Errorf("expected a %s", gchalk.Red(tokenName))
 	}
 

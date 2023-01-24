@@ -19,7 +19,7 @@ func CompileStatementAssignment(context *compiler_context.AwooCompilerContext, s
 	err := encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionADDI,
 		Destination: cpu.AwooRegisterTemporaryZero,
-		Immediate:   uint32(prim.(int)),
+		Immediate:   uint32(prim.(int64)),
 	}, d)
 	if err != nil {
 		return d, err
