@@ -1,7 +1,7 @@
 package cpu
 
 import (
-	"github.com/LamkasDev/awoo-emu/cmd/awoomu/arch"
+	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 )
 
 func ProcessBEQ(cpu *AwooCPU, ins AwooDecodedInstruction) {

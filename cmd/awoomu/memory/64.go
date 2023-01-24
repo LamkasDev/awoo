@@ -2,7 +2,7 @@
 
 package memory
 
-import "github.com/LamkasDev/awoo-emu/cmd/awoomu/arch"
+import "github.com/LamkasDev/awoo-emu/cmd/common/arch"
 
 func WriteMemoryWordDouble(mem *AwooMemory, n arch.AwooRegister, data arch.AwooWordDouble) {
 	WriteMemory128(mem, n, (uint128)(data))

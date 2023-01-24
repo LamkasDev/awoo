@@ -1,84 +1,57 @@
 package cpu
 
-import (
-	"github.com/LamkasDev/awoo-emu/cmd/awoomu/instruction"
-)
+import "github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 
-type AwooInstructionTableEntry struct {
-	Instruction instruction.AwooInstruction
-	Process     AwooDecodedInstructionProcess
-}
-type AwooInstructionTableSubtable struct {
-	Format   uint8
-	Subtable map[uint16]AwooInstructionTableEntry
-}
-type AwooInstructionTable map[uint8]AwooInstructionTableSubtable
-
-func SetupInstructionTableEntry(table AwooInstructionTable, code uint8, arg uint16, format uint8, name string, Process AwooDecodedInstructionProcess) {
-	_, ok := table[code]
-	if !ok {
-		table[code] = AwooInstructionTableSubtable{
-			Format:   format,
-			Subtable: make(map[uint16]AwooInstructionTableEntry),
-		}
-	}
-
-	table[code].Subtable[arg] = AwooInstructionTableEntry{
-		Instruction: instruction.AwooInstruction{Code: code, Format: format, Name: name, Advance: true},
-		Process:     Process,
-	}
-}
-
-func SetupInstructionTable() AwooInstructionTable {
-	table := AwooInstructionTable{}
+func SetupDecoderInstructionTable() instruction.AwooInstructionTable {
+	table := instruction.SetupInstructionTable()
 
 	// Arithmetic (9 instructions)
-	SetupInstructionTableEntry(table, 0b0110011, 0x0, instruction.AwooInstructionFormatR, "ADD", ProcessADD)
-	SetupInstructionTableEntry(table, 0b0110011, 0x100, instruction.AwooInstructionFormatR, "SUB", ProcessSUB)
-	SetupInstructionTableEntry(table, 0b0010011, 0x0, instruction.AwooInstructionFormatI, "ADDI", ProcessADDI)
-	SetupInstructionTableEntry(table, 0b0110011, 0x2, instruction.AwooInstructionFormatR, "SLT", ProcessSLT)
-	SetupInstructionTableEntry(table, 0b0010011, 0x2, instruction.AwooInstructionFormatI, "SLTI", ProcessSLTI)
-	SetupInstructionTableEntry(table, 0b0110011, 0x6, instruction.AwooInstructionFormatR, "SLTU", ProcessSLTU)
-	SetupInstructionTableEntry(table, 0b0010011, 0x6, instruction.AwooInstructionFormatI, "SLTIU", ProcessSLTIU)
-	SetupInstructionTableEntry(table, 0b0110111, 0x0, instruction.AwooInstructionFormatU, "LUI", ProcessLUI)
-	SetupInstructionTableEntry(table, 0b0010111, 0x0, instruction.AwooInstructionFormatU, "AUIPC", ProcessAUIPC)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionADD.Code, instruction.AwooInstructionADD.Argument, ProcessADD)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionSUB.Code, instruction.AwooInstructionSUB.Argument, ProcessSUB)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionADDI.Code, instruction.AwooInstructionADDI.Argument, ProcessADDI)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionSLT.Code, instruction.AwooInstructionSLT.Argument, ProcessSLT)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionSLTI.Code, instruction.AwooInstructionSLTI.Argument, ProcessSLTI)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionSLTU.Code, instruction.AwooInstructionSLTU.Argument, ProcessSLTU)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionSLTIU.Code, instruction.AwooInstructionSLTIU.Argument, ProcessSLTIU)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionLUI.Code, instruction.AwooInstructionLUI.Argument, ProcessLUI)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionAUIPC.Code, instruction.AwooInstructionAUIPC.Argument, ProcessAUIPC)
 
 	// Logical (12 instructions)
-	SetupInstructionTableEntry(table, 0b0110011, 0x7, instruction.AwooInstructionFormatR, "AND", ProcessAND)
-	SetupInstructionTableEntry(table, 0b0110011, 0x6, instruction.AwooInstructionFormatR, "OR", ProcessOR)
-	SetupInstructionTableEntry(table, 0b0110011, 0x4, instruction.AwooInstructionFormatR, "XOR", ProcessXOR)
-	SetupInstructionTableEntry(table, 0b0010011, 0x7, instruction.AwooInstructionFormatI, "ANDI", ProcessANDI)
-	SetupInstructionTableEntry(table, 0b0110011, 0x6, instruction.AwooInstructionFormatI, "ORI", ProcessORI)
-	SetupInstructionTableEntry(table, 0b0110011, 0x4, instruction.AwooInstructionFormatI, "XORI", ProcessXORI)
-	SetupInstructionTableEntry(table, 0b0110011, 0x1, instruction.AwooInstructionFormatR, "SLL", ProcessSLL)
-	SetupInstructionTableEntry(table, 0b0110011, 0x5, instruction.AwooInstructionFormatR, "SRL", ProcessSRL)
-	SetupInstructionTableEntry(table, 0b0110011, 0x105, instruction.AwooInstructionFormatI, "SRA", ProcessSRA)
-	SetupInstructionTableEntry(table, 0b0010011, 0x1, instruction.AwooInstructionFormatI, "SLLI", ProcessSLLI)
-	SetupInstructionTableEntry(table, 0b0010011, 0x5, instruction.AwooInstructionFormatI, "SRLI", ProcessSRLI)
-	SetupInstructionTableEntry(table, 0b0010011, 0x105, instruction.AwooInstructionFormatI, "SRAI", ProcessSRAI)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionAND.Code, instruction.AwooInstructionAND.Argument, ProcessAND)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionOR.Code, instruction.AwooInstructionOR.Argument, ProcessOR)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionXOR.Code, instruction.AwooInstructionXOR.Argument, ProcessXOR)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionANDI.Code, instruction.AwooInstructionANDI.Argument, ProcessANDI)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionORI.Code, instruction.AwooInstructionORI.Argument, ProcessORI)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionXORI.Code, instruction.AwooInstructionXORI.Argument, ProcessXORI)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionSLL.Code, instruction.AwooInstructionSLL.Argument, ProcessSLL)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionSRL.Code, instruction.AwooInstructionSRL.Argument, ProcessSRL)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionSRA.Code, instruction.AwooInstructionSRA.Argument, ProcessSRA)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionSLLI.Code, instruction.AwooInstructionSLLI.Argument, ProcessSLLI)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionSRLI.Code, instruction.AwooInstructionSRLI.Argument, ProcessSRLI)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionSRAI.Code, instruction.AwooInstructionSRAI.Argument, ProcessSRAI)
 
 	// Load / Store (11 instructions)
-	// SetupInstructionTableEntry(table, 0b0000011, 0x3, instruction.AwooInstructionFormatI, "LD", ProcessLD)
-	SetupInstructionTableEntry(table, 0b0000011, 0x2, instruction.AwooInstructionFormatI, "LW", ProcessLW)
-	SetupInstructionTableEntry(table, 0b0000011, 0x1, instruction.AwooInstructionFormatI, "LH", ProcessLH)
-	SetupInstructionTableEntry(table, 0b0000011, 0x0, instruction.AwooInstructionFormatI, "LB", ProcessLB)
-	// SetupInstructionTableEntry(table, 0b0000011, 0x6, instruction.AwooInstructionFormatI, "LWU", ProcessLWU)
-	SetupInstructionTableEntry(table, 0b0000011, 0x5, instruction.AwooInstructionFormatI, "LHU", ProcessLHU)
-	SetupInstructionTableEntry(table, 0b0000011, 0x4, instruction.AwooInstructionFormatI, "LBU", ProcessLBU)
-	// SetupInstructionTableEntry(table, 0b0100011, 0x3, instruction.AwooInstructionFormatS, "SD", ProcessSD)
-	SetupInstructionTableEntry(table, 0b0100011, 0x2, instruction.AwooInstructionFormatS, "SW", ProcessSW)
-	SetupInstructionTableEntry(table, 0b0100011, 0x1, instruction.AwooInstructionFormatS, "SH", ProcessSH)
-	SetupInstructionTableEntry(table, 0b0100011, 0x0, instruction.AwooInstructionFormatS, "SB", ProcessSB)
+	// instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionLD.Code, instruction.AwooInstructionLD.Argument, ProcessLD)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionLW.Code, instruction.AwooInstructionLW.Argument, ProcessLW)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionLH.Code, instruction.AwooInstructionLH.Argument, ProcessLH)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionLB.Code, instruction.AwooInstructionLB.Argument, ProcessLB)
+	// instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionLWU.Code, instruction.AwooInstructionLWU.Argument, ProcessLWU)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionLHU.Code, instruction.AwooInstructionLHU.Argument, ProcessLHU)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionLBU.Code, instruction.AwooInstructionLBU.Argument, ProcessLBU)
+	// instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionSD.Code, instruction.AwooInstructionSD.Argument, ProcessSD)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionSW.Code, instruction.AwooInstructionSW.Argument, ProcessSW)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionSH.Code, instruction.AwooInstructionSH.Argument, ProcessSH)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionSB.Code, instruction.AwooInstructionSB.Argument, ProcessSB)
 
 	// Branching (8 instructions)
-	SetupInstructionTableEntry(table, 0b1100011, 0x0, instruction.AwooInstructionFormatB, "BEQ", ProcessBEQ)
-	SetupInstructionTableEntry(table, 0b1100011, 0x1, instruction.AwooInstructionFormatB, "BNE", ProcessBNE)
-	SetupInstructionTableEntry(table, 0b1100011, 0x5, instruction.AwooInstructionFormatB, "BGE", ProcessBGE)
-	SetupInstructionTableEntry(table, 0b1100011, 0x7, instruction.AwooInstructionFormatB, "BGEU", ProcessBGEU)
-	SetupInstructionTableEntry(table, 0b1100011, 0x4, instruction.AwooInstructionFormatB, "BLT", ProcessBLT)
-	SetupInstructionTableEntry(table, 0b1100011, 0x6, instruction.AwooInstructionFormatB, "BLTU", ProcessBLTU)
-	SetupInstructionTableEntry(table, 0b1101111, 0x0, instruction.AwooInstructionFormatJ, "JAL", ProcessJAL)
-	SetupInstructionTableEntry(table, 0b1100111, 0x0, instruction.AwooInstructionFormatI, "JALR", ProcessJALR)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionBEQ.Code, instruction.AwooInstructionBEQ.Argument, ProcessBEQ)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionBNE.Code, instruction.AwooInstructionBNE.Argument, ProcessBNE)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionBGE.Code, instruction.AwooInstructionBGE.Argument, ProcessBGE)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionBGEU.Code, instruction.AwooInstructionBGEU.Argument, ProcessBGEU)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionBLT.Code, instruction.AwooInstructionBLT.Argument, ProcessBLT)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionBLTU.Code, instruction.AwooInstructionBLTU.Argument, ProcessBLTU)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionJAL.Code, instruction.AwooInstructionJAL.Argument, ProcessJAL)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionJALR.Code, instruction.AwooInstructionJALR.Argument, ProcessJALR)
 
 	return table
 }

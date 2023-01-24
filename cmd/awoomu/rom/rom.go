@@ -3,7 +3,7 @@ package rom
 import (
 	"os"
 
-	"github.com/LamkasDev/awoo-emu/cmd/awoomu/arch"
+	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 )
 
 type AwooRom struct {

@@ -18,4 +18,4 @@ runll: build
 	@./build/$(AWOOPLATFORM)/awooll.exe
 
 clean:
-	@rmdir /S /Q build
+	@if exist "build" rmdir /S /Q build

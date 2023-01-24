@@ -1,8 +1,9 @@
 package cpu
 
 import (
-	"github.com/LamkasDev/awoo-emu/cmd/awoomu/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/memory"
+	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
+	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 )
 
 type AwooCPU struct {
@@ -11,7 +12,7 @@ type AwooCPU struct {
 	Advance   bool
 	Memory    memory.AwooMemory
 
-	Table AwooInstructionTable
+	Table instruction.AwooInstructionTable
 }
 
 var AwooRegisterNames = map[arch.AwooRegister]string{
@@ -86,6 +87,6 @@ func SetupCPU() AwooCPU {
 	return AwooCPU{
 		Advance: true,
 		Memory:  memory.SetupMemory(4096),
-		Table:   SetupInstructionTable(),
+		Table:   SetupDecoderInstructionTable(),
 	}
 }

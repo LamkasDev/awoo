@@ -1,6 +1,6 @@
 package cpu
 
-import "github.com/LamkasDev/awoo-emu/cmd/awoomu/arch"
+import "github.com/LamkasDev/awoo-emu/cmd/common/arch"
 
 func ProcessAND(cpu *AwooCPU, ins AwooDecodedInstruction) {
 	cpu.Registers[ins.Destination] = cpu.Registers[ins.SourceOne] & cpu.Registers[ins.SourceTwo]

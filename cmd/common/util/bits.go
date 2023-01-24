@@ -1,7 +1,7 @@
 package util
 
 import (
-	"github.com/LamkasDev/awoo-emu/cmd/awoomu/arch"
+	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 )
 
 func SelectRangeRegister(raw arch.AwooInstruction, start uint8, length uint8) arch.AwooRegister {

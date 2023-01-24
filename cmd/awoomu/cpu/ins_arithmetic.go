@@ -1,6 +1,6 @@
 package cpu
 
-import "github.com/LamkasDev/awoo-emu/cmd/awoomu/arch"
+import "github.com/LamkasDev/awoo-emu/cmd/common/arch"
 
 // TODO: fixed sign bits
 

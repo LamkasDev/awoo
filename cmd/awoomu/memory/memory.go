@@ -1,6 +1,6 @@
 package memory
 
-import "github.com/LamkasDev/awoo-emu/cmd/awoomu/arch"
+import "github.com/LamkasDev/awoo-emu/cmd/common/arch"
 
 type AwooMemory struct {
 	Data []byte
