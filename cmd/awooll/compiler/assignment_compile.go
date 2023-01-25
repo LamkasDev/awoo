@@ -15,7 +15,7 @@ func CompileStatementAssignment(context *compiler_context.AwooCompilerContext, s
 	name := node.GetNodeIdentifierValue(&nameNode)
 	dest, _ := compiler_context.GetCompilerScopeMemory(context, name)
 	valueNode := statement.GetStatementAssignmentValue(&s)
-	d, err := CompileNodeValue(context, valueNode, d, CompileNodeValueDetails{First: true})
+	d, err := CompileNodeValueFast(context, valueNode, d)
 	if err != nil {
 		return d, err
 	}

@@ -12,6 +12,12 @@ import (
 
 func CreateNodeValue(context *parser_context.AwooParserContext, primitiveType types.AwooType, t lexer_token.AwooLexerToken, fetchToken lexer_token.FetchToken) (AwooParserNode, error) {
 	switch t.Type {
+	case token.TokenOperatorSubstraction:
+		n, err := CreateNodeValueFast(context, primitiveType, fetchToken)
+		if err != nil {
+			return n, err
+		}
+		return CreateNodeNegative(t, n), nil
 	case token.TokenTypePrimitive:
 		return CreateNodePrimitiveSafe(primitiveType, t)
 	case token.TokenTypeIdentifier:

@@ -5,15 +5,15 @@ package memory
 import "github.com/LamkasDev/awoo-emu/cmd/common/arch"
 
 func WriteMemoryWordDouble(mem *AwooMemory, n arch.AwooRegister, data arch.AwooWordDouble) {
-	WriteMemory128(mem, n, (uint128)(data))
+	WriteMemory128(mem, n, (int128)(data))
 }
 
 func WriteMemoryWord(mem *AwooMemory, n arch.AwooRegister, data arch.AwooWord) {
-	WriteMemory64(mem, n, (uint64)(data))
+	WriteMemory64(mem, n, (int64)(data))
 }
 
 func WriteMemoryWordHalf(mem *AwooMemory, n arch.AwooRegister, data arch.AwooWordHalf) {
-	WriteMemory32(mem, n, (uint32)(data))
+	WriteMemory32(mem, n, (int32)(data))
 }
 
 func ReadMemoryWordDouble(mem *AwooMemory, n arch.AwooRegister) arch.AwooWordDouble {

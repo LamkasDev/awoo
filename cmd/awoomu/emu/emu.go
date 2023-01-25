@@ -63,7 +63,7 @@ func Run(emulator *AwooEmulator) {
 		emulator.CPU.Advance = true
 		emulator.Running = emulator.CPU.Counter < emulator.ROM.Length
 	}
-	n1 := memory.ReadMemory32(&emulator.CPU.Memory, 0)
-	n2 := memory.ReadMemory32(&emulator.CPU.Memory, 4)
+	n1 := int(memory.ReadMemory32(&emulator.CPU.Memory, 0))
+	n2 := int(memory.ReadMemory32(&emulator.CPU.Memory, 4))
 	fmt.Printf("%d %d\n", n1, n2)
 }

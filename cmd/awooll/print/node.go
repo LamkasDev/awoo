@@ -24,6 +24,9 @@ func GetNodeDataText(context *lexer_context.AwooLexerContext, n *node.AwooParser
 			context.Tokens.All[n.Token.Type].Key,
 			GetNodeDataText(context, &r),
 		)
+	case node.ParserNodeTypeNegative:
+		v := node.GetNodeNegativeValue(n)
+		return fmt.Sprintf("-(%v)", GetNodeDataText(context, &v))
 	}
 
 	return "??"

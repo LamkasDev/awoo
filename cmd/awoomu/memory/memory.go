@@ -12,7 +12,7 @@ func SetupMemory(n arch.AwooRegisterU) AwooMemory {
 	}
 }
 
-func WriteMemory64(mem *AwooMemory, n arch.AwooRegister, data uint64) {
+func WriteMemory64(mem *AwooMemory, n arch.AwooRegister, data int64) {
 	mem.Data[n] = byte(data >> 56)
 	mem.Data[n+1] = byte(data >> 48)
 	mem.Data[n+2] = byte(data >> 40)
@@ -23,51 +23,51 @@ func WriteMemory64(mem *AwooMemory, n arch.AwooRegister, data uint64) {
 	mem.Data[n+7] = byte(data)
 }
 
-func WriteMemory32(mem *AwooMemory, n arch.AwooRegister, data uint32) {
+func WriteMemory32(mem *AwooMemory, n arch.AwooRegister, data int32) {
 	mem.Data[n] = byte(data >> 24)
 	mem.Data[n+1] = byte(data >> 16)
 	mem.Data[n+2] = byte(data >> 8)
 	mem.Data[n+3] = byte(data)
 }
 
-func WriteMemory16(mem *AwooMemory, n arch.AwooRegister, data uint16) {
+func WriteMemory16(mem *AwooMemory, n arch.AwooRegister, data int16) {
 	mem.Data[n] = byte(data >> 8)
 	mem.Data[n+1] = byte(data)
 }
 
-func WriteMemory8(mem *AwooMemory, n arch.AwooRegister, data uint8) {
+func WriteMemory8(mem *AwooMemory, n arch.AwooRegister, data byte) {
 	mem.Data[n] = byte(data)
 }
 
-func ReadMemory64(mem *AwooMemory, n arch.AwooRegister) uint64 {
-	data := uint64(mem.Data[n]) << 56
-	data |= uint64(mem.Data[n+1]) << 48
-	data |= uint64(mem.Data[n+2]) << 40
-	data |= uint64(mem.Data[n+3]) << 32
-	data |= uint64(mem.Data[n+4]) << 24
-	data |= uint64(mem.Data[n+5]) << 16
-	data |= uint64(mem.Data[n+6]) << 8
-	data |= uint64(mem.Data[n+7])
+func ReadMemory64(mem *AwooMemory, n arch.AwooRegister) int64 {
+	data := int64(mem.Data[n]) << 56
+	data |= int64(mem.Data[n+1]) << 48
+	data |= int64(mem.Data[n+2]) << 40
+	data |= int64(mem.Data[n+3]) << 32
+	data |= int64(mem.Data[n+4]) << 24
+	data |= int64(mem.Data[n+5]) << 16
+	data |= int64(mem.Data[n+6]) << 8
+	data |= int64(mem.Data[n+7])
 
 	return data
 }
 
-func ReadMemory32(mem *AwooMemory, n arch.AwooRegister) uint32 {
-	data := uint32(mem.Data[n]) << 24
-	data |= uint32(mem.Data[n+1]) << 16
-	data |= uint32(mem.Data[n+2]) << 8
-	data |= uint32(mem.Data[n+3])
+func ReadMemory32(mem *AwooMemory, n arch.AwooRegister) int32 {
+	data := int32(mem.Data[n]) << 24
+	data |= int32(mem.Data[n+1]) << 16
+	data |= int32(mem.Data[n+2]) << 8
+	data |= int32(mem.Data[n+3])
 
 	return data
 }
 
-func ReadMemory16(mem *AwooMemory, n arch.AwooRegister) uint16 {
-	data := uint16(mem.Data[n]) << 8
-	data |= uint16(mem.Data[n+1])
+func ReadMemory16(mem *AwooMemory, n arch.AwooRegister) int16 {
+	data := int16(mem.Data[n]) << 8
+	data |= int16(mem.Data[n+1])
 
 	return data
 }
 
-func ReadMemory8(mem *AwooMemory, n arch.AwooRegister) uint8 {
-	return uint8(mem.Data[n])
+func ReadMemory8(mem *AwooMemory, n arch.AwooRegister) int8 {
+	return int8(mem.Data[n])
 }

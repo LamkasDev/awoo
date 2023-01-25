@@ -20,7 +20,7 @@ func CompileStatementDefinition(context *compiler_context.AwooCompilerContext, s
 	if err != nil {
 		return d, err
 	}
-	d, err = CompileNodeValue(context, valueNode, d, CompileNodeValueDetails{First: true})
+	d, err = CompileNodeValueFast(context, valueNode, d)
 	if err != nil {
 		return d, err
 	}

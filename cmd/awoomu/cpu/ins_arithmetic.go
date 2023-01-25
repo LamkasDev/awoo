@@ -9,7 +9,7 @@ func ProcessADD(cpu *AwooCPU, ins AwooDecodedInstruction) {
 }
 
 func ProcessSUB(cpu *AwooCPU, ins AwooDecodedInstruction) {
-	cpu.Registers[ins.Destination] = cpu.Registers[ins.SourceTwo] - cpu.Registers[ins.SourceOne]
+	cpu.Registers[ins.Destination] = cpu.Registers[ins.SourceOne] - cpu.Registers[ins.SourceTwo]
 }
 
 func ProcessADDI(cpu *AwooCPU, ins AwooDecodedInstruction) {
