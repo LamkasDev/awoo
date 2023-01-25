@@ -10,29 +10,24 @@ import (
 )
 
 func CompileStatementDefinition(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement) ([]byte, error) {
-	d := make([]byte, 8)
+	d := []byte{}
 	tNode := statement.GetStatementDefinitionType(&s)
 	t := node.GetNodeTypeType(&tNode)
 	nameNode := statement.GetStatementDefinitionIdentifier(&s)
 	name := node.GetNodeIdentifierValue(&nameNode)
-	primNode := statement.GetStatementDefinitionValue(&s)
-	prim := node.GetNodePrimitiveValue(&primNode)
-	dest := uint8(context.Memory.Position)
-	if err := compiler_context.SetContextMemory(context, name, t); err != nil {
-		return []byte{}, err
-	}
-	err := encoder.Encode(encoder.AwooEncodedInstruction{
-		Instruction: instruction.AwooInstructionADDI,
-		Destination: cpu.AwooRegisterTemporaryZero,
-		Immediate:   uint32(prim.(int64)),
-	}, d)
+	valueNode := statement.GetStatementDefinitionValue(&s)
+	dest, err := compiler_context.SetCompilerScopeCurrentMemory(context, name, t)
 	if err != nil {
 		return d, err
 	}
-	err = encoder.Encode(encoder.AwooEncodedInstruction{
+	d, err = CompileNodeValue(context, valueNode, d, CompileNodeValueDetails{First: true})
+	if err != nil {
+		return d, err
+	}
+
+	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionSW,
 		SourceTwo:   cpu.AwooRegisterTemporaryZero,
 		Immediate:   uint32(dest),
-	}, d[4:])
-	return d, err
+	}, d)
 }

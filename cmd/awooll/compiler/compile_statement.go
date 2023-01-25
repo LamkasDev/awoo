@@ -9,13 +9,12 @@ import (
 )
 
 func CompileStatement(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement) ([]byte, error) {
-	d, err := []byte{}, fmt.Errorf("no idea how to compile %s", gchalk.Red(fmt.Sprint(s.Type)))
 	switch s.Type {
 	case statement.ParserStatementTypeDefinition:
-		d, err = CompileStatementDefinition(context, s)
+		return CompileStatementDefinition(context, s)
 	case statement.ParserStatementTypeAssignment:
-		d, err = CompileStatementAssignment(context, s)
+		return CompileStatementAssignment(context, s)
 	}
 
-	return d, err
+	return []byte{}, fmt.Errorf("no idea how to compile statement %s", gchalk.Red(fmt.Sprint(s.Type)))
 }

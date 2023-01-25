@@ -10,24 +10,19 @@ import (
 )
 
 func CompileStatementAssignment(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement) ([]byte, error) {
-	d := make([]byte, 8)
+	d := []byte{}
 	nameNode := statement.GetStatementAssignmentIdentifier(&s)
 	name := node.GetNodeIdentifierValue(&nameNode)
-	primNode := statement.GetStatementAssignmentValue(&s)
-	prim := node.GetNodePrimitiveValue(&primNode)
-	dest, _ := compiler_context.GetContextMemory(context, name)
-	err := encoder.Encode(encoder.AwooEncodedInstruction{
-		Instruction: instruction.AwooInstructionADDI,
-		Destination: cpu.AwooRegisterTemporaryZero,
-		Immediate:   uint32(prim.(int64)),
-	}, d)
+	dest, _ := compiler_context.GetCompilerScopeMemory(context, name)
+	valueNode := statement.GetStatementAssignmentValue(&s)
+	d, err := CompileNodeValue(context, valueNode, d, CompileNodeValueDetails{First: true})
 	if err != nil {
 		return d, err
 	}
-	err = encoder.Encode(encoder.AwooEncodedInstruction{
+
+	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionSW,
 		SourceTwo:   cpu.AwooRegisterTemporaryZero,
 		Immediate:   uint32(dest),
-	}, d[4:])
-	return d, err
+	}, d)
 }

@@ -14,9 +14,16 @@ type AwooEncodedInstruction struct {
 	Immediate   uint32
 }
 
-func Encode(ins AwooEncodedInstruction, data []byte) error {
+func Encode(ins AwooEncodedInstruction, data []byte) ([]byte, error) {
+	// TODO: finish this silly goose
 	raw := uint32(ins.Instruction.Code)
 	switch ins.Instruction.Format {
+	case instruction.AwooInstructionFormatR:
+		raw |= (uint32(ins.Destination) << 7)
+		raw |= (uint32(ins.Instruction.Argument) << 12)
+		raw |= (uint32(ins.SourceOne) << 15)
+		raw |= (uint32(ins.SourceTwo) << 20)
+		raw |= ((uint32(ins.Instruction.Argument) >> 3) << 25)
 	case instruction.AwooInstructionFormatI:
 		raw |= (uint32(ins.Destination) << 7)
 		raw |= (uint32(ins.Instruction.Argument) << 12)
@@ -30,6 +37,5 @@ func Encode(ins AwooEncodedInstruction, data []byte) error {
 		raw |= ((uint32(ins.Immediate) >> 5) << 25)
 	}
 
-	binary.BigEndian.PutUint32(data, raw)
-	return nil
+	return binary.BigEndian.AppendUint32(data, raw), nil
 }

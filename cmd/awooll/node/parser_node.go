@@ -7,6 +7,7 @@ import (
 const ParserNodeTypeIdentifier = 0x0000
 const ParserNodeTypeType = 0x0001
 const ParserNodeTypePrimitive = 0x0002
+const ParserNodeTypeExpression = 0x0003
 
 type AwooParserNode struct {
 	Error error

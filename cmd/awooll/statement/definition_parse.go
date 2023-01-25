@@ -10,9 +10,9 @@ import (
 	"github.com/jwalton/gchalk"
 )
 
-func ConstructStatementDefinition(context *parser_context.AwooParserContext, t lexer_token.AwooLexerToken, fetchToken ConstructStatementFetchToken) (AwooParserStatement, error) {
-	statementType := context.Lexer.Types.All[lexer_token.GetTokenTypeType(&t)]
+func ConstructStatementDefinition(context *parser_context.AwooParserContext, t lexer_token.AwooLexerToken, fetchToken lexer_token.FetchToken) (AwooParserStatement, error) {
 	statement := CreateStatementDefinition(node.CreateNodeType(t))
+	statementType := context.Lexer.Types.All[lexer_token.GetTokenTypeType(&t)]
 	t, err := ExpectToken(fetchToken, []uint16{token.TokenTypeIdentifier}, "identifier")
 	if err != nil {
 		return statement, err
@@ -21,27 +21,19 @@ func ConstructStatementDefinition(context *parser_context.AwooParserContext, t l
 	if _, ok := parser_context.GetContextVariable(context, identifier); ok {
 		return statement, fmt.Errorf("already defined identifier %s", gchalk.Red(identifier))
 	}
-	parser_context.SetContextVariable(context, parser_context.AwooParserContextVariable{
-		Name: identifier,
-	})
 	SetStatementDefinitionIdentifier(&statement, node.CreateNodeIdentifier(t))
 	_, err = ExpectToken(fetchToken, []uint16{token.TokenOperatorEq}, "=")
 	if err != nil {
 		return statement, err
 	}
-	t, err = ExpectToken(fetchToken, []uint16{token.TokenTypePrimitive}, "primitive")
+	n, err := ConstructExpression(context, fetchToken, statementType)
 	if err != nil {
 		return statement, err
 	}
-	primitiveNode, err := node.CreateNodePrimitiveSafe(statementType, t)
-	if err != nil {
-		return statement, err
-	}
-	SetStatementDefinitionValue(&statement, primitiveNode)
-	_, err = ExpectToken(fetchToken, []uint16{token.TokenOperatorEndStatement}, ";")
-	if err != nil {
-		return statement, err
-	}
+	SetStatementDefinitionValue(&statement, n)
+	parser_context.SetContextVariable(context, parser_context.AwooParserContextVariable{
+		Name: identifier, Type: statementType.Type,
+	})
 
 	return statement, nil
 }

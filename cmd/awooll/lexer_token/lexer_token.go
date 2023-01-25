@@ -8,6 +8,8 @@ type AwooLexerToken struct {
 	Data  interface{}
 }
 
+type FetchToken func() (AwooLexerToken, error)
+
 func CreateToken(start uint16, t *token.AwooToken) AwooLexerToken {
 	return AwooLexerToken{
 		Type:  t.Type,

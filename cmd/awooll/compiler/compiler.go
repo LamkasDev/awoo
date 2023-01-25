@@ -28,9 +28,7 @@ func SetupCompiler(settings AwooCompilerSettings, context parser_context.AwooPar
 	compiler := AwooCompiler{
 		Context: compiler_context.AwooCompilerContext{
 			Parser: context,
-			Memory: compiler_context.AwooCompilerContextMemory{
-				Memory: make(map[string]compiler_context.AwooCompilerContextMemoryEntry),
-			},
+			Scopes: compiler_context.SetupCompilerScopeContainer(),
 		},
 		Settings: settings,
 	}
@@ -91,12 +89,17 @@ func RunCompiler(compiler *AwooCompiler) AwooCompilerResult {
 	}
 
 	fmt.Println(gchalk.Yellow("\n> Memory map"))
-	for name, entry := range compiler.Context.Memory.Memory {
-		fmt.Printf("%s %s  %s\n",
-			gchalk.Green(fmt.Sprintf("%#x - %#x", entry.Start, entry.Start+uint16(compiler.Context.Parser.Lexer.Types.All[entry.Type].Length))),
-			gchalk.Gray("➔"),
-			gchalk.Cyan(name),
-		)
+	for _, scope := range compiler.Context.Scopes.Entries {
+		fmt.Printf("┏━ %s (%s)\n", scope.Name, gchalk.Green(fmt.Sprintf("%#x", scope.ID)))
+		for _, entry := range scope.Memory.Entries {
+			t := compiler.Context.Parser.Lexer.Types.All[entry.Type]
+			fmt.Printf("┣━ %s %s  %s\n",
+				gchalk.Green(fmt.Sprintf("%#x - %#x", entry.Start, entry.Start+uint16(t.Length))),
+				gchalk.Gray("➔"),
+				gchalk.Cyan(t.Key),
+			)
+		}
+		fmt.Printf("┗━━► %s entries\n", gchalk.Blue(fmt.Sprint(len(scope.Memory.Entries))))
 	}
 
 	return result

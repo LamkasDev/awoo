@@ -11,6 +11,7 @@ type AwooParserContext struct {
 
 type AwooParserContextVariable struct {
 	Name string
+	Type uint16
 }
 
 func GetContextVariable(context *AwooParserContext, name string) (AwooParserContextVariable, bool) {

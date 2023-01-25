@@ -1,3 +1,2 @@
-int a = 256;
-int b = 128;
-a = b;
+int a = 128;
+int b = a + 128;
