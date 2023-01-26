@@ -19,7 +19,7 @@ func CreateNodeValue(context *parser_context.AwooParserContext, primitiveType ty
 		}
 		return CreateNodeNegative(t, n), nil
 	case token.TokenTypePrimitive:
-		return CreateNodePrimitiveSafe(primitiveType, t)
+		return CreateNodePrimitiveSafe(context, t)
 	case token.TokenTypeIdentifier:
 		return CreateNodeIdentifierSafe(context, t)
 	}

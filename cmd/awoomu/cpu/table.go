@@ -53,5 +53,9 @@ func SetupDecoderInstructionTable() instruction.AwooInstructionTable {
 	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionJAL.Code, instruction.AwooInstructionJAL.Argument, ProcessJAL)
 	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionJALR.Code, instruction.AwooInstructionJALR.Argument, ProcessJALR)
 
+	// Multiply / Divide extension
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionMUL.Code, instruction.AwooInstructionMUL.Argument, ProcessMUL)
+	instruction.DecorateInstructionTableEntry(table, instruction.AwooInstructionDIV.Code, instruction.AwooInstructionDIV.Argument, ProcessDIV)
+
 	return table
 }

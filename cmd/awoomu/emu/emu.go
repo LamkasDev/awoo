@@ -28,7 +28,7 @@ func Load() {
 	println(fmt.Sprintf("hi from %s :3", gchalk.Red(arch.AwooPlatform)))
 
 	/* program, _ := SelectProgram() */
-	program := "E:\\code\\go\\awoo-emu\\data\\output.bin"
+	program := "C:\\Users\\PC\\Documents\\code\\go\\awoo-emu\\data\\output.bin"
 	emulator := SetupEmulator()
 	rom.LoadROMFromPath(&emulator.ROM, program)
 	Run(&emulator)

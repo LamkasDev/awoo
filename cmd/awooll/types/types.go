@@ -1,7 +1,5 @@
 package types
 
-const AwooTypeFlagsSign = 1
-
 type AwooType struct {
 	Key    string
 	Type   uint16
@@ -16,17 +14,25 @@ type AwooTypeMap struct {
 	Position uint16
 }
 
-func AddType(m *AwooTypeMap, key string, size uint16, flags uint64) {
+func AddTypeAt(m *AwooTypeMap, t uint16, key string, size uint16, flags uint64) uint16 {
 	awooType := AwooType{
 		Key:    key,
-		Type:   m.Position,
+		Type:   t,
 		Length: uint8(len(key)),
 		Size:   size,
 		Flags:  flags,
 	}
-	m.All[m.Position] = awooType
+	m.All[t] = awooType
 	m.Lookup[key] = &awooType
+
+	return t
+}
+
+func AddType(m *AwooTypeMap, key string, size uint16, flags uint64) uint16 {
+	t := AddTypeAt(m, m.Position, key, size, flags)
 	m.Position++
+
+	return t
 }
 
 func SetupTypeMap() AwooTypeMap {
@@ -35,21 +41,19 @@ func SetupTypeMap() AwooTypeMap {
 		Lookup: make(map[string]*AwooType),
 	}
 
-	AddType(&m, "bool", 1, 0)
-	AddType(&m, "byte", 1, 0)
-	AddType(&m, "char", 4, 0)
+	AddTypeAt(&m, AwooTypeBoolean, "bool", 1, 0)
+	AddTypeAt(&m, AwooTypeByte, "byte", 1, 0)
+	AddTypeAt(&m, AwooTypeChar, "char", 4, 0)
 
-	AddType(&m, "int", 4, AwooTypeFlagsSign)
-	AddType(&m, "int8", 1, AwooTypeFlagsSign)
-	AddType(&m, "int16", 2, AwooTypeFlagsSign)
-	AddType(&m, "int32", 4, AwooTypeFlagsSign)
-	AddType(&m, "int64", 8, AwooTypeFlagsSign)
+	AddTypeAt(&m, AwooTypeInt8, "int8", 1, AwooTypeFlagsSign)
+	AddTypeAt(&m, AwooTypeInt16, "int16", 2, AwooTypeFlagsSign)
+	AddTypeAt(&m, AwooTypeInt32, "int32", 4, AwooTypeFlagsSign)
+	AddTypeAt(&m, AwooTypeInt64, "int64", 8, AwooTypeFlagsSign)
 
-	AddType(&m, "uint", 4, 0)
-	AddType(&m, "uint8", 1, 0)
-	AddType(&m, "uint16", 2, 0)
-	AddType(&m, "uint32", 4, 0)
-	AddType(&m, "uint64", 8, 0)
+	AddTypeAt(&m, AwooTypeUInt8, "uint8", 1, 0)
+	AddTypeAt(&m, AwooTypeUIn16, "uint16", 2, 0)
+	AddTypeAt(&m, AwooTypeUInt32, "uint32", 4, 0)
+	AddTypeAt(&m, AwooTypeUInt64, "uint64", 8, 0)
 
 	/* AddType(&m, "float", 4)
 	AddType(&m, "float32", 4)

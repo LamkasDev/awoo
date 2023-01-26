@@ -135,7 +135,7 @@ func RunLexer(lexer *AwooLexer) AwooLexerResult {
 				result.Error = err
 				break
 			}
-			t := lexer_token.CreateTokenPrimitive(lexer.Position, n)
+			t := lexer_token.CreateTokenPrimitive(lexer.Position, types.AwooTypeInt32, n)
 			print.PrintNewToken(&lexer.Context, cs, &t)
 			result.Tokens = append(result.Tokens, t)
 			continue

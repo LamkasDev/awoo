@@ -82,5 +82,9 @@ func SetupInstructionTable() AwooInstructionTable {
 	SetupInstructionTableEntry(table, AwooInstructionJAL, nil)
 	SetupInstructionTableEntry(table, AwooInstructionJALR, nil)
 
+	// Multiply / Divide extension
+	SetupInstructionTableEntry(table, AwooInstructionMUL, nil)
+	SetupInstructionTableEntry(table, AwooInstructionDIV, nil)
+
 	return table
 }

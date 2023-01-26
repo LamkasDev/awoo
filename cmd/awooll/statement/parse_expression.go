@@ -19,21 +19,27 @@ func ConstructExpression(context *parser_context.AwooParserContext, fetchToken l
 	for true {
 		op, err := fetchToken()
 		if err != nil {
-			return leftNode, err
+			// Return a singular value node
+			return leftNode, nil
 		}
 		if op.Type == token.TokenOperatorEndStatement {
 			break
 		}
 		switch op.Type {
 		case token.TokenOperatorAddition,
-			token.TokenOperatorSubstraction,
-			token.TokenOperatorMultiplication,
+			token.TokenOperatorSubstraction:
+			rightNode, err := ConstructExpression(context, fetchToken, requiredType)
+			if err != nil {
+				return rightNode, err
+			}
+			return node.CreateNodeExpression(op, leftNode, rightNode), nil
+		case token.TokenOperatorMultiplication,
 			token.TokenOperatorDivision:
 			rightNode, err := node.CreateNodeValueFast(context, requiredType, fetchToken)
 			if err != nil {
 				return rightNode, err
 			}
-			leftNode = node.CreateNodeExpression(op, leftNode, rightNode)
+			return node.CreateNodeExpression(op, leftNode, rightNode), nil
 		default:
 			return leftNode, fmt.Errorf("expected an %s", gchalk.Red("operator or ;"))
 		}

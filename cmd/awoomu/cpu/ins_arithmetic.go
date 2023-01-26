@@ -2,8 +2,6 @@ package cpu
 
 import "github.com/LamkasDev/awoo-emu/cmd/common/arch"
 
-// TODO: fixed sign bits
-
 func ProcessADD(cpu *AwooCPU, ins AwooDecodedInstruction) {
 	cpu.Registers[ins.Destination] = cpu.Registers[ins.SourceOne] + cpu.Registers[ins.SourceTwo]
 }

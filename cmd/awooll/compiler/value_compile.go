@@ -4,33 +4,12 @@ import (
 	"fmt"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
-	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
-	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/jwalton/gchalk"
 )
 
 type CompileNodeValueDetails struct {
 	Expression bool
-}
-
-func CompileNodeValueAdd(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
-	return encoder.Encode(encoder.AwooEncodedInstruction{
-		Instruction: instruction.AwooInstructionADD,
-		SourceOne:   cpu.AwooRegisterTemporaryZero,
-		SourceTwo:   cpu.AwooRegisterTemporaryOne,
-		Destination: cpu.AwooRegisterTemporaryZero,
-	}, d)
-}
-
-func CompileNodeValueSubstract(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
-	return encoder.Encode(encoder.AwooEncodedInstruction{
-		Instruction: instruction.AwooInstructionSUB,
-		SourceOne:   cpu.AwooRegisterTemporaryZero,
-		SourceTwo:   cpu.AwooRegisterTemporaryOne,
-		Destination: cpu.AwooRegisterTemporaryZero,
-	}, d)
 }
 
 func CompileNodeValue(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details CompileNodeValueDetails) ([]byte, error) {

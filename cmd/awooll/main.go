@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	file, err := os.ReadFile("E:\\code\\go\\awoo-emu\\data\\input.txt")
+	file, err := os.ReadFile("C:\\Users\\PC\\Documents\\code\\go\\awoo-emu\\data\\input.txt")
 	if err != nil {
 		panic(err)
 	}

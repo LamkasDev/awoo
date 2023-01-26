@@ -64,7 +64,7 @@ func RunCompiler(compiler *AwooCompiler) AwooCompilerResult {
 	fmt.Println(gchalk.Yellow("\n> Compiler"))
 	fmt.Printf("Input: %s\n", gchalk.Magenta(fmt.Sprintf("%v", compiler.Contents.Statements)))
 
-	file, err := os.Create("E:\\code\\go\\awoo-emu\\data\\output.bin")
+	file, err := os.Create("C:\\Users\\PC\\Documents\\code\\go\\awoo-emu\\data\\output.bin")
 	if err != nil {
 		panic(err)
 	}
