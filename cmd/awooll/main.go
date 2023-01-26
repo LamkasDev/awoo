@@ -2,6 +2,8 @@ package main
 
 import (
 	"os"
+	"os/user"
+	"path"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer"
@@ -9,7 +11,8 @@ import (
 )
 
 func main() {
-	file, err := os.ReadFile("C:\\Users\\PC\\Documents\\code\\go\\awoo-emu\\data\\input.txt")
+	u, _ := user.Current()
+	file, err := os.ReadFile(path.Join(u.HomeDir, "Documents", "awoo", "data", "input.txt"))
 	if err != nil {
 		panic(err)
 	}

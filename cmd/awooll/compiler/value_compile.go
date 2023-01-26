@@ -5,11 +5,12 @@ import (
 
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
+	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
 	"github.com/jwalton/gchalk"
 )
 
 type CompileNodeValueDetails struct {
-	Expression bool
+	Register uint8
 }
 
 func CompileNodeValue(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details CompileNodeValueDetails) ([]byte, error) {
@@ -28,5 +29,5 @@ func CompileNodeValue(context *compiler_context.AwooCompilerContext, n node.Awoo
 }
 
 func CompileNodeValueFast(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte) ([]byte, error) {
-	return CompileNodeValue(context, n, d, CompileNodeValueDetails{Expression: false})
+	return CompileNodeValue(context, n, d, CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero})
 }

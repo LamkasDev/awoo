@@ -12,39 +12,39 @@ import (
 	"github.com/jwalton/gchalk"
 )
 
-func CompileNodeExpressionAdd(context *compiler_context.AwooCompilerContext, d []byte) ([]byte, error) {
+func CompileNodeExpressionAdd(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionADD,
-		SourceOne:   cpu.AwooRegisterTemporaryZero,
-		SourceTwo:   cpu.AwooRegisterTemporaryOne,
-		Destination: cpu.AwooRegisterTemporaryZero,
+		SourceOne:   details.Register,
+		SourceTwo:   cpu.GetNextTemporaryRegister(details.Register),
+		Destination: details.Register,
 	}, d)
 }
 
-func CompileNodeExpressionSubstract(context *compiler_context.AwooCompilerContext, d []byte) ([]byte, error) {
+func CompileNodeExpressionSubstract(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionSUB,
-		SourceOne:   cpu.AwooRegisterTemporaryZero,
-		SourceTwo:   cpu.AwooRegisterTemporaryOne,
-		Destination: cpu.AwooRegisterTemporaryZero,
+		SourceOne:   details.Register,
+		SourceTwo:   cpu.GetNextTemporaryRegister(details.Register),
+		Destination: details.Register,
 	}, d)
 }
 
-func CompileNodeExpressionMultiply(context *compiler_context.AwooCompilerContext, d []byte) ([]byte, error) {
+func CompileNodeExpressionMultiply(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionMUL,
-		SourceOne:   cpu.AwooRegisterTemporaryZero,
-		SourceTwo:   cpu.AwooRegisterTemporaryOne,
-		Destination: cpu.AwooRegisterTemporaryZero,
+		SourceOne:   details.Register,
+		SourceTwo:   cpu.GetNextTemporaryRegister(details.Register),
+		Destination: details.Register,
 	}, d)
 }
 
-func CompileNodeExpressionDivide(context *compiler_context.AwooCompilerContext, d []byte) ([]byte, error) {
+func CompileNodeExpressionDivide(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionDIV,
-		SourceOne:   cpu.AwooRegisterTemporaryZero,
-		SourceTwo:   cpu.AwooRegisterTemporaryOne,
-		Destination: cpu.AwooRegisterTemporaryZero,
+		SourceOne:   details.Register,
+		SourceTwo:   cpu.GetNextTemporaryRegister(details.Register),
+		Destination: details.Register,
 	}, d)
 }
 
@@ -59,23 +59,24 @@ func CompileNodeExpression(context *compiler_context.AwooCompilerContext, n node
 		token.TokenOperatorSubstraction,
 		token.TokenOperatorMultiplication,
 		token.TokenOperatorDivision:
-		d, err := CompileNodeValue(context, left, d, CompileNodeValueDetails{Expression: false})
+		// TODO: figure out which side
+		d, err := CompileNodeValue(context, left, d, CompileNodeValueDetails{Register: details.Register})
 		if err != nil {
 			return d, err
 		}
-		d, err = CompileNodeValue(context, right, d, CompileNodeValueDetails{Expression: true})
+		d, err = CompileNodeValue(context, right, d, CompileNodeValueDetails{Register: cpu.GetNextTemporaryRegister(details.Register)})
 		if err != nil {
 			return d, err
 		}
 		switch op {
 		case token.TokenOperatorAddition:
-			return CompileNodeExpressionAdd(context, d)
+			return CompileNodeExpressionAdd(context, d, CompileNodeValueDetails{Register: details.Register})
 		case token.TokenOperatorSubstraction:
-			return CompileNodeExpressionSubstract(context, d)
+			return CompileNodeExpressionSubstract(context, d, CompileNodeValueDetails{Register: details.Register})
 		case token.TokenOperatorMultiplication:
-			return CompileNodeExpressionMultiply(context, d)
+			return CompileNodeExpressionMultiply(context, d, CompileNodeValueDetails{Register: details.Register})
 		case token.TokenOperatorDivision:
-			return CompileNodeExpressionDivide(context, d)
+			return CompileNodeExpressionDivide(context, d, CompileNodeValueDetails{Register: details.Register})
 		}
 	}
 

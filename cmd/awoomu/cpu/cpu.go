@@ -83,6 +83,13 @@ const AwooRegisterTemporaryFour = 0x1d
 const AwooRegisterTemporaryFive = 0x1e
 const AwooRegisterTemporarySix = 0x1f
 
+func GetNextTemporaryRegister(r uint8) uint8 {
+	if r == AwooRegisterTemporaryTwo {
+		return AwooRegisterTemporaryThree
+	}
+	return r + 1
+}
+
 func SetupCPU() AwooCPU {
 	return AwooCPU{
 		Advance: true,

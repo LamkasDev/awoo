@@ -3,6 +3,8 @@ package emu
 import (
 	"encoding/binary"
 	"fmt"
+	"os/user"
+	"path"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/memory"
@@ -28,9 +30,9 @@ func Load() {
 	println(fmt.Sprintf("hi from %s :3", gchalk.Red(arch.AwooPlatform)))
 
 	/* program, _ := SelectProgram() */
-	program := "C:\\Users\\PC\\Documents\\code\\go\\awoo-emu\\data\\output.bin"
+	u, _ := user.Current()
 	emulator := SetupEmulator()
-	rom.LoadROMFromPath(&emulator.ROM, program)
+	rom.LoadROMFromPath(&emulator.ROM, path.Join(u.HomeDir, "Documents", "awoo", "data", "output.bin"))
 	Run(&emulator)
 
 	println(fmt.Sprintf("bay! :33"))

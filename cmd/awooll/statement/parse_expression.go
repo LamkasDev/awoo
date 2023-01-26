@@ -11,11 +11,7 @@ import (
 	"github.com/jwalton/gchalk"
 )
 
-func ConstructExpression(context *parser_context.AwooParserContext, fetchToken lexer_token.FetchToken, requiredType types.AwooType) (node.AwooParserNode, error) {
-	leftNode, err := node.CreateNodeValueFast(context, requiredType, fetchToken)
-	if err != nil {
-		return leftNode, err
-	}
+func ConstructExpression(context *parser_context.AwooParserContext, leftNode node.AwooParserNode, fetchToken lexer_token.FetchToken, requiredType types.AwooType) (node.AwooParserNode, error) {
 	for true {
 		op, err := fetchToken()
 		if err != nil {
@@ -28,22 +24,37 @@ func ConstructExpression(context *parser_context.AwooParserContext, fetchToken l
 		switch op.Type {
 		case token.TokenOperatorAddition,
 			token.TokenOperatorSubstraction:
-			rightNode, err := ConstructExpression(context, fetchToken, requiredType)
+			rightNode, err := ConstructExpressionFast(context, fetchToken, requiredType)
 			if err != nil {
-				return rightNode, err
+				return leftNode, err
 			}
 			return node.CreateNodeExpression(op, leftNode, rightNode), nil
 		case token.TokenOperatorMultiplication,
 			token.TokenOperatorDivision:
+			// get right value
 			rightNode, err := node.CreateNodeValueFast(context, requiredType, fetchToken)
 			if err != nil {
-				return rightNode, err
+				return leftNode, err
 			}
-			return node.CreateNodeExpression(op, leftNode, rightNode), nil
+			// join the two so they cannot be separated
+			leftNode, err := node.CreateNodeExpression(op, leftNode, rightNode), nil
+			if err != nil {
+				return leftNode, err
+			}
+			// continue as normal
+			return ConstructExpression(context, leftNode, fetchToken, requiredType)
 		default:
 			return leftNode, fmt.Errorf("expected an %s", gchalk.Red("operator or ;"))
 		}
 	}
 
 	return leftNode, nil
+}
+
+func ConstructExpressionFast(context *parser_context.AwooParserContext, fetchToken lexer_token.FetchToken, requiredType types.AwooType) (node.AwooParserNode, error) {
+	leftNode, err := node.CreateNodeValueFast(context, requiredType, fetchToken)
+	if err != nil {
+		return leftNode, err
+	}
+	return ConstructExpression(context, leftNode, fetchToken, requiredType)
 }

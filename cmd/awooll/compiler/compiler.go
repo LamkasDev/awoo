@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/user"
+	"path"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
@@ -64,7 +66,8 @@ func RunCompiler(compiler *AwooCompiler) AwooCompilerResult {
 	fmt.Println(gchalk.Yellow("\n> Compiler"))
 	fmt.Printf("Input: %s\n", gchalk.Magenta(fmt.Sprintf("%v", compiler.Contents.Statements)))
 
-	file, err := os.Create("C:\\Users\\PC\\Documents\\code\\go\\awoo-emu\\data\\output.bin")
+	u, _ := user.Current()
+	file, err := os.Create(path.Join(u.HomeDir, "Documents", "awoo", "data", "output.bin"))
 	if err != nil {
 		panic(err)
 	}

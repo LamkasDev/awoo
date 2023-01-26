@@ -26,7 +26,7 @@ func ConstructStatementDefinition(context *parser_context.AwooParserContext, t l
 	if err != nil {
 		return statement, err
 	}
-	n, err := ConstructExpression(context, fetchToken, statementType)
+	n, err := ConstructExpressionFast(context, fetchToken, statementType)
 	if err != nil {
 		return statement, err
 	}
