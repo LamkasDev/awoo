@@ -11,50 +11,90 @@ import (
 	"github.com/jwalton/gchalk"
 )
 
-func ConstructExpression(context *parser_context.AwooParserContext, leftNode node.AwooParserNode, fetchToken lexer_token.FetchToken, requiredType types.AwooType) (node.AwooParserNode, error) {
-	for true {
-		op, err := fetchToken()
-		if err != nil {
-			// Return a singular value node
-			return leftNode, nil
-		}
-		if op.Type == token.TokenOperatorEndStatement {
-			break
-		}
-		switch op.Type {
-		case token.TokenOperatorAddition,
-			token.TokenOperatorSubstraction:
-			rightNode, err := ConstructExpressionFast(context, fetchToken, requiredType)
-			if err != nil {
-				return leftNode, err
-			}
-			return node.CreateNodeExpression(op, leftNode, rightNode), nil
-		case token.TokenOperatorMultiplication,
-			token.TokenOperatorDivision:
-			// get right value
-			rightNode, err := node.CreateNodeValueFast(context, requiredType, fetchToken)
-			if err != nil {
-				return leftNode, err
-			}
-			// join the two so they cannot be separated
-			leftNode, err := node.CreateNodeExpression(op, leftNode, rightNode), nil
-			if err != nil {
-				return leftNode, err
-			}
-			// continue as normal
-			return ConstructExpression(context, leftNode, fetchToken, requiredType)
-		default:
-			return leftNode, fmt.Errorf("expected an %s", gchalk.Red("operator or ;"))
-		}
-	}
-
-	return leftNode, nil
+type ConstructExpressionDetails struct {
+	Type    types.AwooType
+	Bracket uint8
 }
 
-func ConstructExpressionFast(context *parser_context.AwooParserContext, fetchToken lexer_token.FetchToken, requiredType types.AwooType) (node.AwooParserNode, error) {
-	leftNode, err := node.CreateNodeValueFast(context, requiredType, fetchToken)
+type ConstructExpressionResult struct {
+	Node  node.AwooParserNode
+	Error error
+	End   bool
+}
+
+func ConstructExpression(context *parser_context.AwooParserContext, leftNode node.AwooParserNode, fetchToken lexer_token.FetchToken, details *ConstructExpressionDetails) ConstructExpressionResult {
+	op, err := fetchToken()
 	if err != nil {
-		return leftNode, err
+		return ConstructExpressionResult{
+			Node: leftNode,
+			End:  true,
+		}
 	}
-	return ConstructExpression(context, leftNode, fetchToken, requiredType)
+	switch op.Type {
+	case token.TokenTypeEndStatement:
+		if details.Bracket > 0 {
+			return ConstructExpressionResult{
+				Node:  leftNode,
+				Error: fmt.Errorf("expected a %s", gchalk.Red(")")),
+			}
+		}
+		return ConstructExpressionResult{
+			Node: leftNode,
+			End:  true,
+		}
+	case token.TokenTypeBracketRight:
+		if details.Bracket > 0 {
+			details.Bracket--
+			return ConstructExpressionResult{
+				Node: leftNode,
+			}
+		}
+		return ConstructExpressionResult{
+			Node:  leftNode,
+			Error: fmt.Errorf("unexpected %s", gchalk.Red(")")),
+		}
+	case token.TokenOperatorAddition,
+		token.TokenOperatorSubstraction:
+		rightNode := ConstructExpressionPriorityFast(context, fetchToken, details)
+		if rightNode.Error != nil {
+			return rightNode
+		}
+		leftNode = node.CreateNodeExpression(op, leftNode, rightNode.Node)
+		if rightNode.End {
+			return ConstructExpressionResult{
+				Node: leftNode,
+				End:  true,
+			}
+		}
+		return ConstructExpression(context, leftNode, fetchToken, details)
+	case token.TokenOperatorMultiplication,
+		token.TokenOperatorDivision:
+		// get a singular right value (or bracket expression)
+		rightNode := CreateNodeValuePriorityFast(context, fetchToken, details)
+		if rightNode.Error != nil {
+			return rightNode
+		}
+		// join the two so they cannot be separated
+		leftNode := node.CreateNodeExpression(op, leftNode, rightNode.Node)
+		if rightNode.End {
+			return ConstructExpressionResult{
+				Node: leftNode,
+				End:  true,
+			}
+		}
+		return ConstructExpression(context, leftNode, fetchToken, details)
+	}
+
+	return ConstructExpressionResult{
+		Node:  leftNode,
+		Error: fmt.Errorf("expected an %s", gchalk.Red("operator or ;")),
+	}
+}
+
+func ConstructExpressionFast(context *parser_context.AwooParserContext, fetchToken lexer_token.FetchToken, details *ConstructExpressionDetails) ConstructExpressionResult {
+	leftNode := ConstructExpressionPriorityFast(context, fetchToken, details)
+	if leftNode.Error != nil || leftNode.End {
+		return leftNode
+	}
+	return ConstructExpression(context, leftNode.Node, fetchToken, details)
 }

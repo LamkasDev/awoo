@@ -8,6 +8,7 @@ type AwooCompilerMemory struct {
 }
 
 type AwooCompilerContextMemoryEntry struct {
+	Name  string
 	Start uint16
 	Type  uint16
 }
@@ -17,6 +18,7 @@ func SetCompilerScopeIdMemory(context *AwooCompilerContext, scopeId uint16, name
 	start := context.Scopes.Entries[scopeId].Memory.Position
 	scope.Memory.Position += context.Parser.Lexer.Types.All[t].Size
 	scope.Memory.Entries[name] = AwooCompilerContextMemoryEntry{
+		Name:  name,
 		Start: start,
 		Type:  t,
 	}

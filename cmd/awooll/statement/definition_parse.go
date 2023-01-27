@@ -26,11 +26,11 @@ func ConstructStatementDefinition(context *parser_context.AwooParserContext, t l
 	if err != nil {
 		return statement, err
 	}
-	n, err := ConstructExpressionFast(context, fetchToken, statementType)
-	if err != nil {
-		return statement, err
+	n := ConstructExpressionPriorityFast(context, fetchToken, &ConstructExpressionDetails{Type: statementType})
+	if n.Error != nil {
+		return statement, n.Error
 	}
-	SetStatementDefinitionValue(&statement, n)
+	SetStatementDefinitionValue(&statement, n.Node)
 	parser_context.SetContextVariable(context, parser_context.AwooParserContextVariable{
 		Name: identifier, Type: statementType.Type,
 	})

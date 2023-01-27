@@ -21,11 +21,11 @@ func ConstructStatementAssignment(context *parser_context.AwooParserContext, t l
 	if err != nil {
 		return statement, err
 	}
-	n, err := ConstructExpressionFast(context, fetchToken, context.Lexer.Types.All[identifierVariable.Type])
-	if err != nil {
-		return statement, err
+	n := ConstructExpressionPriorityFast(context, fetchToken, &ConstructExpressionDetails{Type: context.Lexer.Types.All[identifierVariable.Type]})
+	if n.Error != nil {
+		return statement, n.Error
 	}
-	SetStatementAssignmentValue(&statement, n)
+	SetStatementAssignmentValue(&statement, n.Node)
 
 	return statement, nil
 }

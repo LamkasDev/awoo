@@ -96,9 +96,10 @@ func RunCompiler(compiler *AwooCompiler) AwooCompilerResult {
 		fmt.Printf("┏━ %s (%s)\n", scope.Name, gchalk.Green(fmt.Sprintf("%#x", scope.ID)))
 		for _, entry := range scope.Memory.Entries {
 			t := compiler.Context.Parser.Lexer.Types.All[entry.Type]
-			fmt.Printf("┣━ %s %s  %s\n",
-				gchalk.Green(fmt.Sprintf("%#x - %#x", entry.Start, entry.Start+uint16(t.Length))),
+			fmt.Printf("┣━ %s %s  %s (%s)\n",
+				gchalk.Green(fmt.Sprintf("%#x - %#x", entry.Start, entry.Start+uint16(t.Size)-1)),
 				gchalk.Gray("➔"),
+				entry.Name,
 				gchalk.Cyan(t.Key),
 			)
 		}

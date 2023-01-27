@@ -53,6 +53,9 @@ func SetupTokenMap() AwooTokenMap {
 	AddToken(m, "", "id", TokenTypeIdentifier)
 	AddToken(m, "", "prim", TokenTypePrimitive)
 	AddToken(m, "", "type", TokenTypeType)
+	AddToken(m, ";", ";", TokenTypeEndStatement)
+	AddToken(m, "(", "(", TokenTypeBracketLeft)
+	AddToken(m, ")", ")", TokenTypeBracketRight)
 
 	// Operators
 	AddToken(m, "+", "+", TokenOperatorAddition)
@@ -61,7 +64,6 @@ func SetupTokenMap() AwooTokenMap {
 	AddToken(m, "/", "/", TokenOperatorDivision)
 	AddToken(m, "=", "=", TokenOperatorEq)
 	AddToken(m, "==", "==", TokenOperatorEqEq)
-	AddToken(m, ";", ";", TokenOperatorEndStatement)
 
 	// Keywords
 	AddToken(m, "var", "var", TokenTypeVar)

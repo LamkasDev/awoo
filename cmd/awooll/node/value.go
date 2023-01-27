@@ -10,10 +10,11 @@ import (
 	"github.com/jwalton/gchalk"
 )
 
-func CreateNodeValue(context *parser_context.AwooParserContext, primitiveType types.AwooType, t lexer_token.AwooLexerToken, fetchToken lexer_token.FetchToken) (AwooParserNode, error) {
+func CreateNodeValue(context *parser_context.AwooParserContext, t lexer_token.AwooLexerToken, fetchToken lexer_token.FetchToken, primitiveType types.AwooType) (AwooParserNode, error) {
 	switch t.Type {
 	case token.TokenOperatorSubstraction:
-		n, err := CreateNodeValueFast(context, primitiveType, fetchToken)
+		// TODO: Move this logic so it can be applied to expressions
+		n, err := CreateNodeValueFast(context, fetchToken, primitiveType)
 		if err != nil {
 			return n, err
 		}
@@ -27,10 +28,10 @@ func CreateNodeValue(context *parser_context.AwooParserContext, primitiveType ty
 	return AwooParserNode{}, fmt.Errorf("expected a %s", gchalk.Red("primitive or identifier"))
 }
 
-func CreateNodeValueFast(context *parser_context.AwooParserContext, primitiveType types.AwooType, fetchToken lexer_token.FetchToken) (AwooParserNode, error) {
+func CreateNodeValueFast(context *parser_context.AwooParserContext, fetchToken lexer_token.FetchToken, primitiveType types.AwooType) (AwooParserNode, error) {
 	t, err := fetchToken()
 	if err != nil {
 		return AwooParserNode{}, err
 	}
-	return CreateNodeValue(context, primitiveType, t, fetchToken)
+	return CreateNodeValue(context, t, fetchToken, primitiveType)
 }
