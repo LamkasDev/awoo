@@ -26,7 +26,7 @@ func GetNodeDataText(context *lexer_context.AwooLexerContext, n *node.AwooParser
 		)
 	case node.ParserNodeTypeNegative:
 		v := node.GetNodeNegativeValue(n)
-		return fmt.Sprintf("-(%v)", GetNodeDataText(context, &v))
+		return fmt.Sprintf("-%v", GetNodeDataText(context, &v))
 	}
 
 	return "??"

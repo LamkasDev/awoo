@@ -7,48 +7,33 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
 )
 
-func ConstructExpressionPriority(context *parser_context.AwooParserContext, t lexer_token.AwooLexerToken, fetchToken lexer_token.FetchToken, details *ConstructExpressionDetails) ConstructExpressionResult {
-	priorityNode := ConstructExpressionPriorityFast(context, fetchToken, details)
-	if priorityNode.Error != nil || priorityNode.End {
-		return priorityNode
-	}
-	return ConstructExpression(context, priorityNode.Node, fetchToken, details)
-}
-
-func ConstructExpressionPriorityFast(context *parser_context.AwooParserContext, fetchToken lexer_token.FetchToken, details *ConstructExpressionDetails) ConstructExpressionResult {
-	t, err := ExpectToken(fetchToken, []uint16{token.TokenTypePrimitive, node.ParserNodeTypeIdentifier, token.TokenTypeBracketLeft}, "primitive, identifier or (")
-	if err != nil {
-		return ConstructExpressionResult{
-			Error: err,
-		}
-	}
+// TODO: handle double brackets -> ((1 + 2))
+func ConstructExpressionPriority(context *parser_context.AwooParserContext, t lexer_token.AwooLexerToken, fetchToken lexer_token.FetchToken, details *ConstructExpressionDetails) node.AwooParserNodeResult {
 	if t.Type == token.TokenTypeBracketLeft {
 		details.Bracket++
-		return ConstructExpressionPriority(context, t, fetchToken, details)
-	}
-	valueNode, err := node.CreateNodeValue(context, t, fetchToken, details.Type)
-	if err != nil {
-		return ConstructExpressionResult{
-			Error: err,
+		if details.Value > 0 {
+			details.Value--
 		}
+		if details.Negative > 0 {
+			details.Negative--
+			n := ConstructExpressionNegativeFast(context, fetchToken, details)
+			if n.Error != nil {
+				return n
+			}
+			// TODO: this is missing token
+			return node.CreateNodeNegative(lexer_token.AwooLexerToken{}, n.Node)
+		}
+		return ConstructExpressionNegativeFast(context, fetchToken, details)
 	}
-	return ConstructExpression(context, valueNode, fetchToken, details)
+	return ConstructExpression(context, t, fetchToken, details)
 }
 
-func CreateNodeValuePriorityFast(context *parser_context.AwooParserContext, fetchToken lexer_token.FetchToken, details *ConstructExpressionDetails) ConstructExpressionResult {
+func ConstructExpressionPriorityFast(context *parser_context.AwooParserContext, fetchToken lexer_token.FetchToken, details *ConstructExpressionDetails) node.AwooParserNodeResult {
 	t, err := ExpectToken(fetchToken, []uint16{token.TokenTypePrimitive, node.ParserNodeTypeIdentifier, token.TokenTypeBracketLeft}, "primitive, identifier or (")
 	if err != nil {
-		return ConstructExpressionResult{
+		return node.AwooParserNodeResult{
 			Error: err,
 		}
 	}
-	if t.Type == token.TokenTypeBracketLeft {
-		details.Bracket++
-		return ConstructExpressionPriority(context, t, fetchToken, details)
-	}
-	valueNode, err := node.CreateNodeValue(context, t, fetchToken, details.Type)
-	return ConstructExpressionResult{
-		Node:  valueNode,
-		Error: err,
-	}
+	return ConstructExpressionPriority(context, t, fetchToken, details)
 }

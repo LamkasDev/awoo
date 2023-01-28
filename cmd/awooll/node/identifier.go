@@ -22,21 +22,26 @@ func SetNodeIdentifierValue(n *AwooParserNode, value string) {
 	n.Data = d
 }
 
-func CreateNodeIdentifierSafe(context *parser_context.AwooParserContext, t lexer_token.AwooLexerToken) (AwooParserNode, error) {
+func CreateNodeIdentifierSafe(context *parser_context.AwooParserContext, t lexer_token.AwooLexerToken) AwooParserNodeResult {
 	identifier := lexer_token.GetTokenIdentifierValue(&t)
 	_, ok := parser_context.GetContextVariable(context, identifier)
 	if !ok {
-		return AwooParserNode{}, fmt.Errorf("unknown identifier %s", gchalk.Red(identifier))
+		return AwooParserNodeResult{
+			Error: fmt.Errorf("unknown identifier %s", gchalk.Red(identifier)),
+		}
 	}
-	return CreateNodeIdentifier(t), nil
+
+	return CreateNodeIdentifier(t)
 }
 
-func CreateNodeIdentifier(t lexer_token.AwooLexerToken) AwooParserNode {
-	return AwooParserNode{
-		Type:  ParserNodeTypeIdentifier,
-		Token: t,
-		Data: AwooParserNodeDataIdentifier{
-			Value: lexer_token.GetTokenIdentifierValue(&t),
+func CreateNodeIdentifier(t lexer_token.AwooLexerToken) AwooParserNodeResult {
+	return AwooParserNodeResult{
+		Node: AwooParserNode{
+			Type:  ParserNodeTypeIdentifier,
+			Token: t,
+			Data: AwooParserNodeDataIdentifier{
+				Value: lexer_token.GetTokenIdentifierValue(&t),
+			},
 		},
 	}
 }

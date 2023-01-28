@@ -11,24 +11,32 @@ import (
 )
 
 func ConstructStatementDefinition(context *parser_context.AwooParserContext, t lexer_token.AwooLexerToken, fetchToken lexer_token.FetchToken) (AwooParserStatement, error) {
-	statement := CreateStatementDefinition(node.CreateNodeType(t))
+	n := node.CreateNodeType(t)
+	if n.Error != nil {
+		return AwooParserStatement{}, n.Error
+	}
+	statement := CreateStatementDefinition(n.Node)
 	statementType := context.Lexer.Types.All[lexer_token.GetTokenTypeType(&t)]
 	t, err := ExpectToken(fetchToken, []uint16{token.TokenTypeIdentifier}, "identifier")
 	if err != nil {
-		return statement, err
+		return AwooParserStatement{}, err
 	}
 	identifier := lexer_token.GetTokenIdentifierValue(&t)
 	if _, ok := parser_context.GetContextVariable(context, identifier); ok {
-		return statement, fmt.Errorf("already defined identifier %s", gchalk.Red(identifier))
+		return AwooParserStatement{}, fmt.Errorf("already defined identifier %s", gchalk.Red(identifier))
 	}
-	SetStatementDefinitionIdentifier(&statement, node.CreateNodeIdentifier(t))
+	n = node.CreateNodeIdentifier(t)
+	if n.Error != nil {
+		return AwooParserStatement{}, n.Error
+	}
+	SetStatementDefinitionIdentifier(&statement, n.Node)
 	_, err = ExpectToken(fetchToken, []uint16{token.TokenOperatorEq}, "=")
 	if err != nil {
-		return statement, err
+		return AwooParserStatement{}, err
 	}
-	n := ConstructExpressionPriorityFast(context, fetchToken, &ConstructExpressionDetails{Type: statementType})
+	n = ConstructExpressionNegativeFast(context, fetchToken, &ConstructExpressionDetails{Type: statementType})
 	if n.Error != nil {
-		return statement, n.Error
+		return AwooParserStatement{}, n.Error
 	}
 	SetStatementDefinitionValue(&statement, n.Node)
 	parser_context.SetContextVariable(context, parser_context.AwooParserContextVariable{

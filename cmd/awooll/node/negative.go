@@ -18,12 +18,14 @@ func SetNodeNegativeValue(n *AwooParserNode, value AwooParserNode) {
 	n.Data = d
 }
 
-func CreateNodeNegative(t lexer_token.AwooLexerToken, value AwooParserNode) AwooParserNode {
-	return AwooParserNode{
-		Type:  ParserNodeTypeNegative,
-		Token: t,
-		Data: AwooParserNodeDataNegative{
-			Value: value,
+func CreateNodeNegative(t lexer_token.AwooLexerToken, value AwooParserNode) AwooParserNodeResult {
+	return AwooParserNodeResult{
+		Node: AwooParserNode{
+			Type:  ParserNodeTypeNegative,
+			Token: t,
+			Data: AwooParserNodeDataNegative{
+				Value: value,
+			},
 		},
 	}
 }

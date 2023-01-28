@@ -35,7 +35,7 @@ func SetNodePrimitiveValue(n *AwooParserNode, value interface{}) {
 	n.Data = d
 }
 
-func CreateNodePrimitiveSafe(context *parser_context.AwooParserContext, t lexer_token.AwooLexerToken) (AwooParserNode, error) {
+func CreateNodePrimitiveSafe(context *parser_context.AwooParserContext, t lexer_token.AwooLexerToken) AwooParserNodeResult {
 	// TODO: fix da overflow logic
 	primType := context.Lexer.Types.All[lexer_token.GetTokenPrimitiveType(&t)]
 	primValue := lexer_token.GetTokenPrimitiveValue(&t).(int64)
@@ -45,22 +45,28 @@ func CreateNodePrimitiveSafe(context *parser_context.AwooParserContext, t lexer_
 	}
 	limit := int64(math.Pow(2, limitBytes))
 	if primValue > limit {
-		return AwooParserNode{}, fmt.Errorf("primitive overflow (%s > %s)", gchalk.Red(fmt.Sprint(primValue)), gchalk.Green(fmt.Sprint(limit)))
+		return AwooParserNodeResult{
+			Error: fmt.Errorf("primitive overflow (%s > %s)", gchalk.Red(fmt.Sprint(primValue)), gchalk.Green(fmt.Sprint(limit))),
+		}
 	}
 	if primValue < -limit {
-		return AwooParserNode{}, fmt.Errorf("primitive underflow (%s > %s)", gchalk.Red(fmt.Sprint(primValue)), gchalk.Green(fmt.Sprint(-limit)))
+		return AwooParserNodeResult{
+			Error: fmt.Errorf("primitive underflow (%s > %s)", gchalk.Red(fmt.Sprint(primValue)), gchalk.Green(fmt.Sprint(-limit))),
+		}
 	}
 
-	return CreateNodePrimitive(t), nil
+	return CreateNodePrimitive(t)
 }
 
-func CreateNodePrimitive(t lexer_token.AwooLexerToken) AwooParserNode {
-	return AwooParserNode{
-		Type:  ParserNodeTypePrimitive,
-		Token: t,
-		Data: AwooParserNodeDataPrimitive{
-			Type:  lexer_token.GetTokenPrimitiveType(&t),
-			Value: lexer_token.GetTokenPrimitiveValue(&t),
+func CreateNodePrimitive(t lexer_token.AwooLexerToken) AwooParserNodeResult {
+	return AwooParserNodeResult{
+		Node: AwooParserNode{
+			Type:  ParserNodeTypePrimitive,
+			Token: t,
+			Data: AwooParserNodeDataPrimitive{
+				Type:  lexer_token.GetTokenPrimitiveType(&t),
+				Value: lexer_token.GetTokenPrimitiveValue(&t),
+			},
 		},
 	}
 }

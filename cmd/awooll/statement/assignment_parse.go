@@ -16,14 +16,18 @@ func ConstructStatementAssignment(context *parser_context.AwooParserContext, t l
 	if !ok {
 		return AwooParserStatement{}, fmt.Errorf("unknown identifier %s", gchalk.Red(identifier))
 	}
-	statement := CreateStatementAssignment(node.CreateNodeIdentifier(t))
+	n := node.CreateNodeIdentifier(t)
+	if n.Error != nil {
+		return AwooParserStatement{}, n.Error
+	}
+	statement := CreateStatementAssignment(n.Node)
 	_, err := ExpectToken(fetchToken, []uint16{token.TokenOperatorEq}, "=")
 	if err != nil {
-		return statement, err
+		return AwooParserStatement{}, err
 	}
-	n := ConstructExpressionPriorityFast(context, fetchToken, &ConstructExpressionDetails{Type: context.Lexer.Types.All[identifierVariable.Type]})
+	n = ConstructExpressionNegativeFast(context, fetchToken, &ConstructExpressionDetails{Type: context.Lexer.Types.All[identifierVariable.Type]})
 	if n.Error != nil {
-		return statement, n.Error
+		return AwooParserStatement{}, n.Error
 	}
 	SetStatementAssignmentValue(&statement, n.Node)
 

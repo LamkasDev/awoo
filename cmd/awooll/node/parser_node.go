@@ -16,3 +16,10 @@ type AwooParserNode struct {
 	Token lexer_token.AwooLexerToken
 	Data  interface{}
 }
+
+type AwooParserNodeResult struct {
+	Node       AwooParserNode
+	Error      error
+	End        bool
+	EndBracket bool
+}

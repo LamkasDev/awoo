@@ -16,12 +16,14 @@ func SetNodeTypeType(n *AwooParserNode, value uint16) {
 	n.Data = d
 }
 
-func CreateNodeType(t lexer_token.AwooLexerToken) AwooParserNode {
-	return AwooParserNode{
-		Type:  ParserNodeTypeType,
-		Token: t,
-		Data: AwooParserNodeDataType{
-			Value: lexer_token.GetTokenTypeType(&t),
+func CreateNodeType(t lexer_token.AwooLexerToken) AwooParserNodeResult {
+	return AwooParserNodeResult{
+		Node: AwooParserNode{
+			Type:  ParserNodeTypeType,
+			Token: t,
+			Data: AwooParserNodeDataType{
+				Value: lexer_token.GetTokenTypeType(&t),
+			},
 		},
 	}
 }
