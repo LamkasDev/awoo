@@ -27,15 +27,13 @@ func SetNodeExpressionRight(n *AwooParserNode, value AwooParserNode) {
 	n.Data = d
 }
 
-func CreateNodeExpression(t lexer_token.AwooLexerToken, left AwooParserNode, right AwooParserNode) AwooParserNodeResult {
-	return AwooParserNodeResult{
-		Node: AwooParserNode{
-			Type:  ParserNodeTypeExpression,
-			Token: t,
-			Data: AwooParserNodeDataExpression{
-				Left:  left,
-				Right: right,
-			},
+func CreateNodeExpression(t lexer_token.AwooLexerToken, left AwooParserNode, right AwooParserNode) AwooParserNode {
+	return AwooParserNode{
+		Type:  ParserNodeTypeExpression,
+		Token: t,
+		Data: AwooParserNodeDataExpression{
+			Left:  left,
+			Right: right,
 		},
 	}
 }

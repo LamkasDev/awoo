@@ -10,22 +10,18 @@ import (
 // TODO: handle double brackets -> ((1 + 2))
 func ConstructExpressionPriority(context *parser_context.AwooParserContext, t lexer_token.AwooLexerToken, fetchToken lexer_token.FetchToken, details *ConstructExpressionDetails) node.AwooParserNodeResult {
 	if t.Type == token.TokenTypeBracketLeft {
-		details.Bracket++
-		if details.Value > 0 {
-			details.Value--
-		}
+		details.QueuedBrackets++
+		details.PendingBrackets++
 		if details.Negative > 0 {
-			details.Negative--
-			n := ConstructExpressionNegativeFast(context, fetchToken, details)
-			if n.Error != nil {
-				return n
-			}
-			// TODO: this is missing token
-			return node.CreateNodeNegative(lexer_token.AwooLexerToken{}, n.Node)
+			details.NegativeBracket = details.Negative
+			details.Negative = 0
 		}
 		return ConstructExpressionNegativeFast(context, fetchToken, details)
 	}
-	return ConstructExpression(context, t, fetchToken, details)
+	if details.QueuedBrackets > 0 {
+		details.QueuedBrackets--
+	}
+	return ConstructExpressionContinue(context, t, fetchToken, details)
 }
 
 func ConstructExpressionPriorityFast(context *parser_context.AwooParserContext, fetchToken lexer_token.FetchToken, details *ConstructExpressionDetails) node.AwooParserNodeResult {

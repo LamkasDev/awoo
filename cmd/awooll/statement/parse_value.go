@@ -25,10 +25,10 @@ func ConstructNodeValue(context *parser_context.AwooParserContext, t lexer_token
 	if n.Error != nil {
 		return n
 	}
-	if details.Negative > 0 {
+	for details.Negative > 0 {
 		details.Negative--
 		// TODO: this is missing token
-		return node.CreateNodeNegative(lexer_token.AwooLexerToken{}, n.Node)
+		n = node.CreateNodeNegative(lexer_token.AwooLexerToken{}, n.Node)
 	}
 
 	return n

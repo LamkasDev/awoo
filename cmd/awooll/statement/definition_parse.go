@@ -34,7 +34,7 @@ func ConstructStatementDefinition(context *parser_context.AwooParserContext, t l
 	if err != nil {
 		return AwooParserStatement{}, err
 	}
-	n = ConstructExpressionNegativeFast(context, fetchToken, &ConstructExpressionDetails{Type: statementType})
+	n = ConstructExpressionStart(context, fetchToken, &ConstructExpressionDetails{Type: statementType})
 	if n.Error != nil {
 		return AwooParserStatement{}, n.Error
 	}

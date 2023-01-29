@@ -25,7 +25,7 @@ func ConstructStatementAssignment(context *parser_context.AwooParserContext, t l
 	if err != nil {
 		return AwooParserStatement{}, err
 	}
-	n = ConstructExpressionNegativeFast(context, fetchToken, &ConstructExpressionDetails{Type: context.Lexer.Types.All[identifierVariable.Type]})
+	n = ConstructExpressionStart(context, fetchToken, &ConstructExpressionDetails{Type: context.Lexer.Types.All[identifierVariable.Type]})
 	if n.Error != nil {
 		return AwooParserStatement{}, n.Error
 	}
