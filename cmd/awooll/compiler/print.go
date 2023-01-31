@@ -1,4 +1,4 @@
-package print
+package compiler
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ func PrintNewCompile(context *lexer_context.AwooLexerContext, s *statement.AwooP
 	}
 
 	fmt.Printf("%s %s  %s\n",
-		PrintStatement(context, s),
+		statement.PrintStatement(context, s),
 		gchalk.Gray("➔"),
 		gchalk.Cyan(text),
 	)

@@ -18,8 +18,8 @@ type AwooParserNode struct {
 }
 
 type AwooParserNodeResult struct {
-	Node      AwooParserNode
-	Error     error
-	End       bool
-	IsBracket bool
+	Node       AwooParserNode
+	Error      error
+	End        bool
+	EndBracket bool
 }

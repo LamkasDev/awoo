@@ -10,7 +10,6 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_context"
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/print"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
 	"github.com/jwalton/gchalk"
 )
@@ -73,13 +72,13 @@ func RunCompiler(compiler *AwooCompiler) AwooCompilerResult {
 	}
 	writer := bufio.NewWriter(file)
 	for ok := true; ok; ok = AdvanceCompiler(compiler) {
-		print.PrintStatement(&compiler.Context.Parser.Lexer, &compiler.Current)
+		statement.PrintStatement(&compiler.Context.Parser.Lexer, &compiler.Current)
 		data, err := CompileStatement(&compiler.Context, compiler.Current)
 		if err != nil {
 			result.Error = err
 			break
 		}
-		print.PrintNewCompile(&compiler.Context.Parser.Lexer, &compiler.Current, data)
+		PrintNewCompile(&compiler.Context.Parser.Lexer, &compiler.Current, data)
 		_, err = writer.Write(data)
 		if err != nil {
 			panic(err)

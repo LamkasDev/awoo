@@ -8,10 +8,14 @@ import (
 )
 
 func ConstructExpressionNegative(context *parser_context.AwooParserContext, t lexer_token.AwooLexerToken, fetchToken lexer_token.FetchToken, details *ConstructExpressionDetails) node.AwooParserNodeResult {
-	// TODO: negating brackets negates the whole subsequent expression
 	if t.Type == token.TokenOperatorSubstraction {
-		details.Negative++
-		return ConstructExpressionNegativeFast(context, fetchToken, details)
+		n := ConstructExpressionNegativeFast(context, fetchToken, details)
+		if n.Error != nil {
+			return node.AwooParserNodeResult{
+				Error: n.Error,
+			}
+		}
+		return node.CreateNodeNegative(t, n.Node)
 	}
 	return ConstructExpressionPriority(context, t, fetchToken, details)
 }

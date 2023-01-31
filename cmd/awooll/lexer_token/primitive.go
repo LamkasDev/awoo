@@ -5,6 +5,7 @@ import "github.com/LamkasDev/awoo-emu/cmd/awooll/token"
 type AwooLexerTokenDataPrimitive struct {
 	Type  uint16
 	Value interface{}
+	Extra interface{}
 }
 
 func GetTokenPrimitiveType(t *AwooLexerToken) uint16 {
@@ -23,13 +24,22 @@ func SetTokenPrimitiveValue(t *AwooLexerToken, value interface{}) {
 	t.Data.(*AwooLexerTokenDataPrimitive).Value = value
 }
 
-func CreateTokenPrimitive(start uint16, primitiveType uint16, value interface{}) AwooLexerToken {
+func GetTokenPrimitiveExtra(t *AwooLexerToken) interface{} {
+	return t.Data.(AwooLexerTokenDataPrimitive).Extra
+}
+
+func SetTokenPrimitiveExtra(t *AwooLexerToken, value interface{}) {
+	t.Data.(*AwooLexerTokenDataPrimitive).Extra = value
+}
+
+func CreateTokenPrimitive(start uint16, primitiveType uint16, value interface{}, extra interface{}) AwooLexerToken {
 	return AwooLexerToken{
 		Type:  token.TokenTypePrimitive,
 		Start: start,
 		Data: AwooLexerTokenDataPrimitive{
 			Type:  primitiveType,
 			Value: value,
+			Extra: extra,
 		},
 	}
 }

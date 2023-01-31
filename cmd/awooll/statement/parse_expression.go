@@ -15,10 +15,7 @@ type ConstructExpressionDetails struct {
 	Type            types.AwooType
 	QueuedBrackets  uint8
 	PendingBrackets uint8
-	Value           uint8
-	ValueBracket    uint8
 	Negative        uint8
-	NegativeBracket uint8
 }
 
 func ConstructExpressionEndStatement(context *parser_context.AwooParserContext, n node.AwooParserNode, fetchToken lexer_token.FetchToken, details *ConstructExpressionDetails) node.AwooParserNodeResult {
@@ -37,8 +34,8 @@ func ConstructExpressionEndBracket(context *parser_context.AwooParserContext, n 
 	if details.PendingBrackets > 0 {
 		details.PendingBrackets--
 		return node.AwooParserNodeResult{
-			Node:      n,
-			IsBracket: true,
+			Node:       n,
+			EndBracket: true,
 		}
 	}
 	return node.AwooParserNodeResult{
@@ -57,22 +54,29 @@ func ConstructExpressionAccumulate(context *parser_context.AwooParserContext, le
 	case token.TokenTypeBracketRight:
 		return ConstructExpressionEndBracket(context, leftNode.Node, fetchToken, details)
 	case token.TokenOperatorAddition,
-		token.TokenOperatorSubstraction,
-		token.TokenOperatorMultiplication,
+		token.TokenOperatorSubstraction:
+		rightNode := ConstructExpressionNegativeFast(context, fetchToken, details)
+		if rightNode.Error != nil {
+			return rightNode
+		}
+		return node.AwooParserNodeResult{
+			Node: node.CreateNodeExpression(op, leftNode.Node, rightNode.Node),
+		}
+	case token.TokenOperatorMultiplication,
 		token.TokenOperatorDivision:
 		rightNode := ConstructExpressionNegativeFast(context, fetchToken, details)
 		if rightNode.Error != nil {
 			return rightNode
 		}
-		var resultNode node.AwooParserNodeResult
-		if op.Type == token.TokenOperatorMultiplication || op.Type == token.TokenOperatorDivision {
-			resultNode = node.ProcessPrioritizedExpression(&leftNode, op, &rightNode)
-		} else {
-			resultNode.Node = node.CreateNodeExpression(op, leftNode.Node, rightNode.Node)
-			resultNode.End = rightNode.End
-			resultNode.IsBracket = rightNode.IsBracket
+		if leftNode.Node.Type == node.ParserNodeTypeExpression && !node.GetNodeExpressionIsBracket(&leftNode.Node) {
+			n := node.CreateNodeExpression(op, node.GetNodeExpressionRight(&leftNode.Node), rightNode.Node)
+			return node.AwooParserNodeResult{
+				Node: node.CreateNodeExpression(leftNode.Node.Token, node.GetNodeExpressionLeft(&leftNode.Node), n),
+			}
 		}
-		return resultNode
+		return node.AwooParserNodeResult{
+			Node: node.CreateNodeExpression(op, leftNode.Node, rightNode.Node),
+		}
 	}
 
 	// TODO: this text should say bracket if bracket > 0
@@ -81,20 +85,34 @@ func ConstructExpressionAccumulate(context *parser_context.AwooParserContext, le
 	}
 }
 
-func ConstructExpressionContinue(context *parser_context.AwooParserContext, t lexer_token.AwooLexerToken, fetchToken lexer_token.FetchToken, details *ConstructExpressionDetails) node.AwooParserNodeResult {
-	leftNode := ConstructNodeValue(context, t, fetchToken, details)
-	for leftNode.Error == nil && !leftNode.End && !leftNode.IsBracket {
+func ConstructExpressionBracket(context *parser_context.AwooParserContext, t lexer_token.AwooLexerToken, fetchToken lexer_token.FetchToken, details *ConstructExpressionDetails) node.AwooParserNodeResult {
+	leftNode := ConstructExpressionNegative(context, t, fetchToken, details)
+	for leftNode.Error == nil && !leftNode.End && !leftNode.EndBracket {
 		leftNode = ConstructExpressionAccumulate(context, leftNode, fetchToken, details)
 	}
+	if leftNode.Node.Type == node.ParserNodeTypeExpression {
+		node.SetNodeExpressionIsBracket(&leftNode.Node, true)
+	}
+	leftNode.EndBracket = false
 
 	return leftNode
+}
+
+func ConstructExpressionBracketFast(context *parser_context.AwooParserContext, fetchToken lexer_token.FetchToken, details *ConstructExpressionDetails) node.AwooParserNodeResult {
+	t, err := fetchToken()
+	if err != nil {
+		return node.AwooParserNodeResult{
+			Error: err,
+		}
+	}
+
+	return ConstructExpressionBracket(context, t, fetchToken, details)
 }
 
 func ConstructExpressionStart(context *parser_context.AwooParserContext, fetchToken lexer_token.FetchToken, details *ConstructExpressionDetails) node.AwooParserNodeResult {
 	leftNode := ConstructExpressionNegativeFast(context, fetchToken, details)
 	for leftNode.Error == nil && !leftNode.End {
 		leftNode = ConstructExpressionAccumulate(context, leftNode, fetchToken, details)
-		leftNode.IsBracket = false
 	}
 
 	return leftNode
