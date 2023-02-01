@@ -1,0 +1,5 @@
+{
+	"shell": true,
+	"cmd": ["awooll", "-i", "$file", "-o", "obj", "-q", "&&", "awoomu", "-i", "$file_path\\obj"],
+	"file_patterns": ["*.awoo"]
+}

@@ -26,9 +26,11 @@ func ConstructStatement(context *parser_context.AwooParserContext, t lexer_token
 	statement, err := AwooParserStatement{}, fmt.Errorf("expected a %s", gchalk.Red("statement"))
 	switch t.Type {
 	case token.TokenTypeType:
-		statement, err = ConstructStatementDefinition(context, t, fetchToken)
+		statement, err = ConstructStatementDefinitionVariable(context, t, fetchToken)
 	case token.TokenTypeIdentifier:
 		statement, err = ConstructStatementAssignment(context, t, fetchToken)
+	case token.TokenTypeTypeDefinition:
+		statement, err = ConstructStatementDefinitionType(context, t, fetchToken)
 	}
 
 	return statement, err

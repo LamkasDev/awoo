@@ -5,11 +5,12 @@ import (
 
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
+	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/jwalton/gchalk"
 )
 
 func PrintNewToken(context *lexer_context.AwooLexerContext, cs string, t *AwooLexerToken) {
-	fmt.Printf("%s %s  %s\n", cs, gchalk.Gray("➔"), PrintToken(context, t))
+	logger.Log("%s %s  %s\n", cs, gchalk.Gray("➔"), PrintToken(context, t))
 }
 
 func PrintToken(context *lexer_context.AwooLexerContext, t *AwooLexerToken) string {

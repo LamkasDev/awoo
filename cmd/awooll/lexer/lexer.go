@@ -8,6 +8,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/types"
+	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/jwalton/gchalk"
 )
 
@@ -83,8 +84,8 @@ func RunLexer(lexer *AwooLexer) AwooLexerResult {
 	result := AwooLexerResult{
 		Context: lexer.Context,
 	}
-	fmt.Println(gchalk.Yellow("> Lexer"))
-	fmt.Printf("Input: %s\n", gchalk.Magenta(string(lexer.Contents)))
+	logger.Log(gchalk.Yellow("> Lexer\n"))
+	logger.Log("Input: %s\n", gchalk.Magenta(string(lexer.Contents)))
 	for ok := true; ok; _, ok = AdvanceLexer(lexer) {
 		if unicode.IsSpace(lexer.Current) {
 			continue

@@ -8,6 +8,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
+	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/jwalton/gchalk"
 )
 
@@ -59,16 +60,16 @@ func StepbackParser(parser *AwooParser) bool {
 
 func RunParser(parser *AwooParser) AwooParserResult {
 	result := AwooParserResult{}
-	fmt.Println(gchalk.Yellow("\n> Parser"))
-	fmt.Printf("Input: %s\n", gchalk.Magenta(fmt.Sprintf("%v", parser.Contents.Tokens)))
+	logger.Log(gchalk.Yellow("\n> Parser\n"))
+	logger.Log("Input: %s\n", gchalk.Magenta(fmt.Sprintf("%v", parser.Contents.Tokens)))
 	for ok := true; ok; ok = AdvanceParser(parser) {
-		fmt.Printf("┏━ %s\n", lexer_token.PrintToken(&parser.Contents.Context, &parser.Current))
+		logger.Log("┏━ %s\n", lexer_token.PrintToken(&parser.Contents.Context, &parser.Current))
 		st, err := statement.ConstructStatement(&parser.Context, parser.Current, func() (lexer_token.AwooLexerToken, error) {
 			ok := AdvanceParser(parser)
 			if !ok {
 				return lexer_token.AwooLexerToken{}, fmt.Errorf("no more tokens")
 			}
-			fmt.Printf("┣━ %s\n", lexer_token.PrintToken(&parser.Contents.Context, &parser.Current))
+			logger.Log("┣━ %s\n", lexer_token.PrintToken(&parser.Contents.Context, &parser.Current))
 			return parser.Current, nil
 		})
 		if err != nil {

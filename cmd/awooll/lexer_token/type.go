@@ -3,15 +3,15 @@ package lexer_token
 import "github.com/LamkasDev/awoo-emu/cmd/awooll/token"
 
 type AwooLexerTokenDataType struct {
-	Value uint16
+	Id uint16
 }
 
-func GetTokenTypeType(t *AwooLexerToken) uint16 {
-	return t.Data.(AwooLexerTokenDataType).Value
+func GetTokenTypeId(t *AwooLexerToken) uint16 {
+	return t.Data.(AwooLexerTokenDataType).Id
 }
 
-func SetTokenTypeType(t *AwooLexerToken, value uint16) {
-	t.Data.(*AwooLexerTokenDataType).Value = value
+func SetTokenTypeId(t *AwooLexerToken, id uint16) {
+	t.Data.(*AwooLexerTokenDataType).Id = id
 }
 
 func CreateTokenType(start uint16, value uint16) AwooLexerToken {
@@ -19,7 +19,7 @@ func CreateTokenType(start uint16, value uint16) AwooLexerToken {
 		Type:  token.TokenTypeType,
 		Start: start,
 		Data: AwooLexerTokenDataType{
-			Value: value,
+			Id: value,
 		},
 	}
 }

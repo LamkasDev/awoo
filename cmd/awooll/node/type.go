@@ -22,7 +22,7 @@ func CreateNodeType(t lexer_token.AwooLexerToken) AwooParserNodeResult {
 			Type:  ParserNodeTypeType,
 			Token: t,
 			Data: AwooParserNodeDataType{
-				Value: lexer_token.GetTokenTypeType(&t),
+				Value: lexer_token.GetTokenTypeId(&t),
 			},
 		},
 	}

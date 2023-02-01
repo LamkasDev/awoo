@@ -12,7 +12,7 @@ type FetchToken func() (AwooLexerToken, error)
 
 func CreateToken(start uint16, t *token.AwooToken) AwooLexerToken {
 	return AwooLexerToken{
-		Type:  t.Type,
+		Type:  t.Id,
 		Start: start - uint16(t.Length) + 1,
 	}
 }

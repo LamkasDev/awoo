@@ -11,11 +11,11 @@ import (
 
 func CompileStatementDefinition(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement) ([]byte, error) {
 	d := []byte{}
-	tNode := statement.GetStatementDefinitionType(&s)
+	tNode := statement.GetStatementDefinitionVariableType(&s)
 	t := node.GetNodeTypeType(&tNode)
-	nameNode := statement.GetStatementDefinitionIdentifier(&s)
+	nameNode := statement.GetStatementDefinitionVariableIdentifier(&s)
 	name := node.GetNodeIdentifierValue(&nameNode)
-	valueNode := statement.GetStatementDefinitionValue(&s)
+	valueNode := statement.GetStatementDefinitionVariableValue(&s)
 	dest, err := compiler_context.SetCompilerScopeCurrentMemory(context, name, t)
 	if err != nil {
 		return d, err

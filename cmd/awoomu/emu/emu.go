@@ -3,13 +3,12 @@ package emu
 import (
 	"encoding/binary"
 	"fmt"
-	"os/user"
-	"path"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/memory"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/rom"
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
+	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/jwalton/gchalk"
 )
 
@@ -26,16 +25,11 @@ func SetupEmulator() AwooEmulator {
 	}
 }
 
-func Load() {
-	println(fmt.Sprintf("hi from %s :3", gchalk.Red(arch.AwooPlatform)))
-
+func Load(path string) {
 	/* program, _ := SelectProgram() */
-	u, _ := user.Current()
 	emulator := SetupEmulator()
-	rom.LoadROMFromPath(&emulator.ROM, path.Join(u.HomeDir, "Documents", "awoo", "data", "output.bin"))
+	rom.LoadROMFromPath(&emulator.ROM, path)
 	Run(&emulator)
-
-	println(fmt.Sprintf("bay! :33"))
 }
 
 func Run(emulator *AwooEmulator) {
@@ -46,7 +40,7 @@ func Run(emulator *AwooEmulator) {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf(
+		logger.Log(
 			"c: %s; r: %s; code: %s (%s); src: %s & %s; dst: %s; im: %s\n",
 			gchalk.Red(fmt.Sprintf("%#x", emulator.CPU.Counter)),
 			gchalk.Cyan(fmt.Sprintf("%#x %#x %#x %#x", raw[0:1], raw[1:2], raw[2:3], raw[3:4])),
@@ -67,5 +61,5 @@ func Run(emulator *AwooEmulator) {
 	}
 	n1 := int(memory.ReadMemory32(&emulator.CPU.Memory, 0))
 	n2 := int(memory.ReadMemory32(&emulator.CPU.Memory, 4))
-	fmt.Printf("%d %d\n", n1, n2)
+	logger.Log("%d %d\n", n1, n2)
 }

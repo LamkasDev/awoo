@@ -1,15 +1,17 @@
 package types
 
-const AwooTypeBoolean = 0x0000
-const AwooTypeByte = 0x0001
-const AwooTypeChar = 0x0002
+const AwooTypeBoolean = 0x000
+const AwooTypeByte = 0x001
+const AwooTypeChar = 0x002
 
-const AwooTypeInt8 = 0x0100
-const AwooTypeInt16 = 0x0101
-const AwooTypeInt32 = 0x0102
-const AwooTypeInt64 = 0x0103
+const AwooTypeInt8 = 0x010
+const AwooTypeInt16 = 0x011
+const AwooTypeInt32 = 0x012
+const AwooTypeInt64 = 0x013
 
-const AwooTypeUInt8 = 0x0200
-const AwooTypeUIn16 = 0x0201
-const AwooTypeUInt32 = 0x0202
-const AwooTypeUInt64 = 0x0203
+const AwooTypeUInt8 = 0x014
+const AwooTypeUInt16 = 0x015
+const AwooTypeUInt32 = 0x016
+const AwooTypeUInt64 = 0x017
+
+const AwooTypeUserDefinedStart = 0x100

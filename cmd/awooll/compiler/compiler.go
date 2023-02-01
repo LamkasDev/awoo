@@ -4,13 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"os/user"
-	"path"
+	"path/filepath"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
+	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/jwalton/gchalk"
 )
 
@@ -23,7 +23,9 @@ type AwooCompiler struct {
 	Settings AwooCompilerSettings
 }
 
-type AwooCompilerSettings struct{}
+type AwooCompilerSettings struct {
+	Path string
+}
 
 func SetupCompiler(settings AwooCompilerSettings, context parser_context.AwooParserContext) AwooCompiler {
 	compiler := AwooCompiler{
@@ -62,11 +64,14 @@ func StepbackCompiler(compiler *AwooCompiler) bool {
 
 func RunCompiler(compiler *AwooCompiler) AwooCompilerResult {
 	result := AwooCompilerResult{}
-	fmt.Println(gchalk.Yellow("\n> Compiler"))
-	fmt.Printf("Input: %s\n", gchalk.Magenta(fmt.Sprintf("%v", compiler.Contents.Statements)))
+	logger.Log(gchalk.Yellow("\n> Compiler\n"))
+	logger.Log("Input: %s\n", gchalk.Magenta(fmt.Sprintf("%v", compiler.Contents.Statements)))
 
-	u, _ := user.Current()
-	file, err := os.Create(path.Join(u.HomeDir, "Documents", "awoo", "data", "output.bin"))
+	err := os.MkdirAll(filepath.Dir(compiler.Settings.Path), 644)
+	if err != nil {
+		panic(err)
+	}
+	file, err := os.Create(compiler.Settings.Path)
 	if err != nil {
 		panic(err)
 	}
@@ -90,19 +95,19 @@ func RunCompiler(compiler *AwooCompiler) AwooCompilerResult {
 		panic(result.Error)
 	}
 
-	fmt.Println(gchalk.Yellow("\n> Memory map"))
+	logger.Log(gchalk.Yellow("\n> Memory map\n"))
 	for _, scope := range compiler.Context.Scopes.Entries {
-		fmt.Printf("┏━ %s (%s)\n", scope.Name, gchalk.Green(fmt.Sprintf("%#x", scope.ID)))
+		logger.Log("┏━ %s (%s)\n", scope.Name, gchalk.Green(fmt.Sprintf("%#x", scope.ID)))
 		for _, entry := range scope.Memory.Entries {
 			t := compiler.Context.Parser.Lexer.Types.All[entry.Type]
-			fmt.Printf("┣━ %s %s  %s (%s)\n",
+			logger.Log("┣━ %s %s  %s (%s)\n",
 				gchalk.Green(fmt.Sprintf("%#x - %#x", entry.Start, entry.Start+uint16(t.Size)-1)),
 				gchalk.Gray("➔"),
 				entry.Name,
 				gchalk.Cyan(t.Key),
 			)
 		}
-		fmt.Printf("┗━━► %s entries\n", gchalk.Blue(fmt.Sprint(len(scope.Memory.Entries))))
+		logger.Log("┗━━► %s entries\n", gchalk.Blue(fmt.Sprint(len(scope.Memory.Entries))))
 	}
 
 	return result

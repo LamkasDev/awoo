@@ -1,32 +1,33 @@
 package token
 
 // General
-const TokenTypeIdentifier = 0x0000
-const TokenTypePrimitive = 0x0001
-const TokenTypeType = 0x0002
-const TokenTypeEndStatement = 0x0003
-const TokenTypeBracketLeft = 0x0004
-const TokenTypeBracketRight = 0x0005
+const TokenTypeIdentifier = 0x000
+const TokenTypePrimitive = 0x001
+const TokenTypeType = 0x002
+const TokenTypeEndStatement = 0x003
+const TokenTypeBracketLeft = 0x004
+const TokenTypeBracketRight = 0x005
 
 func IsTokenTypeGeneral(t uint16) bool {
-	return t < 0x1000
+	return t < 0x100
 }
 
 // Operators
-const TokenOperatorAddition = 0x1000
-const TokenOperatorSubstraction = 0x1001
-const TokenOperatorMultiplication = 0x1002
-const TokenOperatorDivision = 0x1003
-const TokenOperatorEq = 0x1004
-const TokenOperatorEqEq = 0x1005
+const TokenOperatorAddition = 0x100
+const TokenOperatorSubstraction = 0x101
+const TokenOperatorMultiplication = 0x102
+const TokenOperatorDivision = 0x103
+const TokenOperatorEq = 0x104
+const TokenOperatorEqEq = 0x105
 
 func IsTokenTypeOperator(t uint16) bool {
-	return t >= 0x1000 && t < 0x2000
+	return t >= 0x100 && t < 0x200
 }
 
 // Keywords
-const TokenTypeVar = 0x2000
+const TokenTypeVar = 0x200
+const TokenTypeTypeDefinition = 0x201
 
 func IsTokenTypeKeyword(t uint16) bool {
-	return t >= 0x2000 && t < 0x3000
+	return t >= 0x200 && t < 0x300
 }
