@@ -9,6 +9,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
+	"github.com/LamkasDev/awoo-emu/cmd/common/flags"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/LamkasDev/awoo-emu/cmd/common/paths"
 )
@@ -27,6 +28,7 @@ func main() {
 	flag.Parse()
 	logger.AwooLoggerEnabled = !quiet
 	input, output = paths.ResolvePaths(input, ".awoo", output, ".awoobj")
+	flags.ResolveColor()
 
 	file, err := os.ReadFile(input)
 	if err != nil {

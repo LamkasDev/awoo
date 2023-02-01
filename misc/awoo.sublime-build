@@ -1,5 +1,10 @@
 {
 	"shell": true,
 	"cmd": ["awooll", "-i", "$file", "-o", "obj", "-q", "&&", "awoomu", "-i", "$file_path\\obj"],
-	"file_patterns": ["*.awoo"]
+	"file_patterns": ["*.awoo"],
+    "target": "ansi_color_build",
+    "syntax": "Packages/ANSIescape/ANSI.sublime-syntax",
+    "env": {
+    	"FORCE_COLOR": "2",
+    }
 }

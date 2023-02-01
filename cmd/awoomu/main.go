@@ -8,6 +8,7 @@ import (
 
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/emu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
+	"github.com/LamkasDev/awoo-emu/cmd/common/flags"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/LamkasDev/awoo-emu/cmd/common/paths"
 	"github.com/jwalton/gchalk"
@@ -24,6 +25,7 @@ func main() {
 	flag.BoolVar(&quiet, "q", false, "set to disable log")
 	flag.Parse()
 	logger.AwooLoggerEnabled = !quiet
+	flags.ResolveColor()
 	input = paths.ResolvePath(input, ".awoobj")
 
 	emu.Load(input)
