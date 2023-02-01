@@ -4,27 +4,26 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 )
 
 func ResolvePath(input string, ext string) string {
-	if !path.IsAbs(input) {
+	if !filepath.IsAbs(input) {
 		wd, err := os.Getwd()
 		if err != nil {
 			panic(err)
 		}
 		input = filepath.Join(wd, input)
 	}
-	if path.Ext(input) == "" {
+	if filepath.Ext(input) == "" {
 		files, err := ioutil.ReadDir(input)
 		if err != nil {
 			panic(err)
 		}
 		for _, file := range files {
 			if filepath.Ext(file.Name()) == ext {
-				input = path.Join(input, file.Name())
+				input = filepath.Join(input, file.Name())
 				break
 			}
 		}
@@ -39,13 +38,13 @@ func ResolvePath(input string, ext string) string {
 func ResolvePaths(input string, inputExt string, output string, outputExt string) (string, string) {
 	input = ResolvePath(input, inputExt)
 	inputName := strings.TrimSuffix(filepath.Base(input), filepath.Ext(input))
-	if path.Ext(output) == "" {
-		if path.IsAbs(output) {
+	if filepath.Ext(output) == "" {
+		if filepath.IsAbs(output) {
 			output = filepath.Join(output, fmt.Sprintf("%s%s", inputName, outputExt))
 		} else {
 			output = filepath.Join(filepath.Dir(input), output, fmt.Sprintf("%s%s", inputName, outputExt))
 		}
-	} else if !path.IsAbs(output) {
+	} else if !filepath.IsAbs(output) {
 		output = filepath.Join(filepath.Dir(input), output)
 	}
 
