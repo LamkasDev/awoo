@@ -14,6 +14,7 @@ import (
 type ConstructExpressionDetails struct {
 	Type            types.AwooType
 	PendingBrackets uint8
+	EndWithCurly    bool
 }
 
 func ConstructExpressionEndStatement(context *parser_context.AwooParserContext, n node.AwooParserNode, fetchToken lexer_token.FetchToken, details *ConstructExpressionDetails) node.AwooParserNodeResult {
@@ -48,7 +49,13 @@ func ConstructExpressionAccumulate(context *parser_context.AwooParserContext, le
 	}
 	switch op.Type {
 	case token.TokenTypeEndStatement:
-		return ConstructExpressionEndStatement(context, leftNode.Node, fetchToken, details)
+		if !details.EndWithCurly {
+			return ConstructExpressionEndStatement(context, leftNode.Node, fetchToken, details)
+		}
+	case token.TokenTypeBracketCurlyLeft:
+		if details.EndWithCurly {
+			return ConstructExpressionEndStatement(context, leftNode.Node, fetchToken, details)
+		}
 	case token.TokenTypeBracketRight:
 		return ConstructExpressionEndBracket(context, leftNode.Node, fetchToken, details)
 	case token.TokenOperatorAddition,
@@ -103,15 +110,42 @@ func ConstructExpressionAccumulate(context *parser_context.AwooParserContext, le
 				Start: op.Start - 1,
 			}, leftNode.Node, rightNode.Node),
 		}
-	}
-
-	if details.PendingBrackets > 0 {
+	case token.TokenOperatorLT,
+		token.TokenOperatorGT:
+		t, err := fetchToken()
+		if err != nil {
+			return leftNode
+		}
+		if t.Type == token.TokenOperatorEq {
+			if op.Type == token.TokenOperatorLT {
+				op.Type = token.TokenOperatorLTEQ
+			} else {
+				op.Type = token.TokenOperatorGTEQ
+			}
+			t, err = fetchToken()
+			if err != nil {
+				return leftNode
+			}
+		}
+		rightNode := ConstructExpressionNegative(context, t, fetchToken, details)
+		if rightNode.Error != nil {
+			return rightNode
+		}
 		return node.AwooParserNodeResult{
-			Error: fmt.Errorf("expected an %s", gchalk.Red("operator, ) or ;")),
+			Node: node.CreateNodeExpression(op, leftNode.Node, rightNode.Node),
 		}
 	}
+
+	opSymbol := "operator, <, >"
+	if details.PendingBrackets > 0 {
+		opSymbol += ", )"
+	}
+	endSymbol := ";"
+	if details.EndWithCurly {
+		endSymbol = "{"
+	}
 	return node.AwooParserNodeResult{
-		Error: fmt.Errorf("expected an %s", gchalk.Red("operator or ;")),
+		Error: fmt.Errorf("expected an %s", gchalk.Red(fmt.Sprintf("%s or %s", opSymbol, endSymbol))),
 	}
 }
 

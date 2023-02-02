@@ -23,6 +23,10 @@ const TokenOperatorDivision = 0x103
 const TokenOperatorEq = 0x104
 const TokenOperatorEqEq = 0x105
 const TokenOperatorNotEq = 0x106
+const TokenOperatorLT = 0x107
+const TokenOperatorLTEQ = 0x108
+const TokenOperatorGT = 0x109
+const TokenOperatorGTEQ = 0x110
 
 func IsTokenTypeOperator(t uint16) bool {
 	return t >= 0x100 && t < 0x200
@@ -37,7 +41,7 @@ func IsTokenTypeUnary(t uint16) bool {
 	return t >= TokenOperatorAddition && t <= TokenOperatorDivision
 }
 func IsTokenTypeEquality(t uint16) bool {
-	return t >= TokenOperatorEqEq && t <= TokenOperatorNotEq
+	return t >= TokenOperatorEqEq && t <= TokenOperatorGTEQ
 }
 func DoesTokenTakePrecendence(op uint16, left uint16) bool {
 	switch op {

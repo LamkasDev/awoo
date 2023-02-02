@@ -21,7 +21,7 @@ func ConstructExpressionNegative(context *parser_context.AwooParserContext, t le
 }
 
 func ConstructExpressionNegativeFast(context *parser_context.AwooParserContext, fetchToken lexer_token.FetchToken, details *ConstructExpressionDetails) node.AwooParserNodeResult {
-	t, err := ExpectToken(fetchToken, []uint16{token.TokenTypePrimitive, node.ParserNodeTypeIdentifier, token.TokenTypeBracketLeft, token.TokenOperatorSubstraction}, "primitive, identifier, ( or -")
+	t, err := ExpectToken(fetchToken, []uint16{token.TokenTypePrimitive, node.ParserNodeTypeIdentifier, token.TokenTypeBracketLeft, token.TokenOperatorSubstraction, token.TokenOperatorEq, token.TokenOperatorLT, token.TokenOperatorGT}, "primitive, identifier, (, -, < or >")
 	if err != nil {
 		return node.AwooParserNodeResult{
 			Error: err,

@@ -78,7 +78,7 @@ func RunCompiler(compiler *AwooCompiler) AwooCompilerResult {
 	writer := bufio.NewWriter(file)
 	for ok := true; ok; ok = AdvanceCompiler(compiler) {
 		statement.PrintStatement(&compiler.Context.Parser.Lexer, &compiler.Current)
-		data, err := CompileStatement(&compiler.Context, compiler.Current)
+		data, err := CompileStatement(&compiler.Context, compiler.Current, []byte{})
 		if err != nil {
 			result.Error = err
 			break

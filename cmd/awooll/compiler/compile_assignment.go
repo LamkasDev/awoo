@@ -9,8 +9,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 )
 
-func CompileStatementAssignment(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement) ([]byte, error) {
-	d := []byte{}
+func CompileStatementAssignment(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement, d []byte) ([]byte, error) {
 	nameNode := statement.GetStatementAssignmentIdentifier(&s)
 	name := node.GetNodeIdentifierValue(&nameNode)
 	dest, _ := compiler_context.GetCompilerScopeMemory(context, name)

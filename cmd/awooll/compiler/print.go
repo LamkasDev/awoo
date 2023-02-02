@@ -11,8 +11,8 @@ import (
 
 func PrintNewCompile(context *lexer_context.AwooLexerContext, s *statement.AwooParserStatement, data []byte) {
 	text := ""
-	for _, b := range data {
-		text += fmt.Sprintf("%#x ", b)
+	for i := 0; i < len(data); i += 4 {
+		text += fmt.Sprintf("[%#x %#x %#x %#x] ", data[i], data[i+1], data[i+2], data[i+3])
 	}
 
 	logger.Log("%s %s  %s\n",

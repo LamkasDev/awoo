@@ -61,6 +61,10 @@ func SetupTokenMap() AwooTokenMap {
 	AddToken(m, "=", "=", TokenOperatorEq)
 	AddToken(m, "", "==", TokenOperatorEqEq)
 	AddToken(m, "", "!=", TokenOperatorNotEq)
+	AddToken(m, "<", "<", TokenOperatorLT)
+	AddToken(m, "", "<=", TokenOperatorLTEQ)
+	AddToken(m, ">", ">", TokenOperatorGT)
+	AddToken(m, "", ">=", TokenOperatorGTEQ)
 
 	// Keywords
 	AddToken(m, "var", "var", TokenTypeVar)

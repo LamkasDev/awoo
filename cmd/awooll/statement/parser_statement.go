@@ -1,8 +1,9 @@
 package statement
 
-const ParserStatementTypeDefinitionVariable = 0x0000
-const ParserStatementTypeAssignment = 0x0001
-const ParserStatementTypeDefinitionType = 0x0002
+const ParserStatementTypeDefinitionVariable = 0x000
+const ParserStatementTypeAssignment = 0x001
+const ParserStatementTypeDefinitionType = 0x002
+const ParserStatementTypeIf = 0x003
 
 type AwooParserStatement struct {
 	Error error

@@ -43,10 +43,10 @@ var AwooInstructionANDI = AwooInstruction{
 	Code: 0b0010011, Argument: 0x7, Format: AwooInstructionFormatI, Name: "ANDI", Advance: true,
 }
 var AwooInstructionORI = AwooInstruction{
-	Code: 0b0110011, Argument: 0x6, Format: AwooInstructionFormatI, Name: "ORI", Advance: true,
+	Code: 0b0010011, Argument: 0x6, Format: AwooInstructionFormatI, Name: "ORI", Advance: true,
 }
 var AwooInstructionXORI = AwooInstruction{
-	Code: 0b0110011, Argument: 0x4, Format: AwooInstructionFormatI, Name: "XORI", Advance: true,
+	Code: 0b0010011, Argument: 0x4, Format: AwooInstructionFormatI, Name: "XORI", Advance: true,
 }
 var AwooInstructionSLL = AwooInstruction{
 	Code: 0b0110011, Argument: 0x1, Format: AwooInstructionFormatR, Name: "SLL", Advance: true,

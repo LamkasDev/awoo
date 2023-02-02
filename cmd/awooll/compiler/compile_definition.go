@@ -9,8 +9,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 )
 
-func CompileStatementDefinition(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement) ([]byte, error) {
-	d := []byte{}
+func CompileStatementDefinition(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement, d []byte) ([]byte, error) {
 	tNode := statement.GetStatementDefinitionVariableType(&s)
 	t := node.GetNodeTypeType(&tNode)
 	nameNode := statement.GetStatementDefinitionVariableIdentifier(&s)

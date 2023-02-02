@@ -65,6 +65,52 @@ func CompileNodeExpressionNotEq(context *compiler_context.AwooCompilerContext, d
 	}, d)
 }
 
+func CompileNodeExpressionLT(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
+	r := cpu.GetNextTemporaryRegister(details.Register)
+	return encoder.Encode(encoder.AwooEncodedInstruction{
+		Instruction: instruction.AwooInstructionSLT,
+		SourceOne:   details.Register,
+		SourceTwo:   r,
+		Destination: details.Register,
+	}, d)
+}
+
+func CompileNodeExpressionLTEQ(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
+	d, err := CompileNodeExpressionGT(context, d, details)
+	if err != nil {
+		return d, err
+	}
+	return encoder.Encode(encoder.AwooEncodedInstruction{
+		Instruction: instruction.AwooInstructionXORI,
+		SourceOne:   details.Register,
+		Destination: details.Register,
+		Immediate:   1,
+	}, d)
+}
+
+func CompileNodeExpressionGT(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
+	r := cpu.GetNextTemporaryRegister(details.Register)
+	return encoder.Encode(encoder.AwooEncodedInstruction{
+		Instruction: instruction.AwooInstructionSLT,
+		SourceOne:   r,
+		SourceTwo:   details.Register,
+		Destination: details.Register,
+	}, d)
+}
+
+func CompileNodeExpressionGTEQ(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
+	d, err := CompileNodeExpressionLT(context, d, details)
+	if err != nil {
+		return d, err
+	}
+	return encoder.Encode(encoder.AwooEncodedInstruction{
+		Instruction: instruction.AwooInstructionXORI,
+		SourceOne:   details.Register,
+		Destination: details.Register,
+		Immediate:   1,
+	}, d)
+}
+
 func CompileNodeExpression(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details CompileNodeValueDetails) ([]byte, error) {
 	left := node.GetNodeExpressionLeft(&n)
 	op := n.Token.Type
@@ -76,7 +122,11 @@ func CompileNodeExpression(context *compiler_context.AwooCompilerContext, n node
 		token.TokenOperatorMultiplication,
 		token.TokenOperatorDivision,
 		token.TokenOperatorEqEq,
-		token.TokenOperatorNotEq:
+		token.TokenOperatorNotEq,
+		token.TokenOperatorLT,
+		token.TokenOperatorLTEQ,
+		token.TokenOperatorGT,
+		token.TokenOperatorGTEQ:
 		d, err := CompileNodeValue(context, left, d, CompileNodeValueDetails{Register: details.Register})
 		if err != nil {
 			return d, err
@@ -98,6 +148,14 @@ func CompileNodeExpression(context *compiler_context.AwooCompilerContext, n node
 			return CompileNodeExpressionEqEq(context, d, CompileNodeValueDetails{Register: details.Register})
 		case token.TokenOperatorNotEq:
 			return CompileNodeExpressionNotEq(context, d, CompileNodeValueDetails{Register: details.Register})
+		case token.TokenOperatorLT:
+			return CompileNodeExpressionLT(context, d, CompileNodeValueDetails{Register: details.Register})
+		case token.TokenOperatorLTEQ:
+			return CompileNodeExpressionLTEQ(context, d, CompileNodeValueDetails{Register: details.Register})
+		case token.TokenOperatorGT:
+			return CompileNodeExpressionGT(context, d, CompileNodeValueDetails{Register: details.Register})
+		case token.TokenOperatorGTEQ:
+			return CompileNodeExpressionGTEQ(context, d, CompileNodeValueDetails{Register: details.Register})
 		}
 	}
 

@@ -28,6 +28,9 @@ func PrintStatement(context *lexer_context.AwooLexerContext, s *AwooParserStatem
 		id := GetStatementDefinitionTypeIdentifier(s)
 		value := GetStatementDefinitionTypeValue(s)
 		return fmt.Sprintf("type %s = %s (%s)", node.GetNodeDataText(context, &id), node.GetNodeDataText(context, &value), gchalk.Green(fmt.Sprintf("%#x", s.Type)))
+	case ParserStatementTypeIf:
+		value := GetStatementIfValue(s)
+		return fmt.Sprintf("if %s (%s)", node.GetNodeDataText(context, &value), gchalk.Green(fmt.Sprintf("%#x", s.Type)))
 	}
 
 	return "??"
