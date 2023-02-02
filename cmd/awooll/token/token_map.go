@@ -9,14 +9,14 @@ type AwooTokenMap struct {
 	Keywords map[string]*AwooToken
 }
 
-func AddToken(m AwooTokenMap, key string, name string, tokenType uint16) {
+func AddToken(m AwooTokenMap, key string, name string, id uint16) {
 	awooToken := AwooToken{
 		Key:    key,
 		Name:   name,
-		Id:     tokenType,
+		Id:     id,
 		Length: uint8(len(key)),
 	}
-	m.All[tokenType] = awooToken
+	m.All[id] = awooToken
 	if awooToken.Length == 0 {
 		return
 	}

@@ -1,6 +1,8 @@
 package util
 
 import (
+	"math"
+
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 )
 
@@ -19,10 +21,14 @@ func InsertRangeRegister(accumulator arch.AwooRegister, current arch.AwooRegiste
 	return accumulator | current
 }
 
-func FillSignBits(raw arch.AwooRegister, start uint8) arch.AwooRegister {
-	// Create regular bitmask and shift it to the sign bit's position
-	mask := arch.AwooRegister(1 << (32 - start - 1))
-	mask = mask << start
+func FillSignBits(imm arch.AwooRegister, start uint8) arch.AwooRegister {
+	// Check if immediate's sign bit is set
+	if imm>>start&1 == 1 {
+		// Create bitmask with (32 - start) 1s and shift it to the sign bit's position
+		mask := arch.AwooRegister(math.Pow(2, float64(32-start)) - 1)
+		mask = mask << start
+		return imm | mask
+	}
 
-	return raw | mask
+	return imm
 }

@@ -70,7 +70,6 @@ func CompileNodeExpression(context *compiler_context.AwooCompilerContext, n node
 	op := n.Token.Type
 	right := node.GetNodeExpressionRight(&n)
 
-	// TODO: make a chain of operation, work correctly
 	switch op {
 	case token.TokenOperatorAddition,
 		token.TokenOperatorSubstraction,
@@ -78,7 +77,6 @@ func CompileNodeExpression(context *compiler_context.AwooCompilerContext, n node
 		token.TokenOperatorDivision,
 		token.TokenOperatorEqEq,
 		token.TokenOperatorNotEq:
-		// TODO: figure out which side
 		d, err := CompileNodeValue(context, left, d, CompileNodeValueDetails{Register: details.Register})
 		if err != nil {
 			return d, err

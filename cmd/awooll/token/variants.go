@@ -27,6 +27,30 @@ const TokenOperatorNotEq = 0x106
 func IsTokenTypeOperator(t uint16) bool {
 	return t >= 0x100 && t < 0x200
 }
+func IsTokenTypeAddSub(t uint16) bool {
+	return t >= TokenOperatorAddition && t <= TokenOperatorSubstraction
+}
+func IsTokenTypeMulDiv(t uint16) bool {
+	return t >= TokenOperatorMultiplication && t <= TokenOperatorDivision
+}
+func IsTokenTypeUnary(t uint16) bool {
+	return t >= TokenOperatorAddition && t <= TokenOperatorDivision
+}
+func IsTokenTypeEquality(t uint16) bool {
+	return t >= TokenOperatorEqEq && t <= TokenOperatorNotEq
+}
+func DoesTokenTakePrecendence(op uint16, left uint16) bool {
+	switch op {
+	case TokenOperatorAddition,
+		TokenOperatorSubstraction:
+		return IsTokenTypeEquality(left)
+	case TokenOperatorMultiplication,
+		TokenOperatorDivision:
+		return IsTokenTypeEquality(left) || IsTokenTypeAddSub(left)
+	}
+
+	return false
+}
 
 // Keywords
 const TokenTypeVar = 0x200

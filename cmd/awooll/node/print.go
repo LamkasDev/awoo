@@ -23,7 +23,7 @@ func GetNodeDataText(context *lexer_context.AwooLexerContext, n *AwooParserNode)
 				"%s%v %v %v%s",
 				gchalk.Red("("),
 				GetNodeDataText(context, &l),
-				context.Tokens.All[n.Token.Type].Key,
+				context.Tokens.All[n.Token.Type].Name,
 				GetNodeDataText(context, &r),
 				gchalk.Red(")"),
 			)
@@ -31,7 +31,7 @@ func GetNodeDataText(context *lexer_context.AwooLexerContext, n *AwooParserNode)
 		return fmt.Sprintf(
 			"(%v %v %v)",
 			GetNodeDataText(context, &l),
-			context.Tokens.All[n.Token.Type].Key,
+			context.Tokens.All[n.Token.Type].Name,
 			GetNodeDataText(context, &r),
 		)
 	case ParserNodeTypeNegative:

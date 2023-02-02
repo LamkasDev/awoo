@@ -35,8 +35,8 @@ func ProcessExtendedRange(raw arch.AwooInstruction, rangeExtended AwooInstructio
 		value = util.InsertRangeRegister(value, currentRangeValue, offset, currentRange.Length)
 		offset += currentRange.Length
 	}
-	if extendSign && offset < 32 {
-		util.InsertRangeRegister(value, 1, offset, 32-offset)
+	if extendSign {
+		value = util.FillSignBits(value, offset-1)
 	}
 
 	return value

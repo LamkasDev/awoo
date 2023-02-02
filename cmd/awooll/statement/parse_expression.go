@@ -13,9 +13,7 @@ import (
 
 type ConstructExpressionDetails struct {
 	Type            types.AwooType
-	QueuedBrackets  uint8
 	PendingBrackets uint8
-	Negative        uint8
 }
 
 func ConstructExpressionEndStatement(context *parser_context.AwooParserContext, n node.AwooParserNode, fetchToken lexer_token.FetchToken, details *ConstructExpressionDetails) node.AwooParserNodeResult {
@@ -54,22 +52,15 @@ func ConstructExpressionAccumulate(context *parser_context.AwooParserContext, le
 	case token.TokenTypeBracketRight:
 		return ConstructExpressionEndBracket(context, leftNode.Node, fetchToken, details)
 	case token.TokenOperatorAddition,
-		token.TokenOperatorSubstraction:
-		// TODO: fix precedence over eqeq
-		rightNode := ConstructExpressionNegativeFast(context, fetchToken, details)
-		if rightNode.Error != nil {
-			return rightNode
-		}
-		return node.AwooParserNodeResult{
-			Node: node.CreateNodeExpression(op, leftNode.Node, rightNode.Node),
-		}
-	case token.TokenOperatorMultiplication,
+		token.TokenOperatorSubstraction,
+		token.TokenOperatorMultiplication,
 		token.TokenOperatorDivision:
 		rightNode := ConstructExpressionNegativeFast(context, fetchToken, details)
 		if rightNode.Error != nil {
 			return rightNode
 		}
-		if leftNode.Node.Type == node.ParserNodeTypeExpression && !node.GetNodeExpressionIsBracket(&leftNode.Node) {
+		if leftNode.Node.Type == node.ParserNodeTypeExpression &&
+			!node.GetNodeExpressionIsBracket(&leftNode.Node) && token.DoesTokenTakePrecendence(op.Type, leftNode.Node.Token.Type) {
 			n := node.CreateNodeExpression(op, node.GetNodeExpressionRight(&leftNode.Node), rightNode.Node)
 			return node.AwooParserNodeResult{
 				Node: node.CreateNodeExpression(leftNode.Node.Token, node.GetNodeExpressionLeft(&leftNode.Node), n),
@@ -114,7 +105,11 @@ func ConstructExpressionAccumulate(context *parser_context.AwooParserContext, le
 		}
 	}
 
-	// TODO: this text should say bracket if bracket > 0
+	if details.PendingBrackets > 0 {
+		return node.AwooParserNodeResult{
+			Error: fmt.Errorf("expected an %s", gchalk.Red("operator, ) or ;")),
+		}
+	}
 	return node.AwooParserNodeResult{
 		Error: fmt.Errorf("expected an %s", gchalk.Red("operator or ;")),
 	}
