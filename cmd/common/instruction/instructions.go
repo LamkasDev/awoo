@@ -17,7 +17,7 @@ var AwooInstructionSLTI = AwooInstruction{
 	Code: 0b0010011, Argument: 0x2, Format: AwooInstructionFormatI, Name: "SLTI", Advance: true,
 }
 var AwooInstructionSLTU = AwooInstruction{
-	Code: 0b0110011, Argument: 0x6, Format: AwooInstructionFormatR, Name: "SLTU", Advance: true,
+	Code: 0b0110011, Argument: 0x3, Format: AwooInstructionFormatR, Name: "SLTU", Advance: true,
 }
 var AwooInstructionSLTIU = AwooInstruction{
 	Code: 0b0010011, Argument: 0x6, Format: AwooInstructionFormatI, Name: "SLTIU", Advance: true,

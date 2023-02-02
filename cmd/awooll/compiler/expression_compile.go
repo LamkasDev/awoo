@@ -12,38 +12,55 @@ import (
 	"github.com/jwalton/gchalk"
 )
 
-func CompileNodeExpressionAdd(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
+func CompileNodeExpressionOp(context *compiler_context.AwooCompilerContext, ins instruction.AwooInstruction, r uint8, d []byte, details CompileNodeValueDetails) ([]byte, error) {
 	return encoder.Encode(encoder.AwooEncodedInstruction{
-		Instruction: instruction.AwooInstructionADD,
+		Instruction: ins,
 		SourceOne:   details.Register,
-		SourceTwo:   cpu.GetNextTemporaryRegister(details.Register),
+		SourceTwo:   r,
 		Destination: details.Register,
 	}, d)
+}
+
+func CompileNodeExpressionAdd(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
+	return CompileNodeExpressionOp(context, instruction.AwooInstructionADD, cpu.GetNextTemporaryRegister(details.Register), d, details)
 }
 
 func CompileNodeExpressionSubstract(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
-	return encoder.Encode(encoder.AwooEncodedInstruction{
-		Instruction: instruction.AwooInstructionSUB,
-		SourceOne:   details.Register,
-		SourceTwo:   cpu.GetNextTemporaryRegister(details.Register),
-		Destination: details.Register,
-	}, d)
+	return CompileNodeExpressionOp(context, instruction.AwooInstructionSUB, cpu.GetNextTemporaryRegister(details.Register), d, details)
 }
 
 func CompileNodeExpressionMultiply(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
-	return encoder.Encode(encoder.AwooEncodedInstruction{
-		Instruction: instruction.AwooInstructionMUL,
-		SourceOne:   details.Register,
-		SourceTwo:   cpu.GetNextTemporaryRegister(details.Register),
-		Destination: details.Register,
-	}, d)
+	return CompileNodeExpressionOp(context, instruction.AwooInstructionMUL, cpu.GetNextTemporaryRegister(details.Register), d, details)
 }
 
 func CompileNodeExpressionDivide(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
+	return CompileNodeExpressionOp(context, instruction.AwooInstructionDIV, cpu.GetNextTemporaryRegister(details.Register), d, details)
+}
+
+func CompileNodeExpressionEqEq(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
+	r := cpu.GetNextTemporaryRegister(details.Register)
+	d, err := CompileNodeExpressionOp(context, instruction.AwooInstructionSUB, r, d, details)
+	if err != nil {
+		return d, err
+	}
 	return encoder.Encode(encoder.AwooEncodedInstruction{
-		Instruction: instruction.AwooInstructionDIV,
+		Instruction: instruction.AwooInstructionSLTIU,
 		SourceOne:   details.Register,
-		SourceTwo:   cpu.GetNextTemporaryRegister(details.Register),
+		Destination: details.Register,
+		Immediate:   1,
+	}, d)
+}
+
+func CompileNodeExpressionNotEq(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
+	r := cpu.GetNextTemporaryRegister(details.Register)
+	d, err := CompileNodeExpressionOp(context, instruction.AwooInstructionSUB, r, d, details)
+	if err != nil {
+		return d, err
+	}
+	return encoder.Encode(encoder.AwooEncodedInstruction{
+		Instruction: instruction.AwooInstructionSLTU,
+		SourceOne:   cpu.AwooRegisterZero,
+		SourceTwo:   details.Register,
 		Destination: details.Register,
 	}, d)
 }
@@ -58,7 +75,9 @@ func CompileNodeExpression(context *compiler_context.AwooCompilerContext, n node
 	case token.TokenOperatorAddition,
 		token.TokenOperatorSubstraction,
 		token.TokenOperatorMultiplication,
-		token.TokenOperatorDivision:
+		token.TokenOperatorDivision,
+		token.TokenOperatorEqEq,
+		token.TokenOperatorNotEq:
 		// TODO: figure out which side
 		d, err := CompileNodeValue(context, left, d, CompileNodeValueDetails{Register: details.Register})
 		if err != nil {
@@ -77,6 +96,10 @@ func CompileNodeExpression(context *compiler_context.AwooCompilerContext, n node
 			return CompileNodeExpressionMultiply(context, d, CompileNodeValueDetails{Register: details.Register})
 		case token.TokenOperatorDivision:
 			return CompileNodeExpressionDivide(context, d, CompileNodeValueDetails{Register: details.Register})
+		case token.TokenOperatorEqEq:
+			return CompileNodeExpressionEqEq(context, d, CompileNodeValueDetails{Register: details.Register})
+		case token.TokenOperatorNotEq:
+			return CompileNodeExpressionNotEq(context, d, CompileNodeValueDetails{Register: details.Register})
 		}
 	}
 

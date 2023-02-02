@@ -55,6 +55,7 @@ func ConstructExpressionAccumulate(context *parser_context.AwooParserContext, le
 		return ConstructExpressionEndBracket(context, leftNode.Node, fetchToken, details)
 	case token.TokenOperatorAddition,
 		token.TokenOperatorSubstraction:
+		// TODO: fix precedence over eqeq
 		rightNode := ConstructExpressionNegativeFast(context, fetchToken, details)
 		if rightNode.Error != nil {
 			return rightNode
@@ -76,6 +77,40 @@ func ConstructExpressionAccumulate(context *parser_context.AwooParserContext, le
 		}
 		return node.AwooParserNodeResult{
 			Node: node.CreateNodeExpression(op, leftNode.Node, rightNode.Node),
+		}
+	case token.TokenOperatorEq:
+		op, err = ExpectToken(fetchToken, []uint16{token.TokenOperatorEq}, "==")
+		if err != nil {
+			return node.AwooParserNodeResult{
+				Error: err,
+			}
+		}
+		rightNode := ConstructExpressionNegativeFast(context, fetchToken, details)
+		if rightNode.Error != nil {
+			return rightNode
+		}
+		return node.AwooParserNodeResult{
+			Node: node.CreateNodeExpression(lexer_token.AwooLexerToken{
+				Type:  token.TokenOperatorEqEq,
+				Start: op.Start - 1,
+			}, leftNode.Node, rightNode.Node),
+		}
+	case token.TokenTypeNot:
+		op, err = ExpectToken(fetchToken, []uint16{token.TokenOperatorEq}, "!=")
+		if err != nil {
+			return node.AwooParserNodeResult{
+				Error: err,
+			}
+		}
+		rightNode := ConstructExpressionNegativeFast(context, fetchToken, details)
+		if rightNode.Error != nil {
+			return rightNode
+		}
+		return node.AwooParserNodeResult{
+			Node: node.CreateNodeExpression(lexer_token.AwooLexerToken{
+				Type:  token.TokenOperatorNotEq,
+				Start: op.Start - 1,
+			}, leftNode.Node, rightNode.Node),
 		}
 	}
 
