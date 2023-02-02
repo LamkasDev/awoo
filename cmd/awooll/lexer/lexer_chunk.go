@@ -1,0 +1,26 @@
+package lexer
+
+import "unicode"
+
+type ConstructChunkValidator func(rune) bool
+
+func ConstructChunkSkipperDefault(r rune) bool { return false }
+
+func ConstructChunk(lexer *AwooLexer, cs string, skip ConstructChunkValidator, validate ConstructChunkValidator) string {
+	for _, ok := AdvanceLexer(lexer); ok; _, ok = AdvanceLexer(lexer) {
+		if skip(unicode.ToLower(lexer.Current)) {
+			continue
+		}
+		if !validate(unicode.ToLower(lexer.Current)) {
+			break
+		}
+		cs += (string)(lexer.Current)
+	}
+	StepbackLexer(lexer)
+
+	return cs
+}
+
+func ConstructChunkFast(lexer *AwooLexer, cs string, validate ConstructChunkValidator) string {
+	return ConstructChunk(lexer, cs, ConstructChunkSkipperDefault, validate)
+}

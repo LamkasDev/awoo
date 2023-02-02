@@ -66,20 +66,6 @@ func StepbackLexer(lexer *AwooLexer) (rune, bool) {
 	return AdvanceLexerFor(lexer, -1)
 }
 
-type ConstructChunkValidator func(rune) bool
-
-func ConstructChunk(lexer *AwooLexer, cs string, validate ConstructChunkValidator) string {
-	for _, ok := AdvanceLexer(lexer); ok; _, ok = AdvanceLexer(lexer) {
-		if !validate(unicode.ToLower(lexer.Current)) {
-			break
-		}
-		cs += (string)(lexer.Current)
-	}
-	StepbackLexer(lexer)
-
-	return cs
-}
-
 func RunLexer(lexer *AwooLexer) AwooLexerResult {
 	result := AwooLexerResult{
 		Context: lexer.Context,
