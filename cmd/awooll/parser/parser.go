@@ -7,8 +7,8 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_context"
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
+	"github.com/LamkasDev/awoo-emu/cmd/common/util"
 	"github.com/jwalton/gchalk"
 )
 
@@ -54,34 +54,34 @@ func AdvanceParser(parser *AwooParser) bool {
 	return AdvanceParserFor(parser, 1)
 }
 
+func PeekParser(parser *AwooParser) (lexer_token.AwooLexerToken, bool) {
+	if parser.Position+1 >= parser.Length {
+		return lexer_token.AwooLexerToken{}, false
+	}
+	return parser.Contents.Tokens[parser.Position+1], true
+}
+
 func StepbackParser(parser *AwooParser) bool {
 	return AdvanceParserFor(parser, -1)
 }
 
-func RunParser(parser *AwooParser) AwooParserResult {
-	result := AwooParserResult{}
-	logger.Log(gchalk.Yellow("\n> Parser\n"))
-	logger.Log("Input: %s\n", gchalk.Magenta(fmt.Sprintf("%v", parser.Contents.Tokens)))
-	for ok := true; ok; ok = AdvanceParser(parser) {
-		logger.Log("┏━ %s\n", lexer_token.PrintToken(&parser.Contents.Context, &parser.Current))
-		st, err := statement.ConstructStatement(&parser.Context, parser.Current, func() (lexer_token.AwooLexerToken, error) {
-			ok := AdvanceParser(parser)
-			if !ok {
-				return lexer_token.AwooLexerToken{}, fmt.Errorf("no more tokens")
-			}
-			logger.Log("┣━ %s\n", lexer_token.PrintToken(&parser.Contents.Context, &parser.Current))
-			return parser.Current, nil
-		})
-		if err != nil {
-			result.Error = err
-			break
-		}
-		statement.PrintNewStatement(&parser.Contents.Context, &st)
-		result.Statements = append(result.Statements, st)
+func FetchTokenParser(cparser *AwooParser) (lexer_token.AwooLexerToken, error) {
+	ok := AdvanceParser(cparser)
+	if !ok {
+		return lexer_token.AwooLexerToken{}, fmt.Errorf("no more tokens")
 	}
-	if result.Error != nil {
-		panic(result.Error)
+	logger.Log("┣━ %s\n", lexer_token.PrintToken(&cparser.Contents.Context, &cparser.Current))
+	return cparser.Current, nil
+}
+
+func ExpectTokenParser(cparser *AwooParser, tokenTypes []uint16, tokenName string) (lexer_token.AwooLexerToken, error) {
+	t, err := FetchTokenParser(cparser)
+	if err != nil {
+		return t, err
+	}
+	if !util.Contains(tokenTypes, t.Type) {
+		return t, fmt.Errorf("expected a %s", gchalk.Red(tokenName))
 	}
 
-	return result
+	return t, nil
 }

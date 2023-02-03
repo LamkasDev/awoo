@@ -70,6 +70,7 @@ func SetupTokenMap() AwooTokenMap {
 	AddToken(m, "var", "var", TokenTypeVar)
 	AddToken(m, "type", "type", TokenTypeTypeDefinition)
 	AddToken(m, "if", "if", TokenTypeIf)
+	AddToken(m, "else", "else", TokenTypeElse)
 
 	return m
 }

@@ -6,7 +6,8 @@ import (
 
 type AwooParserStatementDataIf struct {
 	Value node.AwooParserNode
-	Body  []AwooParserStatement
+	Body  AwooParserStatement
+	Next  []AwooParserStatement
 }
 
 func GetStatementIfValue(s *AwooParserStatement) node.AwooParserNode {
@@ -19,13 +20,23 @@ func SetStatementIfValue(s *AwooParserStatement, n node.AwooParserNode) {
 	s.Data = d
 }
 
-func GetStatementIfBody(s *AwooParserStatement) []AwooParserStatement {
+func GetStatementIfBody(s *AwooParserStatement) AwooParserStatement {
 	return s.Data.(AwooParserStatementDataIf).Body
 }
 
-func SetStatementIfBody(s *AwooParserStatement, b []AwooParserStatement) {
+func SetStatementIfBody(s *AwooParserStatement, b AwooParserStatement) {
 	d := s.Data.(AwooParserStatementDataIf)
 	d.Body = b
+	s.Data = d
+}
+
+func GetStatementIfNext(s *AwooParserStatement) []AwooParserStatement {
+	return s.Data.(AwooParserStatementDataIf).Next
+}
+
+func SetStatementIfNext(s *AwooParserStatement, next []AwooParserStatement) {
+	d := s.Data.(AwooParserStatementDataIf)
+	d.Next = next
 	s.Data = d
 }
 
@@ -34,6 +45,7 @@ func CreateStatementIf(value node.AwooParserNode) AwooParserStatement {
 		Type: ParserStatementTypeIf,
 		Data: AwooParserStatementDataIf{
 			Value: value,
+			Next:  []AwooParserStatement{},
 		},
 	}
 }

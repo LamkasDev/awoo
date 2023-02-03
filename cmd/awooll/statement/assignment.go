@@ -1,8 +1,6 @@
 package statement
 
-import (
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
-)
+import "github.com/LamkasDev/awoo-emu/cmd/awooll/node"
 
 type AwooParserStatementDataAssignment struct {
 	Identifier node.AwooParserNode

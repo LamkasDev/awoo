@@ -18,6 +18,15 @@ func CompileStatement(context *compiler_context.AwooCompilerContext, s statement
 		return []byte{}, nil
 	case statement.ParserStatementTypeIf:
 		return CompileStatementIf(context, s, d)
+	case statement.ParserStatementTypeGroup:
+		var err error = nil
+		for _, n := range statement.GetStatementGroupBody(&s) {
+			d, err = CompileStatement(context, n, d)
+			if err != nil {
+				return d, err
+			}
+		}
+		return d, nil
 	}
 
 	return []byte{}, fmt.Errorf("no idea how to compile statement %s", gchalk.Red(fmt.Sprint(s.Type)))

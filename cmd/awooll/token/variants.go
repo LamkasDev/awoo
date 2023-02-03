@@ -60,6 +60,7 @@ func DoesTokenTakePrecendence(op uint16, left uint16) bool {
 const TokenTypeVar = 0x200
 const TokenTypeTypeDefinition = 0x201
 const TokenTypeIf = 0x202
+const TokenTypeElse = 0x203
 
 func IsTokenTypeKeyword(t uint16) bool {
 	return t >= 0x200 && t < 0x300

@@ -9,6 +9,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_run"
 	"github.com/LamkasDev/awoo-emu/cmd/common/flags"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/LamkasDev/awoo-emu/cmd/common/paths"
@@ -43,7 +44,7 @@ func main() {
 	parSettings := parser.AwooParserSettings{}
 	par := parser.SetupParser(parSettings, lex.Context)
 	parser.LoadParser(&par, lexRes)
-	parRes := parser.RunParser(&par)
+	parRes := parser_run.RunParser(&par)
 
 	compSettings := compiler.AwooCompilerSettings{
 		Path: output,

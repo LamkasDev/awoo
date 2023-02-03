@@ -57,6 +57,7 @@ func Run(emulator *AwooEmulator) {
 			emulator.CPU.Counter += 4
 		}
 		emulator.CPU.Advance = true
+		emulator.CPU.Registers[cpu.AwooRegisterZero] = 0
 		emulator.Running = emulator.CPU.Counter < emulator.ROM.Length
 	}
 	n1 := int(memory.ReadMemory32(&emulator.CPU.Memory, 0))
