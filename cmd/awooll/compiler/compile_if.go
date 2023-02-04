@@ -9,9 +9,34 @@ import (
 )
 
 func CompileStatementIfNode(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement, bodies [][]byte, jump uint32) ([][]byte, uint32, error) {
-	body, err := CompileStatement(context, s, []byte{})
-	if err != nil {
-		return bodies, jump, err
+	var body []byte
+	var err error
+	switch s.Type {
+	case statement.ParserStatementTypeIf:
+		body, err = CompileStatementGroup(context, statement.GetStatementIfBody(&s), []byte{})
+		if err != nil {
+			return bodies, jump, err
+		}
+		// TODO: this could be optimized using top level comparison from value node (because the below instruction can compare)
+		valueNode := statement.GetStatementIfValue(&s)
+		ifIns, err := CompileNodeValueFast(context, valueNode, []byte{})
+		if err != nil {
+			return bodies, jump, err
+		}
+		ifIns, err = encoder.Encode(encoder.AwooEncodedInstruction{
+			Instruction: instruction.AwooInstructionBEQ,
+			SourceOne:   cpu.AwooRegisterTemporaryZero,
+			Immediate:   uint32(len(body) + 8),
+		}, ifIns)
+		if err != nil {
+			return bodies, jump, err
+		}
+		body = append(ifIns, body...)
+	case statement.ParserStatementTypeGroup:
+		body, err = CompileStatementGroup(context, s, []byte{})
+		if err != nil {
+			return bodies, jump, err
+		}
 	}
 	bodies = append(bodies, body)
 	jump += uint32(len(body) + 4)
@@ -20,14 +45,7 @@ func CompileStatementIfNode(context *compiler_context.AwooCompilerContext, s sta
 }
 
 func CompileStatementIf(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement, d []byte) ([]byte, error) {
-	valueNode := statement.GetStatementIfValue(&s)
-	d, err := CompileNodeValueFast(context, valueNode, d)
-	if err != nil {
-		return d, err
-	}
-
-	bodyGroup := statement.GetStatementIfBody(&s)
-	bodies, jump, err := CompileStatementIfNode(context, bodyGroup, [][]byte{}, uint32(4))
+	bodies, jump, err := CompileStatementIfNode(context, s, [][]byte{}, uint32(4))
 	if err != nil {
 		return d, err
 	}
@@ -39,20 +57,12 @@ func CompileStatementIf(context *compiler_context.AwooCompilerContext, s stateme
 		}
 	}
 
-	// TODO: this could be optimized using top level comparison from value node (because the below instruction can compare 1 value)
-	// TODO: skip to the next else
-	d, err = encoder.Encode(encoder.AwooEncodedInstruction{
-		Instruction: instruction.AwooInstructionBEQ,
-		SourceOne:   cpu.AwooRegisterTemporaryZero,
-		Immediate:   uint32(len(bodies[len(bodies)-1]) + 8),
-	}, d)
-	if err != nil {
-		return d, err
-	}
-
 	for i, body := range bodies {
 		// TODO: skip jump if last in chain
 		jump -= uint32(len(body) + 4)
+		if jump <= 4 {
+			continue
+		}
 		bodies[i], err = encoder.Encode(encoder.AwooEncodedInstruction{
 			Instruction: instruction.AwooInstructionJAL,
 			Destination: cpu.AwooRegisterZero,
