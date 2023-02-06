@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_token"
@@ -68,7 +69,7 @@ func StepbackParser(parser *AwooParser) bool {
 func FetchTokenParser(cparser *AwooParser) (lexer_token.AwooLexerToken, error) {
 	ok := AdvanceParser(cparser)
 	if !ok {
-		return lexer_token.AwooLexerToken{}, fmt.Errorf("no more tokens")
+		return lexer_token.AwooLexerToken{}, awerrors.ErrorNoMoreTokens
 	}
 	logger.Log("┣━ %s\n", lexer_token.PrintToken(&cparser.Contents.Context, &cparser.Current))
 	return cparser.Current, nil
@@ -80,7 +81,7 @@ func ExpectTokenParser(cparser *AwooParser, tokenTypes []uint16, tokenName strin
 		return t, err
 	}
 	if !util.Contains(tokenTypes, t.Type) {
-		return t, fmt.Errorf("expected a %s", gchalk.Red(tokenName))
+		return t, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red(tokenName))
 	}
 
 	return t, nil

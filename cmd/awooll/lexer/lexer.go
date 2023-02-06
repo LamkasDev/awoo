@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"unicode"
 
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
@@ -103,7 +104,7 @@ func RunLexer(lexer *AwooLexer) AwooLexerResult {
 
 		token, matchedString, ok := CreateTokenCouple(lexer)
 		if !ok {
-			result.Error = fmt.Errorf("illegal character %s", gchalk.Red((string)(lexer.Current)))
+			result.Error = fmt.Errorf("%w: %s", awerrors.ErrorIllegalCharacter, gchalk.Red((string)(lexer.Current)))
 			break
 		}
 		lexer_token.PrintNewToken(&lexer.Context, matchedString, &token)

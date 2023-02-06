@@ -67,7 +67,7 @@ func RunCompiler(compiler *AwooCompiler) AwooCompilerResult {
 	logger.Log(gchalk.Yellow("\n> Compiler\n"))
 	logger.Log("Input: %s\n", gchalk.Magenta(fmt.Sprintf("%v", compiler.Contents.Statements)))
 
-	err := os.MkdirAll(filepath.Dir(compiler.Settings.Path), 644)
+	err := os.MkdirAll(filepath.Dir(compiler.Settings.Path), 0644)
 	if err != nil {
 		panic(err)
 	}

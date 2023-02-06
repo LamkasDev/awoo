@@ -1,6 +1,9 @@
 package compiler
 
 import (
+	"fmt"
+
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
@@ -11,17 +14,18 @@ import (
 
 func CompileStatementDefinition(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement, d []byte) ([]byte, error) {
 	tNode := statement.GetStatementDefinitionVariableType(&s)
+	// TODO: make this shit handler poitners.
 	t := node.GetNodeTypeType(&tNode)
 	nameNode := statement.GetStatementDefinitionVariableIdentifier(&s)
 	name := node.GetNodeIdentifierValue(&nameNode)
 	valueNode := statement.GetStatementDefinitionVariableValue(&s)
 	dest, err := compiler_context.PushCompilerScopeCurrentMemory(context, name, t)
 	if err != nil {
-		return d, err
+		return d, fmt.Errorf("%w: %w", awerrors.ErrorFailedToCompileStatement, err)
 	}
 	d, err = CompileNodeValueFast(context, valueNode, d)
 	if err != nil {
-		return d, err
+		return d, fmt.Errorf("%w: %w", awerrors.ErrorFailedToCompileStatement, err)
 	}
 
 	return encoder.Encode(encoder.AwooEncodedInstruction{

@@ -52,7 +52,7 @@ func ProcessJAL(cpu *AwooCPU, ins AwooDecodedInstruction) {
 	cpu.Advance = false
 }
 
-// TODO: no multiplied immediate
+// TODO: no multiplied immediate.
 func ProcessJALR(cpu *AwooCPU, ins AwooDecodedInstruction) {
 	t := cpu.Counter + 4
 	cpu.Counter = (cpu.Registers[ins.SourceOne] + ins.Immediate) &^ 1

@@ -3,6 +3,7 @@ package compiler
 import (
 	"fmt"
 
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
@@ -11,6 +12,21 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/jwalton/gchalk"
 )
+
+type AwooCompileNodeExpression func(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error)
+
+var AwooCompileNodeExpressions = map[uint16]AwooCompileNodeExpression{
+	token.TokenOperatorAddition:       CompileNodeExpressionAdd,
+	token.TokenOperatorSubstraction:   CompileNodeExpressionSubstract,
+	token.TokenOperatorMultiplication: CompileNodeExpressionMultiply,
+	token.TokenOperatorDivision:       CompileNodeExpressionDivide,
+	token.TokenOperatorEqEq:           CompileNodeExpressionEqEq,
+	token.TokenOperatorNotEq:          CompileNodeExpressionNotEq,
+	token.TokenOperatorLT:             CompileNodeExpressionLT,
+	token.TokenOperatorLTEQ:           CompileNodeExpressionLTEQ,
+	token.TokenOperatorGT:             CompileNodeExpressionGT,
+	token.TokenOperatorGTEQ:           CompileNodeExpressionGTEQ,
+}
 
 func CompileNodeExpressionOp(context *compiler_context.AwooCompilerContext, ins instruction.AwooInstruction, r uint8, d []byte, details CompileNodeValueDetails) ([]byte, error) {
 	return encoder.Encode(encoder.AwooEncodedInstruction{
@@ -65,7 +81,7 @@ func CompileNodeExpressionNotEq(context *compiler_context.AwooCompilerContext, d
 	}, d)
 }
 
-func CompileNodeExpressionLT(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
+func CompileNodeExpressionLT(_ *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
 	r := cpu.GetNextTemporaryRegister(details.Register)
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionSLT,
@@ -88,7 +104,7 @@ func CompileNodeExpressionLTEQ(context *compiler_context.AwooCompilerContext, d 
 	}, d)
 }
 
-func CompileNodeExpressionGT(context *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
+func CompileNodeExpressionGT(_ *compiler_context.AwooCompilerContext, d []byte, details CompileNodeValueDetails) ([]byte, error) {
 	r := cpu.GetNextTemporaryRegister(details.Register)
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionSLT,
@@ -112,52 +128,24 @@ func CompileNodeExpressionGTEQ(context *compiler_context.AwooCompilerContext, d 
 }
 
 func CompileNodeExpression(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details CompileNodeValueDetails) ([]byte, error) {
+	entry, ok := AwooCompileNodeExpressions[n.Token.Type]
+	if !ok {
+		return d, fmt.Errorf("%w: %s", awerrors.ErrorCantCompileOperator, gchalk.Red(context.Parser.Lexer.Tokens.All[n.Token.Type].Name))
+	}
 	left := node.GetNodeExpressionLeft(&n)
-	op := n.Token.Type
+	d, err := CompileNodeValue(context, left, d, CompileNodeValueDetails{Register: details.Register})
+	if err != nil {
+		return d, fmt.Errorf("%w: %s", awerrors.ErrorFailedToCompileOperator, err)
+	}
 	right := node.GetNodeExpressionRight(&n)
-
-	switch op {
-	case token.TokenOperatorAddition,
-		token.TokenOperatorSubstraction,
-		token.TokenOperatorMultiplication,
-		token.TokenOperatorDivision,
-		token.TokenOperatorEqEq,
-		token.TokenOperatorNotEq,
-		token.TokenOperatorLT,
-		token.TokenOperatorLTEQ,
-		token.TokenOperatorGT,
-		token.TokenOperatorGTEQ:
-		d, err := CompileNodeValue(context, left, d, CompileNodeValueDetails{Register: details.Register})
-		if err != nil {
-			return d, err
-		}
-		d, err = CompileNodeValue(context, right, d, CompileNodeValueDetails{Register: cpu.GetNextTemporaryRegister(details.Register)})
-		if err != nil {
-			return d, err
-		}
-		switch op {
-		case token.TokenOperatorAddition:
-			return CompileNodeExpressionAdd(context, d, CompileNodeValueDetails{Register: details.Register})
-		case token.TokenOperatorSubstraction:
-			return CompileNodeExpressionSubstract(context, d, CompileNodeValueDetails{Register: details.Register})
-		case token.TokenOperatorMultiplication:
-			return CompileNodeExpressionMultiply(context, d, CompileNodeValueDetails{Register: details.Register})
-		case token.TokenOperatorDivision:
-			return CompileNodeExpressionDivide(context, d, CompileNodeValueDetails{Register: details.Register})
-		case token.TokenOperatorEqEq:
-			return CompileNodeExpressionEqEq(context, d, CompileNodeValueDetails{Register: details.Register})
-		case token.TokenOperatorNotEq:
-			return CompileNodeExpressionNotEq(context, d, CompileNodeValueDetails{Register: details.Register})
-		case token.TokenOperatorLT:
-			return CompileNodeExpressionLT(context, d, CompileNodeValueDetails{Register: details.Register})
-		case token.TokenOperatorLTEQ:
-			return CompileNodeExpressionLTEQ(context, d, CompileNodeValueDetails{Register: details.Register})
-		case token.TokenOperatorGT:
-			return CompileNodeExpressionGT(context, d, CompileNodeValueDetails{Register: details.Register})
-		case token.TokenOperatorGTEQ:
-			return CompileNodeExpressionGTEQ(context, d, CompileNodeValueDetails{Register: details.Register})
-		}
+	d, err = CompileNodeValue(context, right, d, CompileNodeValueDetails{Register: cpu.GetNextTemporaryRegister(details.Register)})
+	if err != nil {
+		return d, fmt.Errorf("%w: %s", awerrors.ErrorFailedToCompileOperator, err)
+	}
+	d, err = entry(context, d, details)
+	if err != nil {
+		return d, fmt.Errorf("%w: %s", awerrors.ErrorFailedToCompileOperator, err)
 	}
 
-	return d, fmt.Errorf("no idea how to compile expression with operator %s", gchalk.Red(context.Parser.Lexer.Tokens.All[op].Name))
+	return d, nil
 }

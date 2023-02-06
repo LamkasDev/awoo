@@ -3,6 +3,7 @@ package compiler_context
 import (
 	"fmt"
 
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/jwalton/gchalk"
 )
 
@@ -20,7 +21,7 @@ type AwooCompilerContextMemoryEntry struct {
 }
 
 func PushCompilerScopeIdMemory(context *AwooCompilerContext, scopeId uint16, name string, t uint16) (uint16, error) {
-	// TODO: error checking
+	// TODO: error checking.
 	scope := context.Scopes.Entries[scopeId]
 	start := context.Scopes.Entries[scopeId].Memory.Position
 	scope.Memory.Position += context.Parser.Lexer.Types.All[t].Size
@@ -64,13 +65,13 @@ func PopCompilerScopeMemory(context *AwooCompilerContext, name string) error {
 		}
 	}
 
-	return fmt.Errorf("unknown variable %s", gchalk.Red(name))
+	return fmt.Errorf("%w: %s", awerrors.ErrorUnknownVariable, gchalk.Red(name))
 }
 
 func GetCompilerScopeIdMemory(context *AwooCompilerContext, scopeId uint16, name string) (AwooCompilerContextMemoryEntry, error) {
 	entry, ok := context.Scopes.Entries[scopeId].Memory.Entries[name]
 	if !ok {
-		return AwooCompilerContextMemoryEntry{}, fmt.Errorf("unknown variable %s", gchalk.Red(name))
+		return AwooCompilerContextMemoryEntry{}, fmt.Errorf("%w: %s", awerrors.ErrorUnknownVariable, gchalk.Red(name))
 	}
 
 	return entry, nil
@@ -88,5 +89,5 @@ func GetCompilerScopeMemory(context *AwooCompilerContext, name string) (AwooComp
 		}
 	}
 
-	return AwooCompilerContextMemoryEntry{}, fmt.Errorf("unknown variable %s", gchalk.Red(name))
+	return AwooCompilerContextMemoryEntry{}, fmt.Errorf("%w: %s", awerrors.ErrorUnknownVariable, gchalk.Red(name))
 }

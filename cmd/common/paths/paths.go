@@ -2,7 +2,6 @@ package paths
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,7 +16,7 @@ func ResolvePath(input string, ext string) string {
 		input = filepath.Join(wd, input)
 	}
 	if filepath.Ext(input) == "" {
-		files, err := ioutil.ReadDir(input)
+		files, err := os.ReadDir(input)
 		if err != nil {
 			panic(err)
 		}

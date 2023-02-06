@@ -18,9 +18,9 @@ func ConstructStatement(cparser *parser.AwooParser, t lexer_token.AwooLexerToken
 	case token.TokenTypeIdentifier:
 		statement, err = ConstructStatementAssignment(cparser, t)
 	case token.TokenTypeTypeDefinition:
-		statement, err = ConstructStatementDefinitionType(cparser, t)
+		statement, err = ConstructStatementDefinitionType(cparser)
 	case token.TokenTypeIf:
-		statement, err = ConstructStatementIf(cparser, t)
+		statement, err = ConstructStatementIf(cparser)
 	}
 
 	return statement, err

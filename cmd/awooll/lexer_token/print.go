@@ -14,21 +14,10 @@ func PrintNewToken(context *lexer_context.AwooLexerContext, cs string, t *AwooLe
 }
 
 func PrintToken(context *lexer_context.AwooLexerContext, t *AwooLexerToken) string {
-	tokenType := "token"
-	if token.IsTokenTypeGeneral(t.Type) {
-		tokenType = "token"
-	} else if token.IsTokenTypeOperator(t.Type) {
-		tokenType = "op"
-	} else if token.IsTokenTypeKeyword(t.Type) {
-		tokenType = "type"
-	} else if token.IsTokenTypeKeyword(t.Type) {
-		tokenType = "keyword"
-	}
-	tokenName := context.Tokens.All[t.Type].Name
 	details := gchalk.Green(fmt.Sprintf("%#x", t.Type))
 	if t.Data != nil {
 		details += fmt.Sprintf(", %v", gchalk.Blue(fmt.Sprint(t.Data)))
 	}
 
-	return fmt.Sprintf("%s %s (%s)", tokenType, tokenName, details)
+	return fmt.Sprintf("%s %s (%s)", token.GetTokenTypeName(t.Type), context.Tokens.All[t.Type].Name, details)
 }

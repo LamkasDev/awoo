@@ -3,6 +3,7 @@ package compiler
 import (
 	"fmt"
 
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
 	"github.com/jwalton/gchalk"
@@ -22,5 +23,5 @@ func CompileStatement(context *compiler_context.AwooCompilerContext, s statement
 		return CompileStatementGroup(context, s, d)
 	}
 
-	return []byte{}, fmt.Errorf("no idea how to compile statement %s", gchalk.Red(fmt.Sprint(s.Type)))
+	return []byte{}, fmt.Errorf("%w: %s", awerrors.ErrorCantCompileStatement, gchalk.Red(fmt.Sprint(s.Type)))
 }

@@ -1,6 +1,6 @@
 package instruction
 
-// Arithmetic (9 instructions)
+// Arithmetic (9 instructions).
 var AwooInstructionADD = AwooInstruction{
 	Code: 0b0110011, Argument: 0x0, Format: AwooInstructionFormatR, Name: "ADD", Advance: true,
 }
@@ -29,7 +29,7 @@ var AwooInstructionAUIPC = AwooInstruction{
 	Code: 0b0010111, Argument: 0x0, Format: AwooInstructionFormatU, Name: "AUIPC", Advance: true,
 }
 
-// Logical (12 instructions)
+// Logical (12 instructions).
 var AwooInstructionAND = AwooInstruction{
 	Code: 0b0110011, Argument: 0x7, Format: AwooInstructionFormatR, Name: "AND", Advance: true,
 }
@@ -67,8 +67,8 @@ var AwooInstructionSRAI = AwooInstruction{
 	Code: 0b0010011, Argument: 0x105, Format: AwooInstructionFormatI, Name: "SRAI", Advance: true,
 }
 
-// Load / Store (11 instructions)
-// SetupInstructionTableEntry(table, 0b0000011, 0x3, AwooInstructionFormatI, "LD", nil)
+// Load / Store (11 instructions).
+// SetupInstructionTableEntry(table, 0b0000011, 0x3, AwooInstructionFormatI, "LD", nil).
 var AwooInstructionLW = AwooInstruction{
 	Code: 0b0000011, Argument: 0x2, Format: AwooInstructionFormatI, Name: "LW", Advance: true,
 }

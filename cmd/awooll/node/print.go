@@ -13,6 +13,9 @@ func GetNodeDataText(context *lexer_context.AwooLexerContext, n *AwooParserNode)
 		return GetNodeIdentifierValue(n)
 	case ParserNodeTypeType:
 		return context.Types.All[GetNodeTypeType(n)].Key
+	case ParserNodeTypePointer:
+		s := GetNodeSingleValue(n)
+		return fmt.Sprintf("*%v", GetNodeDataText(context, &s))
 	case ParserNodeTypePrimitive:
 		return fmt.Sprintf("%v", GetNodePrimitiveValue(n))
 	case ParserNodeTypeExpression:
@@ -35,8 +38,14 @@ func GetNodeDataText(context *lexer_context.AwooLexerContext, n *AwooParserNode)
 			GetNodeDataText(context, &r),
 		)
 	case ParserNodeTypeNegative:
-		v := GetNodeNegativeValue(n)
+		v := GetNodeSingleValue(n)
 		return fmt.Sprintf("-%v", GetNodeDataText(context, &v))
+	case ParserNodeTypeReference:
+		v := GetNodeSingleValue(n)
+		return fmt.Sprintf("&%v", GetNodeDataText(context, &v))
+	case ParserNodeTypeDereference:
+		v := GetNodeSingleValue(n)
+		return fmt.Sprintf("*%v", GetNodeDataText(context, &v))
 	}
 
 	return "??"

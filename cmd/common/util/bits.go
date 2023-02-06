@@ -22,11 +22,11 @@ func InsertRangeRegister(accumulator arch.AwooRegister, current arch.AwooRegiste
 }
 
 func FillSignBits(imm arch.AwooRegister, start uint8) arch.AwooRegister {
-	// Check if immediate's sign bit is set
+	// Check if immediate's sign bit is set.
 	if imm>>start&1 == 1 {
-		// Create bitmask with (32 - start) 1s and shift it to the sign bit's position
+		// Create bitmask with (32 - start) 1s and shift it to the sign bit's position.
 		mask := arch.AwooRegister(math.Pow(2, float64(32-start)) - 1)
-		mask = mask << start
+		mask <<= start
 		return imm | mask
 	}
 

@@ -1,9 +1,11 @@
 package lexer
 
 import (
+	"fmt"
 	"strconv"
 	"unicode"
 
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/types"
 )
@@ -13,7 +15,7 @@ func CreateTokenNumber(lexer *AwooLexer) (lexer_token.AwooLexerToken, string, er
 	matchedString := ConstructChunk(lexer, string(lexer.Current), baseSkipper, baseValidator)
 	number, err := strconv.ParseInt(matchedString, base, 64)
 	if err != nil {
-		return lexer_token.AwooLexerToken{}, matchedString, err
+		return lexer_token.AwooLexerToken{}, matchedString, fmt.Errorf("%w: %w", awerrors.ErrorFailedToParse, err)
 	}
 
 	return lexer_token.CreateTokenPrimitive(lexer.Position, types.AwooTypeInt64, number, base), (baseMatchedString + matchedString), nil

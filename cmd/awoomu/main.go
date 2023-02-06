@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	println(fmt.Sprintf("hi from %s :3", gchalk.Red(arch.AwooPlatform)))
+	logger.Log(fmt.Sprintf("hi from %s :3", gchalk.Red(arch.AwooPlatform)))
 
 	u, _ := user.Current()
 	defaultInput := path.Join(u.HomeDir, "Documents", "awoo", "data", "obj", "input.awoobj")
@@ -30,5 +30,5 @@ func main() {
 
 	emu.Load(input)
 
-	println(fmt.Sprintf("bay! :33"))
+	logger.Log("bay! :33")
 }

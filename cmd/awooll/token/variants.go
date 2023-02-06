@@ -1,6 +1,6 @@
 package token
 
-// General
+// General.
 const TokenTypeIdentifier = 0x000
 const TokenTypePrimitive = 0x001
 const TokenTypeType = 0x002
@@ -10,12 +10,13 @@ const TokenTypeBracketRight = 0x005
 const TokenTypeBracketCurlyLeft = 0x006
 const TokenTypeBracketCurlyRight = 0x007
 const TokenTypeNot = 0x008
+const TokenTypeReference = 0x009
 
 func IsTokenTypeGeneral(t uint16) bool {
 	return t < 0x100
 }
 
-// Operators
+// Operators.
 const TokenOperatorAddition = 0x100
 const TokenOperatorSubstraction = 0x101
 const TokenOperatorMultiplication = 0x102
@@ -56,7 +57,7 @@ func DoesTokenTakePrecendence(op uint16, left uint16) bool {
 	return false
 }
 
-// Keywords
+// Keywords.
 const TokenTypeVar = 0x200
 const TokenTypeTypeDefinition = 0x201
 const TokenTypeIf = 0x202
@@ -64,4 +65,19 @@ const TokenTypeElse = 0x203
 
 func IsTokenTypeKeyword(t uint16) bool {
 	return t >= 0x200 && t < 0x300
+}
+
+// Print stuffs.
+func GetTokenTypeName(t uint16) string {
+	if IsTokenTypeGeneral(t) {
+		return "token"
+	}
+	if IsTokenTypeOperator(t) {
+		return "op"
+	}
+	if IsTokenTypeKeyword(t) {
+		return "keyword"
+	}
+
+	return "??"
 }

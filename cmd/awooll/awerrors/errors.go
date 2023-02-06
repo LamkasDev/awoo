@@ -1,0 +1,25 @@
+package awerrors
+
+import "errors"
+
+var ErrorPrimitiveOverflow = errors.New("primitive overflow")
+var ErrorPrimitiveUnderflow = errors.New("primitive underflow")
+var ErrorUnknownVariable = errors.New("unknown variable")
+var ErrorAlreadyDefinedVariable = errors.New("already defined variable")
+var ErrorIllegalCharacter = errors.New("illegal characters")
+var ErrorExpectedToken = errors.New("expected one of")
+var ErrorUnxpectedToken = errors.New("unexpected token")
+var ErrorNoMoreTokens = errors.New("no more tokens")
+var ErrorFailedToParse = errors.New("failed to parse")
+var ErrorFailedToGetVariableFromScope = errors.New("failed to get variable from scope")
+var ErrorFailedToPushVariableIntoScope = errors.New("failed to push variable into scope")
+var ErrorFailedToEncodeInstruction = errors.New("failed to encode instruction")
+var ErrorCantCompileOperator = errors.New("no idea how to compile operator")
+var ErrorCantCompileNode = errors.New("no idea how to compile node")
+var ErrorCantCompileStatement = errors.New("no idea how to compile statement")
+var ErrorFailedToCompileOperator = errors.New("failed to compile operator")
+var ErrorFailedToCompileNode = errors.New("failed to compile node")
+var ErrorFailedToCompileStatement = errors.New("failed to compile statement")
+var ErrorFailedToConstructNode = errors.New("failed to construct node")
+var ErrorFailedToConstructExpression = errors.New("failed to construct expression")
+var ErrorFailedToConstructStatement = errors.New("failed to construct statement")

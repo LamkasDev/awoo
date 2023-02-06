@@ -1,7 +1,9 @@
 package compiler
 
 import (
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
+	"fmt"
+
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
@@ -9,10 +11,10 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 )
 
-func CompileNodePrimitive(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details CompileNodeValueDetails) ([]byte, error) {
+func CompileNodePrimitive(n node.AwooParserNode, d []byte, details CompileNodeValueDetails) ([]byte, error) {
 	prim := node.GetNodePrimitiveValue(&n).(int64)
 	if prim > arch.AwooImmediateSmallMax {
-		// TODO: this will get fucked by sign extension
+		// TODO: this will get fucked by sign extension.
 		r := cpu.GetNextTemporaryRegister(details.Register)
 		d, err := encoder.Encode(encoder.AwooEncodedInstruction{
 			Instruction: instruction.AwooInstructionLUI,
@@ -20,7 +22,7 @@ func CompileNodePrimitive(context *compiler_context.AwooCompilerContext, n node.
 			Destination: r,
 		}, d)
 		if err != nil {
-			return d, err
+			return d, fmt.Errorf("%w: %w", awerrors.ErrorCantCompileNode, err)
 		}
 		return encoder.Encode(encoder.AwooEncodedInstruction{
 			Instruction: instruction.AwooInstructionADDI,

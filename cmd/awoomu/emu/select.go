@@ -5,22 +5,24 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/manifoldco/promptui"
 )
 
 func SelectProgram() (string, error) {
 	paths := make(map[string]string)
 	list := []string{}
-	filepath.Walk("data", func(path string, file os.FileInfo, err error) error {
+	err := filepath.Walk("data", func(path string, file os.FileInfo, err error) error {
 		if err == nil && strings.Contains(file.Name(), ".awoobj") {
-			name := strings.Replace(file.Name(), ".awoobj", "", -1)
+			name := strings.ReplaceAll(file.Name(), ".awoobj", "")
 			paths[name] = path
 			list = append(list, name)
 		}
 
 		return nil
 	})
+	if err != nil {
+		return "", err
+	}
 	prompt := promptui.Select{
 		Label:             "Select program to run",
 		Items:             list,
@@ -33,7 +35,6 @@ func SelectProgram() (string, error) {
 
 	_, result, err := prompt.Run()
 	if err != nil {
-		logger.Log("Prompt failed %v\n", err)
 		return "", err
 	}
 

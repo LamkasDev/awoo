@@ -6,7 +6,7 @@ import (
 )
 
 func CompileStatementGroup(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement, d []byte) ([]byte, error) {
-	var err error = nil
+	var err error
 	for _, n := range statement.GetStatementGroupBody(&s) {
 		d, err = CompileStatement(context, n, d)
 		if err != nil {

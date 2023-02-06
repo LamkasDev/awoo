@@ -1,3 +1,7 @@
 {
-    "go.buildTags": "awoo32,awoodebug"
+    "go.buildTags": "awoo32,awoodebug",
+    "go.lintTool": "golangci-lint",
+    "go.lintFlags": [
+        "--fast"
+    ]
 }

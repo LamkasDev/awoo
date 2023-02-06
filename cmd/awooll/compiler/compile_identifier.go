@@ -1,6 +1,9 @@
 package compiler
 
 import (
+	"fmt"
+
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
@@ -11,12 +14,11 @@ func CompileNodeIdentifier(context *compiler_context.AwooCompilerContext, n node
 	id := node.GetNodeIdentifierValue(&n)
 	src, err := compiler_context.GetCompilerScopeMemory(context, id)
 	if err != nil {
-		return d, err
+		return d, fmt.Errorf("%w: %w", awerrors.ErrorFailedToGetVariableFromScope, err)
 	}
 
-	// TODO: pick instruction based on src size in bytes
 	return encoder.Encode(encoder.AwooEncodedInstruction{
-		Instruction: instruction.AwooInstructionLW,
+		Instruction: *instruction.AwooInstructionsLoad[context.Parser.Lexer.Types.All[src.Type].Size],
 		Destination: details.Register,
 		Immediate:   uint32(src.Start),
 	}, d)

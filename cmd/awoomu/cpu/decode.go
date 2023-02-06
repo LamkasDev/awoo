@@ -3,6 +3,7 @@ package cpu
 import (
 	"fmt"
 
+	"github.com/LamkasDev/awoo-emu/cmd/awoomu/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/util"
@@ -25,13 +26,13 @@ func Decode(table instruction.AwooInstructionTable, raw arch.AwooInstruction) (A
 	code := (uint8)(raw) & AwooOpCodeMask
 	subtable, ok := table[code]
 	if !ok {
-		return AwooDecodedInstruction{}, fmt.Errorf("unknown instruction %s", gchalk.Red(fmt.Sprintf("%#x", code)))
+		return AwooDecodedInstruction{}, fmt.Errorf("%w: %s", awerrors.ErrorUnknownInstruction, gchalk.Red(fmt.Sprintf("%#x", code)))
 	}
 	format := instruction.AwooInstructionFormats[subtable.Format]
 	argument := instruction.ProcessExtendedRange(raw, format.Argument, false)
 	entry, ok := subtable.Subtable[(uint16)(argument)]
 	if !ok {
-		return AwooDecodedInstruction{}, fmt.Errorf("unknown instruction %s", gchalk.Red(fmt.Sprintf("%#x", code)))
+		return AwooDecodedInstruction{}, fmt.Errorf("%w: %s", awerrors.ErrorUnknownInstruction, gchalk.Red(fmt.Sprintf("%#x", code)))
 	}
 
 	return AwooDecodedInstruction{

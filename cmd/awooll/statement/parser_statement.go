@@ -7,7 +7,6 @@ const ParserStatementTypeIf = 0x003
 const ParserStatementTypeGroup = 0x004
 
 type AwooParserStatement struct {
-	Error error
-	Type  uint16
-	Data  interface{}
+	Type uint16
+	Data interface{}
 }

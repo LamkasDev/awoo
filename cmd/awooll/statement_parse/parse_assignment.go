@@ -3,6 +3,7 @@ package statement_parse
 import (
 	"fmt"
 
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
@@ -16,20 +17,17 @@ func ConstructStatementAssignment(cparser *parser.AwooParser, t lexer_token.Awoo
 	identifier := lexer_token.GetTokenIdentifierValue(&t)
 	identifierVariable, ok := parser_context.GetContextVariable(&cparser.Context, identifier)
 	if !ok {
-		return statement.AwooParserStatement{}, fmt.Errorf("unknown identifier %s", gchalk.Red(identifier))
+		return statement.AwooParserStatement{}, fmt.Errorf("%w: %s", awerrors.ErrorUnknownVariable, gchalk.Red(identifier))
 	}
 	n := node.CreateNodeIdentifier(t)
-	if n.Error != nil {
-		return statement.AwooParserStatement{}, n.Error
-	}
 	asStatement := statement.CreateStatementAssignment(n.Node)
 	_, err := parser.ExpectTokenParser(cparser, []uint16{token.TokenOperatorEq}, "=")
 	if err != nil {
-		return statement.AwooParserStatement{}, err
+		return statement.AwooParserStatement{}, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructStatement, err)
 	}
-	n = ConstructExpressionStart(cparser, &ConstructExpressionDetails{Type: cparser.Context.Lexer.Types.All[identifierVariable.Type]})
-	if n.Error != nil {
-		return statement.AwooParserStatement{}, n.Error
+	n, err = ConstructExpressionStart(cparser, &ConstructExpressionDetails{Type: cparser.Context.Lexer.Types.All[identifierVariable.Type]})
+	if err != nil {
+		return statement.AwooParserStatement{}, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructStatement, err)
 	}
 	statement.SetStatementAssignmentValue(&asStatement, n.Node)
 
