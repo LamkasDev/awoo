@@ -35,7 +35,7 @@ func PushCompilerScopeIdMemory(context *AwooCompilerContext, scopeId uint16, nam
 }
 
 func PushCompilerScopeCurrentMemory(context *AwooCompilerContext, name string, t uint16) (uint16, error) {
-	return PushCompilerScopeIdMemory(context, context.Scopes.Current, name, t)
+	return PushCompilerScopeIdMemory(context, context.Scopes.Position, name, t)
 }
 
 func PopCompilerScopeIdMemory(context *AwooCompilerContext, scopeId uint16, name string) error {
@@ -53,11 +53,11 @@ func PopCompilerScopeIdMemory(context *AwooCompilerContext, scopeId uint16, name
 }
 
 func PopCompilerScopeCurrentMemory(context *AwooCompilerContext, name string) error {
-	return PopCompilerScopeIdMemory(context, context.Scopes.Current, name)
+	return PopCompilerScopeIdMemory(context, context.Scopes.Position, name)
 }
 
 func PopCompilerScopeMemory(context *AwooCompilerContext, name string) error {
-	for i := context.Scopes.Current; i > 0; i-- {
+	for i := context.Scopes.Position; i > 0; i-- {
 		err := PopCompilerScopeIdMemory(context, i, name)
 		if err == nil {
 			return nil
@@ -77,12 +77,12 @@ func GetCompilerScopeIdMemory(context *AwooCompilerContext, scopeId uint16, name
 }
 
 func GetCompilerScopeCurrentMemory(context *AwooCompilerContext, name string) (AwooCompilerContextMemoryEntry, error) {
-	return GetCompilerScopeIdMemory(context, context.Scopes.Current, name)
+	return GetCompilerScopeIdMemory(context, context.Scopes.Position, name)
 }
 
 func GetCompilerScopeMemory(context *AwooCompilerContext, name string) (AwooCompilerContextMemoryEntry, error) {
-	for i := context.Scopes.Current; i > 0; i-- {
-		dest, err := GetCompilerScopeIdMemory(context, context.Scopes.Current, name)
+	for i := context.Scopes.Position; i > 0; i-- {
+		dest, err := GetCompilerScopeIdMemory(context, context.Scopes.Position, name)
 		if err == nil {
 			return dest, nil
 		}
