@@ -12,9 +12,12 @@ import (
 func CompileStatementAssignment(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement, d []byte) ([]byte, error) {
 	nameNode := statement.GetStatementAssignmentIdentifier(&s)
 	name := node.GetNodeIdentifierValue(&nameNode)
-	dest, _ := compiler_context.GetCompilerScopeMemory(context, name)
+	dest, err := compiler_context.GetCompilerScopeMemory(context, name)
+	if err != nil {
+		return d, err
+	}
 	valueNode := statement.GetStatementAssignmentValue(&s)
-	d, err := CompileNodeValueFast(context, valueNode, d)
+	d, err = CompileNodeValueFast(context, valueNode, d)
 	if err != nil {
 		return d, err
 	}
