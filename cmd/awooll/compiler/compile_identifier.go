@@ -10,9 +10,11 @@ import (
 func CompileNodeIdentifier(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details CompileNodeValueDetails) ([]byte, error) {
 	id := node.GetNodeIdentifierValue(&n)
 	src, _ := compiler_context.GetCompilerScopeMemory(context, id)
+
+	// TODO: pick instruction based on src size in bytes
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionLW,
 		Destination: details.Register,
-		Immediate:   uint32(src),
+		Immediate:   uint32(src.Start),
 	}, d)
 }

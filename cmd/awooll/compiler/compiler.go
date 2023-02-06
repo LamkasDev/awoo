@@ -97,7 +97,7 @@ func RunCompiler(compiler *AwooCompiler) AwooCompilerResult {
 
 	logger.Log(gchalk.Yellow("\n> Memory map\n"))
 	for _, scope := range compiler.Context.Scopes.Entries {
-		logger.Log("┏━ %s (%s)\n", scope.Name, gchalk.Green(fmt.Sprintf("%#x", scope.ID)))
+		logger.Log("┏━ %s (%s)\n", scope.Name, gchalk.Green(fmt.Sprintf("%#x", scope.Id)))
 		for _, entry := range scope.Memory.Entries {
 			t := compiler.Context.Parser.Lexer.Types.All[entry.Type]
 			logger.Log("┣━ %s %s  %s (%s)\n",

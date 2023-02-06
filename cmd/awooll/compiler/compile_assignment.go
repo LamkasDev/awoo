@@ -19,9 +19,10 @@ func CompileStatementAssignment(context *compiler_context.AwooCompilerContext, s
 		return d, err
 	}
 
+	// TODO: pick instruction based on dest size in bytes
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionSW,
 		SourceTwo:   cpu.AwooRegisterTemporaryZero,
-		Immediate:   uint32(dest),
+		Immediate:   uint32(dest.Start),
 	}, d)
 }

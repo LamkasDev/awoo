@@ -1,12 +1,13 @@
 package compiler_context
 
 type AwooCompilerScopeContainer struct {
-	Entries map[uint16]AwooCompilerScope
-	Current uint16
+	Entries            map[uint16]AwooCompilerScope
+	Current            uint16
+	CurrentMemoryStart uint16
 }
 
 type AwooCompilerScope struct {
-	ID     uint16
+	Id     uint16
 	Name   string
 	Memory AwooCompilerMemory
 }
@@ -14,15 +15,15 @@ type AwooCompilerScope struct {
 func PushCompilerScope(container *AwooCompilerScopeContainer, name string) uint16 {
 	container.Current++
 	scope := AwooCompilerScope{
-		ID:   container.Current,
+		Id:   container.Current,
 		Name: name,
 		Memory: AwooCompilerMemory{
 			Entries: make(map[string]AwooCompilerContextMemoryEntry),
 		},
 	}
-	container.Entries[scope.ID] = scope
+	container.Entries[scope.Id] = scope
 
-	return scope.ID
+	return scope.Id
 }
 
 func PopCompilerScope(container *AwooCompilerScopeContainer) {
