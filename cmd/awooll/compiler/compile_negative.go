@@ -15,6 +15,7 @@ func CompileNodeNegative(context *compiler_context.AwooCompilerContext, n node.A
 	if err != nil {
 		return d, fmt.Errorf("%w: %w", awerrors.ErrorFailedToCompileNode, err)
 	}
+
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionSUB,
 		Destination: details.Register,

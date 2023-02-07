@@ -24,6 +24,10 @@ func CompileNodeValue(context *compiler_context.AwooCompilerContext, n node.Awoo
 		return CompileNodeExpression(context, n, d, details)
 	case node.ParserNodeTypeNegative:
 		return CompileNodeNegative(context, n, d, details)
+	case node.ParserNodeTypeReference:
+		return CompileNodeReference(context, n, d, details)
+	case node.ParserNodeTypeDereference:
+		return CompileNodeDereference(context, n, d, details)
 	}
 
 	return d, fmt.Errorf("%w: %s", awerrors.ErrorCantCompileNode, gchalk.Red(fmt.Sprintf("%#x", n.Type)))

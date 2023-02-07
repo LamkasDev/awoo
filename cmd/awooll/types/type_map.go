@@ -45,6 +45,10 @@ func SetupTypeMap() AwooTypeMap {
 		Key: "char", Id: AwooTypeChar, Type: AwooTypeChar,
 		Size: 1,
 	})
+	AddTypeBuiltin(&m, AwooType{
+		Key: "ptr", Id: AwooTypePointer, Type: AwooTypePointer,
+		Size: 4,
+	})
 
 	AddTypeBuiltin(&m, AwooType{
 		Key: "int8", Id: AwooTypeInt8, Type: AwooTypeInt8,

@@ -12,7 +12,12 @@ type AwooCompilerScope struct {
 }
 
 func PushCompilerScope(container *AwooCompilerScopeContainer, name string) uint16 {
-	pos := container.Entries[container.Position].Memory.Position
+	prev, ok := container.Entries[container.Position]
+	pos := uint16(0)
+	if ok {
+		pos = prev.Memory.Position
+	}
+
 	container.Position++
 	scope := AwooCompilerScope{
 		Id:   container.Position,

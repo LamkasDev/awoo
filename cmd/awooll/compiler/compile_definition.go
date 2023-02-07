@@ -8,18 +8,28 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/types"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 )
 
 func CompileStatementDefinition(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement, d []byte) ([]byte, error) {
 	tNode := statement.GetStatementDefinitionVariableType(&s)
-	// TODO: make this shit handler poitners.
-	t := node.GetNodeTypeType(&tNode)
+	entry := compiler_context.AwooCompilerContextMemoryEntry{}
+	switch tNode.Type {
+	case node.ParserNodeTypeType:
+		entry.Type = node.GetNodeTypeType(&tNode)
+	case node.ParserNodeTypePointer:
+		entry.Type = types.AwooTypePointer
+		// TODO: chaining pointers
+		tNode = node.GetNodeSingleValue(&tNode)
+		entry.Data = node.GetNodeTypeType(&tNode)
+	}
+
 	nameNode := statement.GetStatementDefinitionVariableIdentifier(&s)
-	name := node.GetNodeIdentifierValue(&nameNode)
+	entry.Name = node.GetNodeIdentifierValue(&nameNode)
 	valueNode := statement.GetStatementDefinitionVariableValue(&s)
-	dest, err := compiler_context.PushCompilerScopeCurrentMemory(context, name, t)
+	dest, err := compiler_context.PushCompilerScopeCurrentMemory(context, entry)
 	if err != nil {
 		return d, fmt.Errorf("%w: %w", awerrors.ErrorFailedToCompileStatement, err)
 	}

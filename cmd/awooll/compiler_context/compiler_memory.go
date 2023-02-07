@@ -18,25 +18,22 @@ type AwooCompilerContextMemoryEntry struct {
 	Name  string
 	Start uint16
 	Type  uint16
+	Data  interface{}
 }
 
-func PushCompilerScopeIdMemory(context *AwooCompilerContext, scopeId uint16, name string, t uint16) (uint16, error) {
+func PushCompilerScopeIdMemory(context *AwooCompilerContext, scopeId uint16, entry AwooCompilerContextMemoryEntry) (uint16, error) {
 	// TODO: error checking.
 	scope := context.Scopes.Entries[scopeId]
-	start := context.Scopes.Entries[scopeId].Memory.Position
-	scope.Memory.Position += context.Parser.Lexer.Types.All[t].Size
-	scope.Memory.Entries[name] = AwooCompilerContextMemoryEntry{
-		Name:  name,
-		Start: start,
-		Type:  t,
-	}
+	entry.Start = scope.Memory.Position
+	scope.Memory.Position += context.Parser.Lexer.Types.All[entry.Type].Size
+	scope.Memory.Entries[entry.Name] = entry
 	context.Scopes.Entries[scopeId] = scope
 
-	return start, nil
+	return entry.Start, nil
 }
 
-func PushCompilerScopeCurrentMemory(context *AwooCompilerContext, name string, t uint16) (uint16, error) {
-	return PushCompilerScopeIdMemory(context, context.Scopes.Position, name, t)
+func PushCompilerScopeCurrentMemory(context *AwooCompilerContext, entry AwooCompilerContextMemoryEntry) (uint16, error) {
+	return PushCompilerScopeIdMemory(context, context.Scopes.Position, entry)
 }
 
 func PopCompilerScopeIdMemory(context *AwooCompilerContext, scopeId uint16, name string) error {
@@ -83,7 +80,7 @@ func GetCompilerScopeCurrentMemory(context *AwooCompilerContext, name string) (A
 
 func GetCompilerScopeMemory(context *AwooCompilerContext, name string) (AwooCompilerContextMemoryEntry, error) {
 	for i := context.Scopes.Position; i > 0; i-- {
-		dest, err := GetCompilerScopeIdMemory(context, context.Scopes.Position, name)
+		dest, err := GetCompilerScopeIdMemory(context, i, name)
 		if err == nil {
 			return dest, nil
 		}
