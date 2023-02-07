@@ -1,14 +1,7 @@
 package node
 
 import (
-	"fmt"
-	"math"
-
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_token"
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_context"
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/types"
-	"github.com/jwalton/gchalk"
 )
 
 type AwooParserNodeDataPrimitive struct {
@@ -34,32 +27,6 @@ func SetNodePrimitiveValue(n *AwooParserNode, value interface{}) {
 	d := n.Data.(AwooParserNodeDataPrimitive)
 	d.Value = value
 	n.Data = d
-}
-
-func CreateNodePrimitiveSafe(context *parser_context.AwooParserContext, t lexer_token.AwooLexerToken) (AwooParserNodeResult, error) {
-	primType := context.Lexer.Types.All[lexer_token.GetTokenPrimitiveType(&t)]
-	primValue := lexer_token.GetTokenPrimitiveValue(&t).(int64)
-	primBytes := float64(8 * primType.Size)
-	if primType.Flags&types.AwooTypeFlagsSign == 1 {
-		up := int64(math.Pow(2, primBytes-1)) - 1
-		if primValue > up {
-			return AwooParserNodeResult{}, fmt.Errorf("%w: %s > %s", awerrors.ErrorPrimitiveOverflow, gchalk.Red(fmt.Sprint(primValue)), gchalk.Green(fmt.Sprint(up)))
-		}
-		down := -int64(math.Pow(2, primBytes-1))
-		if primValue < down {
-			return AwooParserNodeResult{}, fmt.Errorf("%w: %s < %s", awerrors.ErrorPrimitiveUnderflow, gchalk.Red(fmt.Sprint(primValue)), gchalk.Green(fmt.Sprint(down)))
-		}
-	} else {
-		up := int64(math.Pow(2, primBytes)) - 1
-		if primValue > up {
-			return AwooParserNodeResult{}, fmt.Errorf("%w: %s > %s", awerrors.ErrorPrimitiveOverflow, gchalk.Red(fmt.Sprint(primValue)), gchalk.Green(fmt.Sprint(up)))
-		}
-		if primValue < 0 {
-			return AwooParserNodeResult{}, fmt.Errorf("%w: %s < %s", awerrors.ErrorPrimitiveUnderflow, gchalk.Red(fmt.Sprint(primValue)), gchalk.Green("0"))
-		}
-	}
-
-	return CreateNodePrimitive(t), nil
 }
 
 func CreateNodePrimitive(t lexer_token.AwooLexerToken) AwooParserNodeResult {

@@ -18,32 +18,12 @@ type ConstructExpressionDetails struct {
 	EndWithCurly    bool
 }
 
-func ConstructExpressionEndStatement(n node.AwooParserNode, details *ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
-	if details.PendingBrackets > 0 {
-		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red(")"))
-	}
-	return node.AwooParserNodeResult{
-		Node: n,
-		End:  true,
-	}, nil
-}
-
-func ConstructExpressionEndBracket(n node.AwooParserNode, details *ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
-	if details.PendingBrackets > 0 {
-		details.PendingBrackets--
-		return node.AwooParserNodeResult{
-			Node:       n,
-			EndBracket: true,
-		}, nil
-	}
-	return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorUnxpectedToken, gchalk.Red(")"))
-}
-
 func ConstructExpressionAccumulate(cparser *parser.AwooParser, leftNode node.AwooParserNodeResult, details *ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
 	op, err := parser.FetchTokenParser(cparser)
 	if err != nil {
 		return leftNode, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructExpression, err)
 	}
+	// TODO: refactor using a map
 	switch op.Type {
 	case token.TokenTypeEndStatement:
 		if !details.EndWithCurly {
@@ -59,74 +39,14 @@ func ConstructExpressionAccumulate(cparser *parser.AwooParser, leftNode node.Awo
 		token.TokenOperatorSubstraction,
 		token.TokenOperatorMultiplication,
 		token.TokenOperatorDivision:
-		rightNode, err := ConstructExpressionReferenceFast(cparser, details)
-		if err != nil {
-			return rightNode, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructExpression, err)
-		}
-		if leftNode.Node.Type == node.ParserNodeTypeExpression &&
-			!node.GetNodeExpressionIsBracket(&leftNode.Node) && token.DoesTokenTakePrecendence(op.Type, leftNode.Node.Token.Type) {
-			n := node.CreateNodeExpression(op, node.GetNodeExpressionRight(&leftNode.Node), rightNode.Node)
-			return node.AwooParserNodeResult{
-				Node: node.CreateNodeExpression(leftNode.Node.Token, node.GetNodeExpressionLeft(&leftNode.Node), n),
-			}, nil
-		}
-		return node.AwooParserNodeResult{
-			Node: node.CreateNodeExpression(op, leftNode.Node, rightNode.Node),
-		}, nil
+		return ConstructExpressionUnary(cparser, leftNode, op, details)
 	case token.TokenOperatorEq:
-		op, err = parser.ExpectTokenParser(cparser, []uint16{token.TokenOperatorEq}, "==")
-		if err != nil {
-			return node.AwooParserNodeResult{}, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructExpression, err)
-		}
-		rightNode, err := ConstructExpressionReferenceFast(cparser, details)
-		if err != nil {
-			return rightNode, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructExpression, err)
-		}
-		return node.AwooParserNodeResult{
-			Node: node.CreateNodeExpression(lexer_token.AwooLexerToken{
-				Type:  token.TokenOperatorEqEq,
-				Start: op.Start - 1,
-			}, leftNode.Node, rightNode.Node),
-		}, nil
+		return ConstructExpressionEquality(cparser, leftNode, details)
 	case token.TokenTypeNot:
-		op, err = parser.ExpectTokenParser(cparser, []uint16{token.TokenOperatorEq}, "!=")
-		if err != nil {
-			return node.AwooParserNodeResult{}, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructExpression, err)
-		}
-		rightNode, err := ConstructExpressionReferenceFast(cparser, details)
-		if err != nil {
-			return rightNode, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructExpression, err)
-		}
-		return node.AwooParserNodeResult{
-			Node: node.CreateNodeExpression(lexer_token.AwooLexerToken{
-				Type:  token.TokenOperatorNotEq,
-				Start: op.Start - 1,
-			}, leftNode.Node, rightNode.Node),
-		}, nil
+		return ConstructExpressionNotEquality(cparser, leftNode, details)
 	case token.TokenOperatorLT,
 		token.TokenOperatorGT:
-		t, err := parser.FetchTokenParser(cparser)
-		if err != nil {
-			return leftNode, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructExpression, err)
-		}
-		if t.Type == token.TokenOperatorEq {
-			if op.Type == token.TokenOperatorLT {
-				op.Type = token.TokenOperatorLTEQ
-			} else {
-				op.Type = token.TokenOperatorGTEQ
-			}
-			t, err = parser.FetchTokenParser(cparser)
-			if err != nil {
-				return leftNode, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructExpression, err)
-			}
-		}
-		rightNode, err := ConstructExpressionReference(cparser, t, details)
-		if err != nil {
-			return rightNode, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructExpression, err)
-		}
-		return node.AwooParserNodeResult{
-			Node: node.CreateNodeExpression(op, leftNode.Node, rightNode.Node),
-		}, nil
+		return ConstructExpressionComparison(cparser, leftNode, op, details)
 	}
 
 	opSymbol := "operator, <, >"

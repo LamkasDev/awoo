@@ -1,9 +1,10 @@
-package compiler
+package statement_compile
 
 import (
 	"fmt"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
@@ -11,7 +12,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 )
 
-func CompileNodePrimitive(n node.AwooParserNode, d []byte, details CompileNodeValueDetails) ([]byte, error) {
+func CompileNodePrimitive(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details compiler_context.CompileNodeValueDetails) ([]byte, error) {
 	prim := node.GetNodePrimitiveValue(&n).(int64)
 	if prim > arch.AwooImmediateSmallMax {
 		// TODO: this will get fucked by sign extension.

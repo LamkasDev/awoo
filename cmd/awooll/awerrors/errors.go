@@ -2,13 +2,17 @@ package awerrors
 
 import "errors"
 
+var ErrorFailedToSelectProgram = errors.New("failed to select program")
 var ErrorPrimitiveOverflow = errors.New("primitive overflow")
 var ErrorPrimitiveUnderflow = errors.New("primitive underflow")
 var ErrorUnknownVariable = errors.New("unknown variable")
 var ErrorAlreadyDefinedVariable = errors.New("already defined variable")
+var ErrorUnknownFunction = errors.New("unknown function")
 var ErrorIllegalCharacter = errors.New("illegal characters")
 var ErrorExpectedToken = errors.New("expected one of")
-var ErrorUnxpectedToken = errors.New("unexpected token")
+var ErrorUnexpectedToken = errors.New("unexpected token")
+var ErrorExpectedStatement = errors.New("expected statement")
+var ErrorUnexpectedStatement = errors.New("unexpected statement")
 var ErrorNoMoreTokens = errors.New("no more tokens")
 var ErrorFailedToParse = errors.New("failed to parse")
 var ErrorFailedToGetVariableFromScope = errors.New("failed to get variable from scope")

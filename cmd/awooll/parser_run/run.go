@@ -17,7 +17,7 @@ func RunParser(cparser *parser.AwooParser) parser.AwooParserResult {
 	logger.Log("Input: %s\n", gchalk.Magenta(fmt.Sprintf("%v", cparser.Contents.Tokens)))
 	for ok := true; ok; ok = parser.AdvanceParser(cparser) {
 		logger.Log("┏━ %s\n", lexer_token.PrintToken(&cparser.Contents.Context, &cparser.Current))
-		st, err := statement_parse.ConstructStatement(cparser, cparser.Current)
+		st, err := statement_parse.ConstructStatement(cparser, cparser.Current, &statement_parse.ConstructStatementDetails{})
 		if err != nil {
 			result.Error = err
 			break

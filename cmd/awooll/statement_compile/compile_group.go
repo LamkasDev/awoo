@@ -1,4 +1,4 @@
-package compiler
+package statement_compile
 
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"

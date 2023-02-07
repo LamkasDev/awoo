@@ -8,6 +8,7 @@ import (
 )
 
 func GetNodeDataText(context *lexer_context.AwooLexerContext, n *AwooParserNode) string {
+	// TODO: refactor to a map
 	switch n.Type {
 	case ParserNodeTypeIdentifier:
 		return GetNodeIdentifierValue(n)
@@ -15,7 +16,7 @@ func GetNodeDataText(context *lexer_context.AwooLexerContext, n *AwooParserNode)
 		return context.Types.All[GetNodeTypeType(n)].Key
 	case ParserNodeTypePointer:
 		s := GetNodeSingleValue(n)
-		return fmt.Sprintf("*%v", GetNodeDataText(context, &s))
+		return fmt.Sprintf("*%s", GetNodeDataText(context, &s))
 	case ParserNodeTypePrimitive:
 		return fmt.Sprintf("%v", GetNodePrimitiveValue(n))
 	case ParserNodeTypeExpression:
@@ -23,7 +24,7 @@ func GetNodeDataText(context *lexer_context.AwooLexerContext, n *AwooParserNode)
 		r := GetNodeExpressionRight(n)
 		if GetNodeExpressionIsBracket(n) {
 			return fmt.Sprintf(
-				"%s%v %v %v%s",
+				"%s%s %s %s%s",
 				gchalk.Red("("),
 				GetNodeDataText(context, &l),
 				context.Tokens.All[n.Token.Type].Name,
@@ -32,20 +33,23 @@ func GetNodeDataText(context *lexer_context.AwooLexerContext, n *AwooParserNode)
 			)
 		}
 		return fmt.Sprintf(
-			"(%v %v %v)",
+			"(%s %s %s)",
 			GetNodeDataText(context, &l),
 			context.Tokens.All[n.Token.Type].Name,
 			GetNodeDataText(context, &r),
 		)
 	case ParserNodeTypeNegative:
 		v := GetNodeSingleValue(n)
-		return fmt.Sprintf("-%v", GetNodeDataText(context, &v))
+		return fmt.Sprintf("-%s", GetNodeDataText(context, &v))
 	case ParserNodeTypeReference:
 		v := GetNodeSingleValue(n)
-		return fmt.Sprintf("&%v", GetNodeDataText(context, &v))
+		return fmt.Sprintf("&%s", GetNodeDataText(context, &v))
 	case ParserNodeTypeDereference:
 		v := GetNodeSingleValue(n)
-		return fmt.Sprintf("*%v", GetNodeDataText(context, &v))
+		return fmt.Sprintf("*%s", GetNodeDataText(context, &v))
+	case ParserNodeTypeCall:
+		v := GetNodeCallValue(n)
+		return fmt.Sprintf("%s()", v)
 	}
 
 	return "??"

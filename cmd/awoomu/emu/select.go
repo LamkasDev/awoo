@@ -1,10 +1,12 @@
 package emu
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/manifoldco/promptui"
 )
 
@@ -21,7 +23,7 @@ func SelectProgram() (string, error) {
 		return nil
 	})
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("%w: %w", awerrors.ErrorFailedToSelectProgram, err)
 	}
 	prompt := promptui.Select{
 		Label:             "Select program to run",
@@ -35,7 +37,7 @@ func SelectProgram() (string, error) {
 
 	_, result, err := prompt.Run()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("%w: %w", awerrors.ErrorFailedToSelectProgram, err)
 	}
 
 	return paths[result], nil

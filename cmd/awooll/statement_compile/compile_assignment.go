@@ -1,4 +1,4 @@
-package compiler
+package statement_compile
 
 import (
 	"fmt"

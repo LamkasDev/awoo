@@ -1,17 +1,13 @@
 package compiler
 
 import (
-	"bufio"
-	"fmt"
-	"os"
-	"path/filepath"
-
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
-	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
-	"github.com/jwalton/gchalk"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement_compile"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
 )
 
 type AwooCompiler struct {
@@ -32,6 +28,35 @@ func SetupCompiler(settings AwooCompilerSettings, context parser_context.AwooPar
 		Context: compiler_context.AwooCompilerContext{
 			Parser: context,
 			Scopes: compiler_context.SetupCompilerScopeContainer(),
+			MappingsStatement: map[uint16]compiler_context.AwooCompileStatement{
+				statement.ParserStatementTypeDefinitionVariable: statement_compile.CompileStatementDefinition,
+				statement.ParserStatementTypeAssignment:         statement_compile.CompileStatementAssignment,
+				statement.ParserStatementTypeDefinitionType: func(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement, d []byte) ([]byte, error) {
+					return []byte{}, nil
+				},
+				statement.ParserStatementTypeIf:    statement_compile.CompileStatementIf,
+				statement.ParserStatementTypeGroup: statement_compile.CompileStatementGroup,
+			},
+			MappingsNodeValue: map[uint16]compiler_context.AwooCompileNodeValue{
+				node.ParserNodeTypeIdentifier:  statement_compile.CompileNodeIdentifier,
+				node.ParserNodeTypePrimitive:   statement_compile.CompileNodePrimitive,
+				node.ParserNodeTypeExpression:  statement_compile.CompileNodeExpression,
+				node.ParserNodeTypeNegative:    statement_compile.CompileNodeNegative,
+				node.ParserNodeTypeReference:   statement_compile.CompileNodeReference,
+				node.ParserNodeTypeDereference: statement_compile.CompileNodeDereference,
+			},
+			MappingsNodeExpression: map[uint16]compiler_context.AwooCompileNodeExpression{
+				token.TokenOperatorAddition:       statement_compile.CompileNodeExpressionAdd,
+				token.TokenOperatorSubstraction:   statement_compile.CompileNodeExpressionSubstract,
+				token.TokenOperatorMultiplication: statement_compile.CompileNodeExpressionMultiply,
+				token.TokenOperatorDivision:       statement_compile.CompileNodeExpressionDivide,
+				token.TokenOperatorEqEq:           statement_compile.CompileNodeExpressionEqEq,
+				token.TokenOperatorNotEq:          statement_compile.CompileNodeExpressionNotEq,
+				token.TokenOperatorLT:             statement_compile.CompileNodeExpressionLT,
+				token.TokenOperatorLTEQ:           statement_compile.CompileNodeExpressionLTEQ,
+				token.TokenOperatorGT:             statement_compile.CompileNodeExpressionGT,
+				token.TokenOperatorGTEQ:           statement_compile.CompileNodeExpressionGTEQ,
+			},
 		},
 		Settings: settings,
 	}
@@ -60,55 +85,4 @@ func AdvanceCompiler(compiler *AwooCompiler) bool {
 
 func StepbackCompiler(compiler *AwooCompiler) bool {
 	return AdvanceCompilerFor(compiler, -1)
-}
-
-func RunCompiler(compiler *AwooCompiler) AwooCompilerResult {
-	result := AwooCompilerResult{}
-	logger.Log(gchalk.Yellow("\n> Compiler\n"))
-	logger.Log("Input: %s\n", gchalk.Magenta(fmt.Sprintf("%v", compiler.Contents.Statements)))
-
-	err := os.MkdirAll(filepath.Dir(compiler.Settings.Path), 0644)
-	if err != nil {
-		panic(err)
-	}
-	file, err := os.Create(compiler.Settings.Path)
-	if err != nil {
-		panic(err)
-	}
-	writer := bufio.NewWriter(file)
-	for ok := true; ok; ok = AdvanceCompiler(compiler) {
-		statement.PrintStatement(&compiler.Context.Parser.Lexer, &compiler.Current)
-		data, err := CompileStatement(&compiler.Context, compiler.Current, []byte{})
-		if err != nil {
-			result.Error = err
-			break
-		}
-		PrintNewCompile(&compiler.Context.Parser.Lexer, &compiler.Current, data)
-		_, err = writer.Write(data)
-		if err != nil {
-			panic(err)
-		}
-	}
-	writer.Flush()
-	file.Close()
-	if result.Error != nil {
-		panic(result.Error)
-	}
-
-	logger.Log(gchalk.Yellow("\n> Memory map\n"))
-	for _, scope := range compiler.Context.Scopes.Entries {
-		logger.Log("┏━ %s (%s)\n", scope.Name, gchalk.Green(fmt.Sprintf("%#x", scope.Id)))
-		for _, entry := range scope.Memory.Entries {
-			t := compiler.Context.Parser.Lexer.Types.All[entry.Type]
-			logger.Log("┣━ %s %s  %s (%s)\n",
-				gchalk.Green(fmt.Sprintf("%#x - %#x", entry.Start, entry.Start+uint16(t.Size)-1)),
-				gchalk.Gray("➔"),
-				entry.Name,
-				gchalk.Cyan(t.Key),
-			)
-		}
-		logger.Log("┗━━► %s entries\n", gchalk.Blue(fmt.Sprint(len(scope.Memory.Entries))))
-	}
-
-	return result
 }

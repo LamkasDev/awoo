@@ -29,6 +29,7 @@ func SetupParser(settings AwooParserSettings, context lexer_context.AwooLexerCon
 		Context: parser_context.AwooParserContext{
 			Lexer:     context,
 			Variables: make(map[string]parser_context.AwooParserContextVariable),
+			Functions: make(map[string]parser_context.AwooParserContextFunction),
 		},
 		Settings: settings,
 	}

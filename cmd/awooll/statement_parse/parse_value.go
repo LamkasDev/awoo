@@ -14,9 +14,9 @@ import (
 func ConstructNodeValue(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, error) {
 	switch t.Type {
 	case token.TokenTypePrimitive:
-		return node.CreateNodePrimitiveSafe(&cparser.Context, t)
+		return CreateNodePrimitiveSafe(cparser, t)
 	case token.TokenTypeIdentifier:
-		return node.CreateNodeIdentifierSafe(&cparser.Context, t)
+		return CreateNodeIdentifierSafe(cparser, t)
 	}
 
 	return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red("primitive or identifier"))

@@ -9,13 +9,13 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
 )
 
-func ConstructStatementIfOuter(cparser *parser.AwooParser) (statement.AwooParserStatement, error) {
+func ConstructStatementIfOuter(cparser *parser.AwooParser, details *ConstructStatementDetails) (statement.AwooParserStatement, error) {
 	n, err := ConstructExpressionStart(cparser, &ConstructExpressionDetails{EndWithCurly: true})
 	if err != nil {
 		return statement.AwooParserStatement{}, err
 	}
 	ifStatement := statement.CreateStatementIf(n.Node)
-	ifGroup, err := ConstructStatementIfGroup(cparser)
+	ifGroup, err := ConstructStatementGroup(cparser, details)
 	if err != nil {
 		return ifStatement, err
 	}
@@ -24,21 +24,8 @@ func ConstructStatementIfOuter(cparser *parser.AwooParser) (statement.AwooParser
 	return ifStatement, nil
 }
 
-func ConstructStatementIfGroup(cparser *parser.AwooParser) (statement.AwooParserStatement, error) {
-	body := []statement.AwooParserStatement{}
-	for t, err := parser.FetchTokenParser(cparser); err == nil && t.Type != token.TokenTypeBracketCurlyRight; t, err = parser.FetchTokenParser(cparser) {
-		bodyStatement, err := ConstructStatement(cparser, t)
-		if err != nil {
-			return statement.AwooParserStatement{}, err
-		}
-		body = append(body, bodyStatement)
-	}
-
-	return statement.CreateStatementGroup(body), nil
-}
-
-func ConstructStatementIf(cparser *parser.AwooParser) (statement.AwooParserStatement, error) {
-	ifStatement, err := ConstructStatementIfOuter(cparser)
+func ConstructStatementIf(cparser *parser.AwooParser, details *ConstructStatementDetails) (statement.AwooParserStatement, error) {
+	ifStatement, err := ConstructStatementIfOuter(cparser, details)
 	if err != nil {
 		return ifStatement, err
 	}
@@ -50,13 +37,13 @@ func ConstructStatementIf(cparser *parser.AwooParser) (statement.AwooParserState
 		}
 		switch t.Type {
 		case token.TokenTypeIf:
-			elifStatement, err := ConstructStatementIfOuter(cparser)
+			elifStatement, err := ConstructStatementIfOuter(cparser, details)
 			if err != nil {
 				return ifStatement, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructStatement, err)
 			}
 			statement.SetStatementIfNext(&ifStatement, append(statement.GetStatementIfNext(&ifStatement), elifStatement))
 		case token.TokenTypeBracketCurlyLeft:
-			elseStatement, err := ConstructStatementIfGroup(cparser)
+			elseStatement, err := ConstructStatementGroup(cparser, details)
 			if err != nil {
 				return ifStatement, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructStatement, err)
 			}

@@ -62,6 +62,8 @@ const TokenTypeVar = 0x200
 const TokenTypeTypeDefinition = 0x201
 const TokenTypeIf = 0x202
 const TokenTypeElse = 0x203
+const TokenTypeFunc = 0x204
+const TokenTypeReturn = 0x205
 
 func IsTokenTypeKeyword(t uint16) bool {
 	return t >= 0x200 && t < 0x300

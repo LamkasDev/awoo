@@ -1,4 +1,4 @@
-package compiler
+package statement_compile
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 )
 
-func CompileNodeReference(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details CompileNodeValueDetails) ([]byte, error) {
+func CompileNodeReference(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details compiler_context.CompileNodeValueDetails) ([]byte, error) {
 	// TODO: chaining references (only identifiers can be references anyways)
 	idNode := node.GetNodeSingleValue(&n)
 	id := node.GetNodeIdentifierValue(&idNode)
@@ -28,7 +28,7 @@ func CompileNodeReference(context *compiler_context.AwooCompilerContext, n node.
 	}, d)
 }
 
-func CompileNodeDereference(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details CompileNodeValueDetails) ([]byte, error) {
+func CompileNodeDereference(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details compiler_context.CompileNodeValueDetails) ([]byte, error) {
 	d, err := CompileNodeValue(context, node.GetNodeSingleValue(&n), d, details)
 	if err != nil {
 		return d, fmt.Errorf("%w: %w", awerrors.ErrorFailedToCompileNode, err)

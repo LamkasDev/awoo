@@ -7,6 +7,7 @@ import (
 	"path"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_run"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_run"
@@ -51,5 +52,5 @@ func main() {
 	}
 	comp := compiler.SetupCompiler(compSettings, par.Context)
 	compiler.LoadCompiler(&comp, parRes)
-	compiler.RunCompiler(&comp)
+	compiler_run.RunCompiler(&comp)
 }
