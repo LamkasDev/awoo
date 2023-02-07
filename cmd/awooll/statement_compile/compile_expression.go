@@ -12,121 +12,119 @@ import (
 	"github.com/jwalton/gchalk"
 )
 
-func CompileNodeExpressionOp(context *compiler_context.AwooCompilerContext, ins instruction.AwooInstruction, r uint8, d []byte, details compiler_context.CompileNodeValueDetails) ([]byte, error) {
+func CompileNodeExpressionOp(context *compiler_context.AwooCompilerContext, ins instruction.AwooInstruction, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: ins,
-		SourceOne:   details.Register,
-		SourceTwo:   r,
-		Destination: details.Register,
+		SourceOne:   leftDetails.Register,
+		SourceTwo:   rightDetails.Register,
+		Destination: leftDetails.Register,
 	}, d)
 }
 
-func CompileNodeExpressionAdd(context *compiler_context.AwooCompilerContext, d []byte, details compiler_context.CompileNodeValueDetails) ([]byte, error) {
-	return CompileNodeExpressionOp(context, instruction.AwooInstructionADD, cpu.GetNextTemporaryRegister(details.Register), d, details)
+func CompileNodeExpressionAdd(context *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
+	return CompileNodeExpressionOp(context, instruction.AwooInstructionADD, d, leftDetails, rightDetails)
 }
 
-func CompileNodeExpressionSubstract(context *compiler_context.AwooCompilerContext, d []byte, details compiler_context.CompileNodeValueDetails) ([]byte, error) {
-	return CompileNodeExpressionOp(context, instruction.AwooInstructionSUB, cpu.GetNextTemporaryRegister(details.Register), d, details)
+func CompileNodeExpressionSubstract(context *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
+	return CompileNodeExpressionOp(context, instruction.AwooInstructionSUB, d, leftDetails, rightDetails)
 }
 
-func CompileNodeExpressionMultiply(context *compiler_context.AwooCompilerContext, d []byte, details compiler_context.CompileNodeValueDetails) ([]byte, error) {
-	return CompileNodeExpressionOp(context, instruction.AwooInstructionMUL, cpu.GetNextTemporaryRegister(details.Register), d, details)
+func CompileNodeExpressionMultiply(context *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
+	return CompileNodeExpressionOp(context, instruction.AwooInstructionMUL, d, leftDetails, rightDetails)
 }
 
-func CompileNodeExpressionDivide(context *compiler_context.AwooCompilerContext, d []byte, details compiler_context.CompileNodeValueDetails) ([]byte, error) {
-	return CompileNodeExpressionOp(context, instruction.AwooInstructionDIV, cpu.GetNextTemporaryRegister(details.Register), d, details)
+func CompileNodeExpressionDivide(context *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
+	return CompileNodeExpressionOp(context, instruction.AwooInstructionDIV, d, leftDetails, rightDetails)
 }
 
-func CompileNodeExpressionEqEq(context *compiler_context.AwooCompilerContext, d []byte, details compiler_context.CompileNodeValueDetails) ([]byte, error) {
-	r := cpu.GetNextTemporaryRegister(details.Register)
-	d, err := CompileNodeExpressionOp(context, instruction.AwooInstructionSUB, r, d, details)
+func CompileNodeExpressionEqEq(context *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
+	d, err := CompileNodeExpressionOp(context, instruction.AwooInstructionSUB, d, leftDetails, rightDetails)
 	if err != nil {
 		return d, err
 	}
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionSLTIU,
-		SourceOne:   details.Register,
-		Destination: details.Register,
+		SourceOne:   leftDetails.Register,
+		Destination: leftDetails.Register,
 		Immediate:   1,
 	}, d)
 }
 
-func CompileNodeExpressionNotEq(context *compiler_context.AwooCompilerContext, d []byte, details compiler_context.CompileNodeValueDetails) ([]byte, error) {
-	r := cpu.GetNextTemporaryRegister(details.Register)
-	d, err := CompileNodeExpressionOp(context, instruction.AwooInstructionSUB, r, d, details)
+func CompileNodeExpressionNotEq(context *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
+	d, err := CompileNodeExpressionOp(context, instruction.AwooInstructionSUB, d, leftDetails, rightDetails)
 	if err != nil {
 		return d, err
 	}
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionSLTU,
 		SourceOne:   cpu.AwooRegisterZero,
-		SourceTwo:   details.Register,
-		Destination: details.Register,
+		SourceTwo:   leftDetails.Register,
+		Destination: leftDetails.Register,
 	}, d)
 }
 
-func CompileNodeExpressionLT(_ *compiler_context.AwooCompilerContext, d []byte, details compiler_context.CompileNodeValueDetails) ([]byte, error) {
-	r := cpu.GetNextTemporaryRegister(details.Register)
+func CompileNodeExpressionLT(_ *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionSLT,
-		SourceOne:   details.Register,
-		SourceTwo:   r,
-		Destination: details.Register,
+		SourceOne:   leftDetails.Register,
+		SourceTwo:   rightDetails.Register,
+		Destination: leftDetails.Register,
 	}, d)
 }
 
-func CompileNodeExpressionLTEQ(context *compiler_context.AwooCompilerContext, d []byte, details compiler_context.CompileNodeValueDetails) ([]byte, error) {
-	d, err := CompileNodeExpressionGT(context, d, details)
+func CompileNodeExpressionLTEQ(context *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
+	d, err := CompileNodeExpressionGT(context, d, leftDetails, rightDetails)
 	if err != nil {
 		return d, err
 	}
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionXORI,
-		SourceOne:   details.Register,
-		Destination: details.Register,
+		SourceOne:   leftDetails.Register,
+		Destination: leftDetails.Register,
 		Immediate:   1,
 	}, d)
 }
 
-func CompileNodeExpressionGT(_ *compiler_context.AwooCompilerContext, d []byte, details compiler_context.CompileNodeValueDetails) ([]byte, error) {
-	r := cpu.GetNextTemporaryRegister(details.Register)
+func CompileNodeExpressionGT(_ *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionSLT,
-		SourceOne:   r,
-		SourceTwo:   details.Register,
-		Destination: details.Register,
+		SourceOne:   rightDetails.Register,
+		SourceTwo:   leftDetails.Register,
+		Destination: leftDetails.Register,
 	}, d)
 }
 
-func CompileNodeExpressionGTEQ(context *compiler_context.AwooCompilerContext, d []byte, details compiler_context.CompileNodeValueDetails) ([]byte, error) {
-	d, err := CompileNodeExpressionLT(context, d, details)
+func CompileNodeExpressionGTEQ(context *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
+	d, err := CompileNodeExpressionLT(context, d, leftDetails, rightDetails)
 	if err != nil {
 		return d, err
 	}
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionXORI,
-		SourceOne:   details.Register,
-		Destination: details.Register,
+		SourceOne:   leftDetails.Register,
+		Destination: leftDetails.Register,
 		Immediate:   1,
 	}, d)
 }
 
-func CompileNodeExpression(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details compiler_context.CompileNodeValueDetails) ([]byte, error) {
+func CompileNodeExpression(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details *compiler_context.CompileNodeValueDetails) ([]byte, error) {
 	entry, ok := context.MappingsNodeExpression[n.Token.Type]
 	if !ok {
 		return d, fmt.Errorf("%w: %s", awerrors.ErrorCantCompileOperator, gchalk.Red(context.Parser.Lexer.Tokens.All[n.Token.Type].Name))
 	}
 	left := node.GetNodeExpressionLeft(&n)
-	d, err := CompileNodeValue(context, left, d, compiler_context.CompileNodeValueDetails{Register: details.Register})
+	leftDetails := compiler_context.CompileNodeValueDetails{Register: details.Register}
+	rightDetails := compiler_context.CompileNodeValueDetails{Register: cpu.GetNextTemporaryRegister(details.Register)}
+	d, err := CompileNodeValue(context, left, d, &leftDetails)
 	if err != nil {
 		return d, fmt.Errorf("%w: %s", awerrors.ErrorFailedToCompileOperator, err)
 	}
 	right := node.GetNodeExpressionRight(&n)
-	d, err = CompileNodeValue(context, right, d, compiler_context.CompileNodeValueDetails{Register: cpu.GetNextTemporaryRegister(details.Register)})
+	d, err = CompileNodeValue(context, right, d, &rightDetails)
 	if err != nil {
 		return d, fmt.Errorf("%w: %s", awerrors.ErrorFailedToCompileOperator, err)
 	}
-	d, err = entry(context, d, details)
+	d, err = entry(context, d, &leftDetails, &rightDetails)
 	if err != nil {
 		return d, fmt.Errorf("%w: %s", awerrors.ErrorFailedToCompileOperator, err)
 	}

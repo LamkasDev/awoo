@@ -4,6 +4,7 @@ const AwooTypeBoolean = 0x000
 const AwooTypeByte = 0x001
 const AwooTypeChar = 0x002
 const AwooTypePointer = 0x003
+const AwooTypeFunction = 0x004
 
 const AwooTypeInt8 = 0x010
 const AwooTypeInt16 = 0x011

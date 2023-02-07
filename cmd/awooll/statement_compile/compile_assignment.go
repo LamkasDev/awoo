@@ -20,14 +20,15 @@ func CompileStatementAssignment(context *compiler_context.AwooCompilerContext, s
 		return d, fmt.Errorf("%w: %w", awerrors.ErrorFailedToGetVariableFromScope, err)
 	}
 	valueNode := statement.GetStatementAssignmentValue(&s)
-	d, err = CompileNodeValueFast(context, valueNode, d)
+	details := compiler_context.CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero}
+	d, err = CompileNodeValueFast(context, valueNode, d, &details)
 	if err != nil {
 		return d, fmt.Errorf("%w: %w", awerrors.ErrorFailedToCompileNode, err)
 	}
 
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: *instruction.AwooInstructionsSave[context.Parser.Lexer.Types.All[dest.Type].Size],
-		SourceTwo:   cpu.AwooRegisterTemporaryZero,
+		SourceTwo:   details.Register,
 		Immediate:   uint32(dest.Start),
 	}, d)
 }

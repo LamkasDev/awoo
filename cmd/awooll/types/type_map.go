@@ -9,7 +9,9 @@ type AwooTypeMap struct {
 func AddTypeAt(m *AwooTypeMap, t AwooType) uint16 {
 	t.Length = uint8(len(t.Key))
 	m.All[t.Id] = t
-	m.Lookup[t.Key] = &t
+	if t.Length > 0 {
+		m.Lookup[t.Key] = &t
+	}
 
 	return t.Id
 }
@@ -48,6 +50,9 @@ func SetupTypeMap() AwooTypeMap {
 	AddTypeBuiltin(&m, AwooType{
 		Key: "ptr", Id: AwooTypePointer, Type: AwooTypePointer,
 		Size: 4,
+	})
+	AddTypeBuiltin(&m, AwooType{
+		Key: "", Id: AwooTypeFunction, Type: AwooTypeFunction,
 	})
 
 	AddTypeBuiltin(&m, AwooType{

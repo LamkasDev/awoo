@@ -28,14 +28,19 @@ func SetupCompiler(settings AwooCompilerSettings, context parser_context.AwooPar
 		Context: compiler_context.AwooCompilerContext{
 			Parser: context,
 			Scopes: compiler_context.SetupCompilerScopeContainer(),
+			Functions: compiler_context.AwooCompilerFunctionContainer{
+				Entries: map[string]compiler_context.AwooCompilerFunction{},
+			},
 			MappingsStatement: map[uint16]compiler_context.AwooCompileStatement{
 				statement.ParserStatementTypeDefinitionVariable: statement_compile.CompileStatementDefinition,
 				statement.ParserStatementTypeAssignment:         statement_compile.CompileStatementAssignment,
 				statement.ParserStatementTypeDefinitionType: func(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement, d []byte) ([]byte, error) {
 					return []byte{}, nil
 				},
-				statement.ParserStatementTypeIf:    statement_compile.CompileStatementIf,
-				statement.ParserStatementTypeGroup: statement_compile.CompileStatementGroup,
+				statement.ParserStatementTypeIf:     statement_compile.CompileStatementIf,
+				statement.ParserStatementTypeGroup:  statement_compile.CompileStatementGroup,
+				statement.ParserStatementTypeFunc:   statement_compile.CompileStatementFunc,
+				statement.ParserStatementTypeReturn: statement_compile.CompileStatementReturn,
 			},
 			MappingsNodeValue: map[uint16]compiler_context.AwooCompileNodeValue{
 				node.ParserNodeTypeIdentifier:  statement_compile.CompileNodeIdentifier,
@@ -44,6 +49,7 @@ func SetupCompiler(settings AwooCompilerSettings, context parser_context.AwooPar
 				node.ParserNodeTypeNegative:    statement_compile.CompileNodeNegative,
 				node.ParserNodeTypeReference:   statement_compile.CompileNodeReference,
 				node.ParserNodeTypeDereference: statement_compile.CompileNodeDereference,
+				node.ParserNodeTypeCall:        statement_compile.CompileNodeCall,
 			},
 			MappingsNodeExpression: map[uint16]compiler_context.AwooCompileNodeExpression{
 				token.TokenOperatorAddition:       statement_compile.CompileNodeExpressionAdd,

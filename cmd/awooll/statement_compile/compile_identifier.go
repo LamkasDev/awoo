@@ -10,7 +10,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 )
 
-func CompileNodeIdentifier(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details compiler_context.CompileNodeValueDetails) ([]byte, error) {
+func CompileNodeIdentifier(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details *compiler_context.CompileNodeValueDetails) ([]byte, error) {
 	id := node.GetNodeIdentifierValue(&n)
 	src, err := compiler_context.GetCompilerScopeMemory(context, id)
 	if err != nil {

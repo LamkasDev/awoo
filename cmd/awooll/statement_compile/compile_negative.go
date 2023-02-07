@@ -10,7 +10,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 )
 
-func CompileNodeNegative(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details compiler_context.CompileNodeValueDetails) ([]byte, error) {
+func CompileNodeNegative(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details *compiler_context.CompileNodeValueDetails) ([]byte, error) {
 	d, err := CompileNodeValue(context, node.GetNodeSingleValue(&n), d, details)
 	if err != nil {
 		return d, fmt.Errorf("%w: %w", awerrors.ErrorFailedToCompileNode, err)

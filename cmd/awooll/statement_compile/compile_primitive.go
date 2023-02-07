@@ -12,7 +12,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 )
 
-func CompileNodePrimitive(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details compiler_context.CompileNodeValueDetails) ([]byte, error) {
+func CompileNodePrimitive(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details *compiler_context.CompileNodeValueDetails) ([]byte, error) {
 	prim := node.GetNodePrimitiveValue(&n).(int64)
 	if prim > arch.AwooImmediateSmallMax {
 		// TODO: this will get fucked by sign extension.

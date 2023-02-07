@@ -25,6 +25,7 @@ func CompileStatementDefinition(context *compiler_context.AwooCompilerContext, s
 		tNode = node.GetNodeSingleValue(&tNode)
 		entry.Data = node.GetNodeTypeType(&tNode)
 	}
+	entry.Size = context.Parser.Lexer.Types.All[entry.Type].Size
 
 	nameNode := statement.GetStatementDefinitionVariableIdentifier(&s)
 	entry.Name = node.GetNodeIdentifierValue(&nameNode)
@@ -33,14 +34,15 @@ func CompileStatementDefinition(context *compiler_context.AwooCompilerContext, s
 	if err != nil {
 		return d, fmt.Errorf("%w: %w", awerrors.ErrorFailedToCompileStatement, err)
 	}
-	d, err = CompileNodeValueFast(context, valueNode, d)
+	details := compiler_context.CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero}
+	d, err = CompileNodeValueFast(context, valueNode, d, &details)
 	if err != nil {
 		return d, fmt.Errorf("%w: %w", awerrors.ErrorFailedToCompileStatement, err)
 	}
 
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionSW,
-		SourceTwo:   cpu.AwooRegisterTemporaryZero,
+		SourceTwo:   details.Register,
 		Immediate:   uint32(dest),
 	}, d)
 }

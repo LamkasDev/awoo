@@ -6,11 +6,10 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
-	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
 	"github.com/jwalton/gchalk"
 )
 
-func CompileNodeValue(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details compiler_context.CompileNodeValueDetails) ([]byte, error) {
+func CompileNodeValue(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details *compiler_context.CompileNodeValueDetails) ([]byte, error) {
 	entry, ok := context.MappingsNodeValue[n.Type]
 	if !ok {
 		return d, fmt.Errorf("%w: %s", awerrors.ErrorCantCompileNode, gchalk.Red(fmt.Sprintf("%#x", n.Type)))
@@ -23,6 +22,6 @@ func CompileNodeValue(context *compiler_context.AwooCompilerContext, n node.Awoo
 	return d, nil
 }
 
-func CompileNodeValueFast(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte) ([]byte, error) {
-	return CompileNodeValue(context, n, d, compiler_context.CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero})
+func CompileNodeValueFast(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details *compiler_context.CompileNodeValueDetails) ([]byte, error) {
+	return CompileNodeValue(context, n, d, details)
 }

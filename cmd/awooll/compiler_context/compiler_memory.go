@@ -17,6 +17,7 @@ type AwooCompilerMemory struct {
 type AwooCompilerContextMemoryEntry struct {
 	Name  string
 	Start uint16
+	Size  uint16
 	Type  uint16
 	Data  interface{}
 }
@@ -25,7 +26,7 @@ func PushCompilerScopeIdMemory(context *AwooCompilerContext, scopeId uint16, ent
 	// TODO: error checking.
 	scope := context.Scopes.Entries[scopeId]
 	entry.Start = scope.Memory.Position
-	scope.Memory.Position += context.Parser.Lexer.Types.All[entry.Type].Size
+	scope.Memory.Position += entry.Size
 	scope.Memory.Entries[entry.Name] = entry
 	context.Scopes.Entries[scopeId] = scope
 
@@ -43,7 +44,7 @@ func PopCompilerScopeIdMemory(context *AwooCompilerContext, scopeId uint16, name
 	}
 
 	scope := context.Scopes.Entries[scopeId]
-	scope.Memory.Position -= context.Parser.Lexer.Types.All[entry.Type].Size
+	scope.Memory.Position -= entry.Size
 	delete(scope.Memory.Entries, name)
 	context.Scopes.Entries[scopeId] = scope
 

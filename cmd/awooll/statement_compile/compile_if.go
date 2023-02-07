@@ -24,13 +24,14 @@ func CompileStatementIfNode(context *compiler_context.AwooCompilerContext, s sta
 		compiler_context.PopCompilerScope(&context.Scopes)
 		// TODO: this could be optimized using top level comparison from value node (because the below instruction can compare).
 		valueNode := statement.GetStatementIfValue(&s)
-		ifIns, err := CompileNodeValueFast(context, valueNode, []byte{})
+		details := compiler_context.CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero}
+		ifIns, err := CompileNodeValueFast(context, valueNode, []byte{}, &details)
 		if err != nil {
 			return bodies, jump, fmt.Errorf("%w: %w", awerrors.ErrorFailedToCompileStatement, err)
 		}
 		ifIns, err = encoder.Encode(encoder.AwooEncodedInstruction{
 			Instruction: instruction.AwooInstructionBEQ,
-			SourceOne:   cpu.AwooRegisterTemporaryZero,
+			SourceOne:   details.Register,
 			Immediate:   uint32(len(body) + 8),
 		}, ifIns)
 		if err != nil {
