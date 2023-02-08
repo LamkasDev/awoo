@@ -1,9 +1,6 @@
 package statement_compile
 
 import (
-	"fmt"
-
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
@@ -23,7 +20,7 @@ func CompileNodePrimitive(context *compiler_context.AwooCompilerContext, n node.
 			Destination: r,
 		}, d)
 		if err != nil {
-			return d, fmt.Errorf("%w: %w", awerrors.ErrorCantCompileNode, err)
+			return d, err
 		}
 		return encoder.Encode(encoder.AwooEncodedInstruction{
 			Instruction: instruction.AwooInstructionADDI,

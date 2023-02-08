@@ -16,7 +16,7 @@ func CompileNodeValue(context *compiler_context.AwooCompilerContext, n node.Awoo
 	}
 	d, err := entry(context, n, d, details)
 	if err != nil {
-		return d, fmt.Errorf("%w: %s", awerrors.ErrorFailedToCompileNode, err)
+		return d, err
 	}
 
 	return d, nil

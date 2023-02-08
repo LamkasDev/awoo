@@ -1,9 +1,6 @@
 package statement_parse
 
 import (
-	"fmt"
-
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
@@ -33,19 +30,19 @@ func ConstructStatementIf(cparser *parser.AwooParser, details *ConstructStatemen
 		t, _ = parser.FetchTokenParser(cparser)
 		t, err = parser.ExpectTokenParser(cparser, []uint16{token.TokenTypeIf, token.TokenTypeBracketCurlyLeft}, "if or {")
 		if err != nil {
-			return ifStatement, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructStatement, err)
+			return ifStatement, err
 		}
 		switch t.Type {
 		case token.TokenTypeIf:
 			elifStatement, err := ConstructStatementIfOuter(cparser, details)
 			if err != nil {
-				return ifStatement, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructStatement, err)
+				return ifStatement, err
 			}
 			statement.SetStatementIfNext(&ifStatement, append(statement.GetStatementIfNext(&ifStatement), elifStatement))
 		case token.TokenTypeBracketCurlyLeft:
 			elseStatement, err := ConstructStatementGroup(cparser, details)
 			if err != nil {
-				return ifStatement, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructStatement, err)
+				return ifStatement, err
 			}
 			statement.SetStatementIfNext(&ifStatement, append(statement.GetStatementIfNext(&ifStatement), elseStatement))
 		}

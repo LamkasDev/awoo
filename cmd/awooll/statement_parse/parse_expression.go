@@ -21,7 +21,7 @@ type ConstructExpressionDetails struct {
 func ConstructExpressionAccumulate(cparser *parser.AwooParser, leftNode node.AwooParserNodeResult, details *ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
 	op, err := parser.FetchTokenParser(cparser)
 	if err != nil {
-		return leftNode, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructExpression, err)
+		return leftNode, err
 	}
 	// TODO: refactor using a map
 	switch op.Type {
@@ -66,7 +66,7 @@ func ConstructExpressionBracket(cparser *parser.AwooParser, t lexer_token.AwooLe
 		leftNode, err = ConstructExpressionAccumulate(cparser, leftNode, details)
 	}
 	if err != nil {
-		return leftNode, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructExpression, err)
+		return leftNode, err
 	}
 	if leftNode.Node.Type == node.ParserNodeTypeExpression {
 		node.SetNodeExpressionIsBracket(&leftNode.Node, true)
@@ -79,7 +79,7 @@ func ConstructExpressionBracket(cparser *parser.AwooParser, t lexer_token.AwooLe
 func ConstructExpressionBracketFast(cparser *parser.AwooParser, details *ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
 	t, err := parser.FetchTokenParser(cparser)
 	if err != nil {
-		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructExpression, err)
+		return node.AwooParserNodeResult{}, err
 	}
 
 	return ConstructExpressionBracket(cparser, t, details)
@@ -91,7 +91,7 @@ func ConstructExpressionStart(cparser *parser.AwooParser, details *ConstructExpr
 		leftNode, err = ConstructExpressionAccumulate(cparser, leftNode, details)
 	}
 	if err != nil {
-		return leftNode, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructExpression, err)
+		return leftNode, err
 	}
 
 	return leftNode, nil

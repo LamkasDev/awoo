@@ -1,9 +1,6 @@
 package statement_parse
 
 import (
-	"fmt"
-
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
@@ -16,7 +13,7 @@ import (
 func ConstructStatementDefinitionType(cparser *parser.AwooParser) (statement.AwooParserStatement, error) {
 	t, err := parser.ExpectTokenParser(cparser, []uint16{token.TokenTypeIdentifier}, "identifier")
 	if err != nil {
-		return statement.AwooParserStatement{}, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructStatement, err)
+		return statement.AwooParserStatement{}, err
 	}
 	newIdentifier := lexer_token.GetTokenIdentifierValue(&t)
 	newType := types.AwooType{
@@ -28,7 +25,7 @@ func ConstructStatementDefinitionType(cparser *parser.AwooParser) (statement.Awo
 	// TODO: this is a placeholder i promise.
 	t, err = parser.ExpectTokenParser(cparser, []uint16{token.TokenTypeType}, "type")
 	if err != nil {
-		return statement.AwooParserStatement{}, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructStatement, err)
+		return statement.AwooParserStatement{}, err
 	}
 	originalIdentifier := lexer_token.GetTokenTypeId(&t)
 	originalType, _ := lexer_context.GetContextTypeId(&cparser.Context.Lexer, originalIdentifier)
@@ -39,7 +36,7 @@ func ConstructStatementDefinitionType(cparser *parser.AwooParser) (statement.Awo
 
 	t, err = parser.ExpectTokenParser(cparser, []uint16{token.TokenTypeEndStatement}, ";")
 	if err != nil {
-		return statement.AwooParserStatement{}, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructStatement, err)
+		return statement.AwooParserStatement{}, err
 	}
 
 	return defStatement, nil

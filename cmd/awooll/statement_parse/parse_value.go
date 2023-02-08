@@ -25,7 +25,7 @@ func ConstructNodeValue(cparser *parser.AwooParser, t lexer_token.AwooLexerToken
 func ConstructNodeValueFast(cparser *parser.AwooParser) (node.AwooParserNodeResult, error) {
 	t, err := parser.ExpectTokenParser(cparser, []uint16{token.TokenTypePrimitive, node.ParserNodeTypeIdentifier}, "primitive or identifier")
 	if err != nil {
-		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructNode, err)
+		return node.AwooParserNodeResult{}, err
 	}
 	return ConstructNodeValue(cparser, t)
 }

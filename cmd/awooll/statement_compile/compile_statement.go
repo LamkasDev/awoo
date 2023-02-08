@@ -16,7 +16,7 @@ func CompileStatement(context *compiler_context.AwooCompilerContext, s statement
 	}
 	d, err := entry(context, s, d)
 	if err != nil {
-		return d, fmt.Errorf("%w: %s", awerrors.ErrorFailedToCompileStatement, err)
+		return d, err
 	}
 
 	return d, nil

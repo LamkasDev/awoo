@@ -1,9 +1,6 @@
 package statement_compile
 
 import (
-	"fmt"
-
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
@@ -16,7 +13,7 @@ func CompileStatementReturn(context *compiler_context.AwooCompilerContext, s sta
 		Register: cpu.AwooRegisterFunctionOne,
 	})
 	if err != nil {
-		return d, fmt.Errorf("%w: %w", awerrors.ErrorFailedToCompileStatement, err)
+		return d, err
 	}
 
 	// TODO: this is retarder.

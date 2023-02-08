@@ -12,7 +12,25 @@ import (
 	"github.com/jwalton/gchalk"
 )
 
-// TODO: this should be split
+func CreateNodeIdentifierVariableSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, error) {
+	identifier := lexer_token.GetTokenIdentifierValue(&t)
+	_, ok := parser_context.GetContextVariable(&cparser.Context, identifier)
+	if ok {
+		return node.CreateNodeIdentifier(t), nil
+	}
+
+	return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorUnknownVariable, gchalk.Red(identifier))
+}
+
+func CreateNodeIdentifierVariableSafeFast(cparser *parser.AwooParser) (node.AwooParserNodeResult, error) {
+	t, err := parser.ExpectTokenParser(cparser, []uint16{node.ParserNodeTypeIdentifier}, "identifier")
+	if err != nil {
+		return node.AwooParserNodeResult{}, err
+	}
+	return CreateNodeIdentifierVariableSafe(cparser, t)
+}
+
+// TODO: this should call above.
 func CreateNodeIdentifierSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, error) {
 	identifier := lexer_token.GetTokenIdentifierValue(&t)
 	_, ok := parser_context.GetContextVariable(&cparser.Context, identifier)
@@ -24,10 +42,10 @@ func CreateNodeIdentifierSafe(cparser *parser.AwooParser, t lexer_token.AwooLexe
 		if !ok {
 			return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorUnknownFunction, gchalk.Red(identifier))
 		}
-		_, _ = parser.FetchTokenParser(cparser)
+		parser.AdvanceParser(cparser)
 		_, err := parser.ExpectTokenParser(cparser, []uint16{token.TokenTypeBracketRight}, ")")
 		if err != nil {
-			return node.AwooParserNodeResult{}, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructNode, err)
+			return node.AwooParserNodeResult{}, err
 		}
 
 		return node.CreateNodeCall(t), nil
@@ -39,7 +57,7 @@ func CreateNodeIdentifierSafe(cparser *parser.AwooParser, t lexer_token.AwooLexe
 func CreateNodeIdentifierSafeFast(cparser *parser.AwooParser) (node.AwooParserNodeResult, error) {
 	t, err := parser.ExpectTokenParser(cparser, []uint16{node.ParserNodeTypeIdentifier}, "identifier")
 	if err != nil {
-		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructNode, err)
+		return node.AwooParserNodeResult{}, err
 	}
 	return CreateNodeIdentifierSafe(cparser, t)
 }

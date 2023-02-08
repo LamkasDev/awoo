@@ -15,16 +15,34 @@ func CompileNodeCall(context *compiler_context.AwooCompilerContext, n node.AwooP
 	if !ok {
 		return d, awerrors.ErrorFailedToGetFunctionFromScope
 	}
+	compiler_context.PushCompilerScope(&context.Scopes, "call")
 	arguments := node.GetNodeCallArguments(&n)
-	var err error
-	for _, arg := range arguments {
-		d, err = CompileNodeValueFast(context, arg, d, &compiler_context.CompileNodeValueDetails{
-			Register: cpu.AwooRegisterFunctionOne,
+	for i := 0; i < len(f.Arguments); i++ {
+		// TODO: merge this logic
+		funcArg := f.Arguments[i]
+		dest, err := compiler_context.PushCompilerScopeCurrentMemory(context, compiler_context.AwooCompilerContextMemoryEntry{
+			Name: funcArg.Name,
+			Size: funcArg.Size,
+			Type: funcArg.Type,
+			Data: funcArg.Data,
 		})
 		if err != nil {
 			return d, err
 		}
+		d, err = CompileNodeValueFast(context, arguments[i], d, details)
+		if err != nil {
+			return d, err
+		}
+		d, err = encoder.Encode(encoder.AwooEncodedInstruction{
+			Instruction: instruction.AwooInstructionSW,
+			SourceTwo:   details.Register,
+			Immediate:   uint32(dest),
+		}, d)
+		if err != nil {
+			return d, err
+		}
 	}
+	compiler_context.PopCompilerScope(&context.Scopes)
 	details.Register = cpu.AwooRegisterFunctionOne
 
 	// TODO: this is retarder.

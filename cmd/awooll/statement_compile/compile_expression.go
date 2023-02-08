@@ -117,16 +117,16 @@ func CompileNodeExpression(context *compiler_context.AwooCompilerContext, n node
 	rightDetails := compiler_context.CompileNodeValueDetails{Register: cpu.GetNextTemporaryRegister(details.Register)}
 	d, err := CompileNodeValue(context, left, d, &leftDetails)
 	if err != nil {
-		return d, fmt.Errorf("%w: %s", awerrors.ErrorFailedToCompileOperator, err)
+		return d, err
 	}
 	right := node.GetNodeExpressionRight(&n)
 	d, err = CompileNodeValue(context, right, d, &rightDetails)
 	if err != nil {
-		return d, fmt.Errorf("%w: %s", awerrors.ErrorFailedToCompileOperator, err)
+		return d, err
 	}
 	d, err = entry(context, d, &leftDetails, &rightDetails)
 	if err != nil {
-		return d, fmt.Errorf("%w: %s", awerrors.ErrorFailedToCompileOperator, err)
+		return d, err
 	}
 
 	return d, nil

@@ -6,7 +6,15 @@ import (
 
 type AwooParserStatementDataFunc struct {
 	Identifier node.AwooParserNode
+	Arguments  []AwooParserStatementFuncArgument
 	Body       AwooParserStatement
+}
+
+type AwooParserStatementFuncArgument struct {
+	Name string
+	Size uint16
+	Type uint16
+	Data interface{}
 }
 
 func GetStatementFuncIdentifier(s *AwooParserStatement) node.AwooParserNode {
@@ -16,6 +24,16 @@ func GetStatementFuncIdentifier(s *AwooParserStatement) node.AwooParserNode {
 func SetStatementFuncIdentifier(s *AwooParserStatement, identifier node.AwooParserNode) {
 	d := s.Data.(AwooParserStatementDataFunc)
 	d.Identifier = identifier
+	s.Data = d
+}
+
+func GetStatementFuncArguments(s *AwooParserStatement) []AwooParserStatementFuncArgument {
+	return s.Data.(AwooParserStatementDataFunc).Arguments
+}
+
+func SetStatementFuncArguments(s *AwooParserStatement, arguments []AwooParserStatementFuncArgument) {
+	d := s.Data.(AwooParserStatementDataFunc)
+	d.Arguments = arguments
 	s.Data = d
 }
 
@@ -34,6 +52,7 @@ func CreateStatementFunc(identifier node.AwooParserNode) AwooParserStatement {
 		Type: ParserStatementTypeFunc,
 		Data: AwooParserStatementDataFunc{
 			Identifier: identifier,
+			Arguments:  []AwooParserStatementFuncArgument{},
 		},
 	}
 }

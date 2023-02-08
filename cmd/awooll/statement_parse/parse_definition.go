@@ -19,7 +19,7 @@ func ConstructStatementDefinitionVariable(cparser *parser.AwooParser, t lexer_to
 	statementType := cparser.Context.Lexer.Types.All[lexer_token.GetTokenTypeId(&t)]
 	t, err := parser.ExpectTokenParser(cparser, []uint16{token.TokenTypeIdentifier}, "identifier")
 	if err != nil {
-		return statement.AwooParserStatement{}, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructStatement, err)
+		return statement.AwooParserStatement{}, err
 	}
 	identifier := lexer_token.GetTokenIdentifierValue(&t)
 	if _, ok := parser_context.GetContextVariable(&cparser.Context, identifier); ok {
@@ -29,11 +29,11 @@ func ConstructStatementDefinitionVariable(cparser *parser.AwooParser, t lexer_to
 	statement.SetStatementDefinitionVariableIdentifier(&defStatement, n.Node)
 	_, err = parser.ExpectTokenParser(cparser, []uint16{token.TokenOperatorEq}, "=")
 	if err != nil {
-		return statement.AwooParserStatement{}, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructStatement, err)
+		return statement.AwooParserStatement{}, err
 	}
 	n, err = ConstructExpressionStart(cparser, &ConstructExpressionDetails{Type: statementType})
 	if err != nil {
-		return statement.AwooParserStatement{}, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructStatement, err)
+		return statement.AwooParserStatement{}, err
 	}
 	statement.SetStatementDefinitionVariableValue(&defStatement, n.Node)
 	parser_context.SetContextVariable(&cparser.Context, parser_context.AwooParserContextVariable{

@@ -1,9 +1,6 @@
 package statement_parse
 
 import (
-	"fmt"
-
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
@@ -24,7 +21,7 @@ func ConstructExpressionNegative(cparser *parser.AwooParser, t lexer_token.AwooL
 func ConstructExpressionNegativeFast(cparser *parser.AwooParser, details *ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
 	t, err := parser.ExpectTokenParser(cparser, []uint16{token.TokenTypePrimitive, node.ParserNodeTypeIdentifier, token.TokenOperatorEq, token.TokenOperatorLT, token.TokenOperatorGT, token.TokenTypeBracketLeft, token.TokenOperatorSubstraction}, "primitive, identifier, =, <, >, ( or -")
 	if err != nil {
-		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructExpression, err)
+		return node.AwooParserNodeResult{}, err
 	}
 	return ConstructExpressionNegative(cparser, t, details)
 }

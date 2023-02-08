@@ -1,9 +1,6 @@
 package statement_compile
 
 import (
-	"fmt"
-
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
@@ -14,7 +11,7 @@ func CompileNodeIdentifier(context *compiler_context.AwooCompilerContext, n node
 	id := node.GetNodeIdentifierValue(&n)
 	src, err := compiler_context.GetCompilerScopeMemory(context, id)
 	if err != nil {
-		return d, fmt.Errorf("%w: %w", awerrors.ErrorFailedToGetVariableFromScope, err)
+		return d, err
 	}
 
 	return encoder.Encode(encoder.AwooEncodedInstruction{

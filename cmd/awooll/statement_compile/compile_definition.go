@@ -1,9 +1,6 @@
 package statement_compile
 
 import (
-	"fmt"
-
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
@@ -32,12 +29,12 @@ func CompileStatementDefinition(context *compiler_context.AwooCompilerContext, s
 	valueNode := statement.GetStatementDefinitionVariableValue(&s)
 	dest, err := compiler_context.PushCompilerScopeCurrentMemory(context, entry)
 	if err != nil {
-		return d, fmt.Errorf("%w: %w", awerrors.ErrorFailedToCompileStatement, err)
+		return d, err
 	}
 	details := compiler_context.CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero}
 	d, err = CompileNodeValueFast(context, valueNode, d, &details)
 	if err != nil {
-		return d, fmt.Errorf("%w: %w", awerrors.ErrorFailedToCompileStatement, err)
+		return d, err
 	}
 
 	return encoder.Encode(encoder.AwooEncodedInstruction{

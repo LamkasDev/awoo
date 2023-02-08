@@ -1,13 +1,16 @@
 package compiler_context
 
+import "github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
+
 type AwooCompilerFunctionContainer struct {
 	Entries map[string]AwooCompilerFunction
 }
 
 type AwooCompilerFunction struct {
-	Name  string
-	Start uint16
-	Size  uint16
+	Name      string
+	Start     uint16
+	Size      uint16
+	Arguments []statement.AwooParserStatementFuncArgument
 }
 
 func PushCompilerFunction(context *AwooCompilerContext, entry AwooCompilerFunction) {
