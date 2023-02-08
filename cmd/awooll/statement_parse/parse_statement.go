@@ -15,6 +15,7 @@ type ConstructStatementDetails struct {
 	CanReturn bool
 }
 
+// TODO: redo using map
 func ConstructStatement(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *ConstructStatementDetails) (statement.AwooParserStatement, error) {
 	statement, err := statement.AwooParserStatement{}, awerrors.ErrorExpectedStatement
 	switch t.Type {

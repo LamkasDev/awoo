@@ -31,7 +31,6 @@ func RunCompiler(ccompiler *compiler.AwooCompiler) {
 
 	writer := bufio.NewWriter(file)
 	file.Seek(int64(compiler_context.GetProgramHeaderSize()), 0)
-	// TODO: jump beyond function definitions at start.
 	for ok := true; ok; ok = compiler.AdvanceCompiler(ccompiler) {
 		statement.PrintStatement(&ccompiler.Context.Parser.Lexer, &ccompiler.Current)
 		data, err := statement_compile.CompileStatement(&ccompiler.Context, ccompiler.Current, []byte{})

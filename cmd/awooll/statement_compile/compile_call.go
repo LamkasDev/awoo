@@ -15,6 +15,16 @@ func CompileNodeCall(context *compiler_context.AwooCompilerContext, n node.AwooP
 	if !ok {
 		return d, awerrors.ErrorFailedToGetFunctionFromScope
 	}
+	arguments := node.GetNodeCallArguments(&n)
+	var err error
+	for _, arg := range arguments {
+		d, err = CompileNodeValueFast(context, arg, d, &compiler_context.CompileNodeValueDetails{
+			Register: cpu.AwooRegisterFunctionOne,
+		})
+		if err != nil {
+			return d, err
+		}
+	}
 	details.Register = cpu.AwooRegisterFunctionOne
 
 	// TODO: this is retarder.

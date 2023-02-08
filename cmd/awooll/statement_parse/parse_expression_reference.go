@@ -13,13 +13,13 @@ import (
 func ConstructExpressionReference(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
 	switch t.Type {
 	case token.TokenOperatorMultiplication:
-		n, err := ConstructExpressionReferenceFast(cparser, details)
+		n, err := CreateNodeIdentifierSafeFast(cparser)
 		if err != nil {
 			return node.AwooParserNodeResult{}, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructExpression, err)
 		}
 		return node.CreateNodeDereference(t, n.Node), nil
 	case token.TokenTypeReference:
-		n, err := ConstructExpressionReferenceFast(cparser, details)
+		n, err := CreateNodeIdentifierSafeFast(cparser)
 		if err != nil {
 			return node.AwooParserNodeResult{}, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructExpression, err)
 		}

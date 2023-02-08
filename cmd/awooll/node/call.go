@@ -5,7 +5,8 @@ import (
 )
 
 type AwooParserNodeDataCall struct {
-	Value string
+	Value     string
+	Arguments []AwooParserNode
 }
 
 func GetNodeCallValue(n *AwooParserNode) string {
@@ -18,13 +19,24 @@ func SetNodeCallValue(n *AwooParserNode, value string) {
 	n.Data = d
 }
 
+func GetNodeCallArguments(n *AwooParserNode) []AwooParserNode {
+	return n.Data.(AwooParserNodeDataCall).Arguments
+}
+
+func SetNodeCallArguments(n *AwooParserNode, arguments []AwooParserNode) {
+	d := n.Data.(AwooParserNodeDataCall)
+	d.Arguments = arguments
+	n.Data = d
+}
+
 func CreateNodeCall(t lexer_token.AwooLexerToken) AwooParserNodeResult {
 	return AwooParserNodeResult{
 		Node: AwooParserNode{
 			Type:  ParserNodeTypeCall,
 			Token: t,
 			Data: AwooParserNodeDataCall{
-				Value: lexer_token.GetTokenIdentifierValue(&t),
+				Value:     lexer_token.GetTokenIdentifierValue(&t),
+				Arguments: []AwooParserNode{},
 			},
 		},
 	}

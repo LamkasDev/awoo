@@ -12,6 +12,7 @@ import (
 	"github.com/jwalton/gchalk"
 )
 
+// TODO: this should be split
 func CreateNodeIdentifierSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, error) {
 	identifier := lexer_token.GetTokenIdentifierValue(&t)
 	_, ok := parser_context.GetContextVariable(&cparser.Context, identifier)
@@ -33,4 +34,12 @@ func CreateNodeIdentifierSafe(cparser *parser.AwooParser, t lexer_token.AwooLexe
 	}
 
 	return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorUnknownVariable, gchalk.Red(identifier))
+}
+
+func CreateNodeIdentifierSafeFast(cparser *parser.AwooParser) (node.AwooParserNodeResult, error) {
+	t, err := parser.ExpectTokenParser(cparser, []uint16{node.ParserNodeTypeIdentifier}, "identifier")
+	if err != nil {
+		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %w", awerrors.ErrorFailedToConstructNode, err)
+	}
+	return CreateNodeIdentifierSafe(cparser, t)
 }
