@@ -16,10 +16,12 @@ type AwooCompileNodeValue func(context *AwooCompilerContext, n node.AwooParserNo
 
 type AwooCompileNodeExpression func(context *AwooCompilerContext, d []byte, leftDetails *CompileNodeValueDetails, rightDetails *CompileNodeValueDetails) ([]byte, error)
 
+// TODO: create a stack class that saves position of stack after all constants have been written
 type AwooCompilerContext struct {
 	Position               uint16
 	Parser                 parser_context.AwooParserContext
 	Scopes                 AwooCompilerScopeContainer
+	Registers              AwooCompilerRegisters
 	Functions              AwooCompilerFunctionContainer
 	MappingsStatement      map[uint16]AwooCompileStatement
 	MappingsNodeValue      map[uint16]AwooCompileNodeValue

@@ -13,12 +13,12 @@ func CompileStatementIfNode(context *compiler_context.AwooCompilerContext, s sta
 	var err error
 	switch s.Type {
 	case statement.ParserStatementTypeIf:
-		compiler_context.PushCompilerScope(&context.Scopes, "if")
+		compiler_context.PushCompilerScopeCurrentBlock(context, "if")
 		body, err = CompileStatementGroup(context, statement.GetStatementIfBody(&s), []byte{})
 		if err != nil {
 			return bodies, jump, err
 		}
-		compiler_context.PopCompilerScope(&context.Scopes)
+		compiler_context.PopCompilerScopeCurrentBlock(context)
 		// TODO: this could be optimized using top level comparison from value node (because the below instruction can compare).
 		valueNode := statement.GetStatementIfValue(&s)
 		details := compiler_context.CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero}
@@ -36,12 +36,12 @@ func CompileStatementIfNode(context *compiler_context.AwooCompilerContext, s sta
 		}
 		body = append(ifIns, body...)
 	case statement.ParserStatementTypeGroup:
-		compiler_context.PushCompilerScope(&context.Scopes, "else")
+		compiler_context.PushCompilerScopeCurrentBlock(context, "else")
 		body, err = CompileStatementGroup(context, s, []byte{})
 		if err != nil {
 			return bodies, jump, err
 		}
-		compiler_context.PopCompilerScope(&context.Scopes)
+		compiler_context.PopCompilerScopeCurrentBlock(context)
 	}
 	bodies = append(bodies, body)
 	jump += uint32(len(body) + 4)

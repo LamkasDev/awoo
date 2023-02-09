@@ -12,7 +12,7 @@ import (
 func CompileStatementAssignment(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement, d []byte) ([]byte, error) {
 	nameNode := statement.GetStatementAssignmentIdentifier(&s)
 	name := node.GetNodeIdentifierValue(&nameNode)
-	dest, err := compiler_context.GetCompilerScopeMemory(context, name)
+	dest, err := compiler_context.GetCompilerScopeCurrentFunctionMemory(context, name)
 	if err != nil {
 		return d, err
 	}
@@ -25,6 +25,7 @@ func CompileStatementAssignment(context *compiler_context.AwooCompilerContext, s
 
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: *instruction.AwooInstructionsSave[context.Parser.Lexer.Types.All[dest.Type].Size],
+		SourceOne:   cpu.AwooRegisterSavedOne,
 		SourceTwo:   details.Register,
 		Immediate:   uint32(dest.Start),
 	}, d)

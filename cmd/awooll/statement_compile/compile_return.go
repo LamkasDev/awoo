@@ -10,7 +10,7 @@ import (
 
 func CompileStatementReturn(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement, d []byte) ([]byte, error) {
 	d, err := CompileNodeValue(context, statement.GetStatementReturnValue(&s), d, &compiler_context.CompileNodeValueDetails{
-		Register: cpu.AwooRegisterFunctionOne,
+		Register: cpu.AwooRegisterFunctionZero,
 	})
 	if err != nil {
 		return d, err

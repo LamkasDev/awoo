@@ -15,40 +15,37 @@ func CompileNodeCall(context *compiler_context.AwooCompilerContext, n node.AwooP
 	if !ok {
 		return d, awerrors.ErrorFailedToGetFunctionFromScope
 	}
-	compiler_context.PushCompilerScope(&context.Scopes, "call")
-	arguments := node.GetNodeCallArguments(&n)
+	// compiler_context.PushCompilerScopeBlock(&context.Scopes, "call")
+	// arguments := node.GetNodeCallArguments(&n)
 	for i := 0; i < len(f.Arguments); i++ {
 		// TODO: merge this logic
-		funcArg := f.Arguments[i]
-		dest, err := compiler_context.PushCompilerScopeCurrentMemory(context, compiler_context.AwooCompilerContextMemoryEntry{
-			Name: funcArg.Name,
-			Size: funcArg.Size,
-			Type: funcArg.Type,
-			Data: funcArg.Data,
-		})
-		if err != nil {
-			return d, err
-		}
-		d, err = CompileNodeValueFast(context, arguments[i], d, details)
-		if err != nil {
-			return d, err
-		}
-		d, err = encoder.Encode(encoder.AwooEncodedInstruction{
-			Instruction: instruction.AwooInstructionSW,
-			SourceTwo:   details.Register,
-			Immediate:   uint32(dest),
-		}, d)
-		if err != nil {
-			return d, err
-		}
+		// funcArg := f.Arguments[i]
+		// TODO: push argument onto stack
 	}
-	compiler_context.PopCompilerScope(&context.Scopes)
-	details.Register = cpu.AwooRegisterFunctionOne
+	// compiler_context.PopCompilerScopeFunction(&context.Scopes)
+	details.Register = cpu.AwooRegisterFunctionZero
 
-	// TODO: this is retarder.
-	return encoder.Encode(encoder.AwooEncodedInstruction{
+	// TODO: determine if stack adjustment is required (not if called function doesn't allocate variables)
+	adj := uint32(compiler_context.GetCompilerScopeCurrentFunctionSize(context))
+	d, err := encoder.Encode(encoder.AwooEncodedInstruction{
+		Instruction: instruction.AwooInstructionADDI,
+		Destination: cpu.AwooRegisterSavedOne,
+		Immediate:   adj,
+	}, d)
+	if err != nil {
+		return d, err
+	}
+	d, err = encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionJALR,
 		Destination: cpu.AwooRegisterStackPointer,
 		Immediate:   uint32(f.Start),
+	}, d)
+	if err != nil {
+		return d, err
+	}
+	return encoder.Encode(encoder.AwooEncodedInstruction{
+		Instruction: instruction.AwooInstructionADDI,
+		Destination: cpu.AwooRegisterSavedOne,
+		Immediate:   -adj,
 	}, d)
 }

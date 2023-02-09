@@ -27,7 +27,7 @@ func CompileStatementDefinition(context *compiler_context.AwooCompilerContext, s
 	nameNode := statement.GetStatementDefinitionVariableIdentifier(&s)
 	entry.Name = node.GetNodeIdentifierValue(&nameNode)
 	valueNode := statement.GetStatementDefinitionVariableValue(&s)
-	dest, err := compiler_context.PushCompilerScopeCurrentMemory(context, entry)
+	dest, err := compiler_context.PushCompilerScopeCurrentBlockMemory(context, entry)
 	if err != nil {
 		return d, err
 	}

@@ -11,7 +11,7 @@ func CompileNodeReference(context *compiler_context.AwooCompilerContext, n node.
 	// TODO: chaining references (only identifiers can be references anyways)
 	idNode := node.GetNodeSingleValue(&n)
 	id := node.GetNodeIdentifierValue(&idNode)
-	src, err := compiler_context.GetCompilerScopeMemory(context, id)
+	src, err := compiler_context.GetCompilerScopeCurrentFunctionMemory(context, id)
 	if err != nil {
 		return d, err
 	}

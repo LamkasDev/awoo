@@ -58,21 +58,29 @@ func RunCompiler(ccompiler *compiler.AwooCompiler) {
 	file.Close()
 
 	logger.Log(gchalk.Yellow("\n> Memory map\n"))
-	for _, scope := range ccompiler.Context.Scopes.Entries {
-		logger.Log("┏━ %s (%s)\n", scope.Name, gchalk.Green(fmt.Sprintf("%#x", scope.Id)))
-		entries := maps.Values(scope.Memory.Entries)
-		sort.Slice(entries, func(i, j int) bool {
-			return entries[i].Start < entries[j].Start
+	for _, f := range ccompiler.Context.Scopes.Functions {
+		logger.Log("┏━ %s (%s)\n", f.Name, gchalk.Green(fmt.Sprintf("%#x", f.Id)))
+		blocks := maps.Values(f.Blocks)
+		sort.Slice(blocks, func(i, j int) bool {
+			return blocks[i].Memory.Position < blocks[j].Memory.Position
 		})
-		for _, entry := range entries {
-			t := ccompiler.Context.Parser.Lexer.Types.All[entry.Type]
-			logger.Log("┣━ %s %s  %s (%s)\n",
-				gchalk.Green(fmt.Sprintf("%#x - %#x", entry.Start, entry.Start+uint16(entry.Size)-1)),
-				gchalk.Gray("➔"),
-				entry.Name,
-				gchalk.Cyan(t.Key),
-			)
+		for _, block := range blocks {
+			entries := maps.Values(block.Memory.Entries)
+			sort.Slice(entries, func(i, j int) bool {
+				return entries[i].Start < entries[j].Start
+			})
+			for _, entry := range entries {
+				t := ccompiler.Context.Parser.Lexer.Types.All[entry.Type]
+				logger.Log("┣━ %s %s  %s (%s)\n",
+					gchalk.Green(fmt.Sprintf("%#x - %#x", entry.Start, entry.Start+uint16(entry.Size)-1)),
+					gchalk.Gray("➔"),
+					entry.Name,
+					gchalk.Cyan(t.Key),
+				)
+				logger.Log("┗━━► %s entries\n", gchalk.Blue(fmt.Sprint(len(block.Memory.Entries))))
+			}
 		}
-		logger.Log("┗━━► %s entries\n", gchalk.Blue(fmt.Sprint(len(scope.Memory.Entries))))
+		logger.Log("┗━━► %s blocks\n", gchalk.Blue(fmt.Sprint(len(f.Blocks))))
 	}
+	logger.Log("┗━━► %s functions\n", gchalk.Blue(fmt.Sprint(len(ccompiler.Context.Scopes.Functions))))
 }
