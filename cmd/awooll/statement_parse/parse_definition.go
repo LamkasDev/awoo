@@ -10,6 +10,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/types"
 	"github.com/jwalton/gchalk"
 )
 
@@ -27,15 +28,24 @@ func ConstructStatementDefinitionVariable(cparser *parser.AwooParser, t lexer_to
 	}
 	n = node.CreateNodeIdentifier(t)
 	statement.SetStatementDefinitionVariableIdentifier(&defStatement, n.Node)
-	_, err = parser.ExpectTokenParser(cparser, []uint16{token.TokenOperatorEq}, "=")
+	t, err = parser.ExpectTokenParser(cparser, []uint16{token.TokenOperatorEq, token.TokenTypeEndStatement}, "= or ;")
 	if err != nil {
 		return statement.AwooParserStatement{}, err
 	}
-	n, err = ConstructExpressionStart(cparser, &ConstructExpressionDetails{Type: statementType})
-	if err != nil {
-		return statement.AwooParserStatement{}, err
+	if t.Type == token.TokenOperatorEq {
+		if err != nil {
+			return statement.AwooParserStatement{}, err
+		}
+		n, err = ConstructExpressionStart(cparser, &ConstructExpressionDetails{Type: statementType})
+		if err != nil {
+			return statement.AwooParserStatement{}, err
+		}
+		statement.SetStatementDefinitionVariableValue(&defStatement, n.Node)
+	} else {
+		// TODO: create set for uninitialized nodes
+		n := node.CreateNodePrimitive(lexer_token.CreateTokenPrimitive(0, types.AwooTypeInt64, int64(0), nil))
+		statement.SetStatementDefinitionVariableValue(&defStatement, n.Node)
 	}
-	statement.SetStatementDefinitionVariableValue(&defStatement, n.Node)
 	parser_context.SetContextVariable(&cparser.Context, parser_context.AwooParserContextVariable{
 		Name: identifier, Type: statementType.Id,
 	})

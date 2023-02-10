@@ -25,7 +25,7 @@ func CompileStatementAssignment(context *compiler_context.AwooCompilerContext, s
 
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: *instruction.AwooInstructionsSave[context.Parser.Lexer.Types.All[dest.Type].Size],
-		SourceOne:   cpu.AwooRegisterSavedOne,
+		SourceOne:   cpu.AwooRegisterSavedZero,
 		SourceTwo:   details.Register,
 		Immediate:   uint32(dest.Start),
 	}, d)

@@ -39,6 +39,7 @@ func CompileStatementDefinition(context *compiler_context.AwooCompilerContext, s
 
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionSW,
+		SourceOne:   cpu.AwooRegisterSavedZero,
 		SourceTwo:   details.Register,
 		Immediate:   uint32(dest),
 	}, d)

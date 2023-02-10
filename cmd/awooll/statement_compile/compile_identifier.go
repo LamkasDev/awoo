@@ -17,7 +17,7 @@ func CompileNodeIdentifier(context *compiler_context.AwooCompilerContext, n node
 
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: *instruction.AwooInstructionsLoad[context.Parser.Lexer.Types.All[src.Type].Size],
-		SourceOne:   cpu.AwooRegisterSavedOne,
+		SourceOne:   cpu.AwooRegisterSavedZero,
 		Destination: details.Register,
 		Immediate:   uint32(src.Start),
 	}, d)

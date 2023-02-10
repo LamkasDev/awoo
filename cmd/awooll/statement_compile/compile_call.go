@@ -29,7 +29,8 @@ func CompileNodeCall(context *compiler_context.AwooCompilerContext, n node.AwooP
 	adj := uint32(compiler_context.GetCompilerScopeCurrentFunctionSize(context))
 	d, err := encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionADDI,
-		Destination: cpu.AwooRegisterSavedOne,
+		SourceOne:   cpu.AwooRegisterSavedZero,
+		Destination: cpu.AwooRegisterSavedZero,
 		Immediate:   adj,
 	}, d)
 	if err != nil {
@@ -45,7 +46,8 @@ func CompileNodeCall(context *compiler_context.AwooCompilerContext, n node.AwooP
 	}
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionADDI,
-		Destination: cpu.AwooRegisterSavedOne,
+		SourceOne:   cpu.AwooRegisterSavedZero,
+		Destination: cpu.AwooRegisterSavedZero,
 		Immediate:   -adj,
 	}, d)
 }

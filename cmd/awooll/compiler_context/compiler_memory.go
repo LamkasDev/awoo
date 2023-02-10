@@ -51,8 +51,8 @@ func PopCompilerScopeBlockMemory(context *AwooCompilerContext, funcId uint16, bl
 }
 
 func PopCompilerScopeFunctionMemory(context *AwooCompilerContext, funcId uint16, name string) error {
-	for blockId := uint16(len(context.Scopes.Functions[funcId].Blocks)); blockId > 0; blockId-- {
-		err := PopCompilerScopeBlockMemory(context, funcId, blockId, name)
+	for blockId := len(context.Scopes.Functions[funcId].Blocks); blockId >= 0; blockId-- {
+		err := PopCompilerScopeBlockMemory(context, funcId, uint16(blockId), name)
 		if err == nil {
 			return nil
 		}
@@ -75,8 +75,8 @@ func GetCompilerScopeBlockMemory(context *AwooCompilerContext, funcId uint16, bl
 }
 
 func GetCompilerScopeFunctionMemory(context *AwooCompilerContext, funcId uint16, name string) (AwooCompilerContextMemoryEntry, error) {
-	for blockId := uint16(len(context.Scopes.Functions[funcId].Blocks)); blockId > 0; blockId-- {
-		dest, err := GetCompilerScopeBlockMemory(context, funcId, blockId, name)
+	for blockId := len(context.Scopes.Functions[funcId].Blocks); blockId >= 0; blockId-- {
+		dest, err := GetCompilerScopeBlockMemory(context, funcId, uint16(blockId), name)
 		if err == nil {
 			return dest, nil
 		}
