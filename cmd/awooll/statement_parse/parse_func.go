@@ -8,13 +8,14 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_context"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
 	"github.com/jwalton/gchalk"
 )
 
-func ConstructStatementFunc(cparser *parser.AwooParser) (statement.AwooParserStatement, error) {
-	t, err := parser.ExpectTokenParser(cparser, []uint16{token.TokenTypeIdentifier}, "identifier")
+func ConstructStatementFunc(cparser *parser.AwooParser, _ lexer_token.AwooLexerToken, _ *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
+	t, err := parser.ExpectTokenParser(cparser, token.TokenTypeIdentifier, "identifier")
 	if err != nil {
 		return statement.AwooParserStatement{}, err
 	}
@@ -24,14 +25,17 @@ func ConstructStatementFunc(cparser *parser.AwooParser) (statement.AwooParserSta
 	}
 	identifierNode := node.CreateNodeIdentifier(t)
 	funcStatement := statement.CreateStatementFunc(identifierNode.Node)
-	t, err = parser.ExpectTokenParser(cparser, []uint16{token.TokenTypeBracketLeft}, "(")
-	if err != nil {
+	contextFunc := parser_context.AwooParserContextFunction{
+		Name:      identifier,
+		Arguments: []parser_context.AwooParserContextVariable{},
+	}
+	if _, err = parser.ExpectTokenParser(cparser, token.TokenTypeBracketLeft, "("); err != nil {
 		return funcStatement, err
 	}
 	for t, ok := parser.PeekParser(cparser); ok && t.Type == token.TokenTypeIdentifier; t, ok = parser.PeekParser(cparser) {
-		t, _ = parser.FetchTokenParser(cparser)
+		parser.AdvanceParser(cparser)
 		argumentIdentifier := lexer_token.GetTokenIdentifierValue(&t)
-		t, err = parser.ExpectTokenParser(cparser, []uint16{token.TokenTypeType}, "type")
+		t, err = parser.ExpectTokenParser(cparser, token.TokenTypeType, "type")
 		if err != nil {
 			return statement.AwooParserStatement{}, err
 		}
@@ -42,26 +46,24 @@ func ConstructStatementFunc(cparser *parser.AwooParser) (statement.AwooParserSta
 			Type: argumentType,
 		}))
 		// TODO: setup a proper scoped system for variables.
-		parser_context.SetContextVariable(&cparser.Context, parser_context.AwooParserContextVariable{
+		contextArg := parser_context.AwooParserContextVariable{
 			Name: argumentIdentifier, Type: argumentType,
-		})
+		}
+		parser_context.SetContextVariable(&cparser.Context, contextArg)
+		contextFunc.Arguments = append(contextFunc.Arguments, contextArg)
 	}
-	t, err = parser.ExpectTokenParser(cparser, []uint16{token.TokenTypeBracketRight}, ")")
-	if err != nil {
+	if _, err = parser.ExpectTokenParser(cparser, token.TokenTypeBracketRight, ")"); err != nil {
 		return funcStatement, err
 	}
-	t, err = parser.ExpectTokenParser(cparser, []uint16{token.TokenTypeBracketCurlyLeft}, "{")
-	if err != nil {
+	if _, err = parser.ExpectTokenParser(cparser, token.TokenTypeBracketCurlyLeft, "{"); err != nil {
 		return funcStatement, err
 	}
-	funcGroup, err := ConstructStatementGroup(cparser, &ConstructStatementDetails{CanReturn: true})
+	funcGroup, err := ConstructStatementGroup(cparser, &parser_details.ConstructStatementDetails{CanReturn: true})
 	if err != nil {
 		return funcStatement, err
 	}
 	statement.SetStatementFuncBody(&funcStatement, funcGroup)
-	parser_context.SetContextFunction(&cparser.Context, parser_context.AwooParserContextFunction{
-		Name: identifier,
-	})
+	parser_context.SetContextFunction(&cparser.Context, contextFunc)
 
 	return funcStatement, nil
 }

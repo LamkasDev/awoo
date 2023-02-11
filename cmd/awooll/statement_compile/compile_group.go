@@ -1,14 +1,14 @@
 package statement_compile
 
 import (
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
 )
 
-func CompileStatementGroup(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement, d []byte) ([]byte, error) {
+func CompileStatementGroup(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
 	var err error
 	for _, n := range statement.GetStatementGroupBody(&s) {
-		d, err = CompileStatement(context, n, d)
+		d, err = CompileStatement(ccompiler, n, d)
 		if err != nil {
 			return d, err
 		}

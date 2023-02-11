@@ -33,7 +33,7 @@ func RunCompiler(ccompiler *compiler.AwooCompiler) {
 	file.Seek(int64(compiler_context.GetProgramHeaderSize()), 0)
 	for ok := true; ok; ok = compiler.AdvanceCompiler(ccompiler) {
 		statement.PrintStatement(&ccompiler.Context.Parser.Lexer, &ccompiler.Current)
-		data, err := statement_compile.CompileStatement(&ccompiler.Context, ccompiler.Current, []byte{})
+		data, err := statement_compile.CompileStatement(ccompiler, ccompiler.Current, []byte{})
 		if err != nil {
 			panic(err)
 		}
@@ -42,7 +42,7 @@ func RunCompiler(ccompiler *compiler.AwooCompiler) {
 		if err != nil {
 			panic(err)
 		}
-		ccompiler.Context.Position += uint16(len(data))
+		ccompiler.Context.CurrentAddress += uint16(len(data))
 	}
 	writer.Flush()
 	file.Seek(0, 0)

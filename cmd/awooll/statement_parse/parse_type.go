@@ -10,7 +10,7 @@ import (
 func ConstructNodeType(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) node.AwooParserNodeResult {
 	n := node.CreateNodeType(t)
 	for t, ok := parser.PeekParser(cparser); ok && t.Type == token.TokenOperatorMultiplication; t, ok = parser.PeekParser(cparser) {
-		t, _ = parser.FetchTokenParser(cparser)
+		parser.AdvanceParser(cparser)
 		n = node.CreateNodePointer(t, n.Node)
 	}
 

@@ -7,23 +7,20 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
 	"github.com/jwalton/gchalk"
 )
 
 func ConstructNodeValue(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, error) {
-	switch t.Type {
-	case token.TokenTypePrimitive:
-		return CreateNodePrimitiveSafe(cparser, t)
-	case token.TokenTypeIdentifier:
-		return CreateNodeIdentifierSafe(cparser, t)
+	entry, ok := cparser.Settings.Mappings.NodeValue[t.Type]
+	if !ok {
+		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red("primitive or identifier"))
 	}
 
-	return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red("primitive or identifier"))
+	return entry(cparser, t)
 }
 
 func ConstructNodeValueFast(cparser *parser.AwooParser) (node.AwooParserNodeResult, error) {
-	t, err := parser.ExpectTokenParser(cparser, []uint16{token.TokenTypePrimitive, node.ParserNodeTypeIdentifier}, "primitive or identifier")
+	t, err := parser.FetchTokenParser(cparser)
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}

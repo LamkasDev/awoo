@@ -1,7 +1,9 @@
 package statement_compile
 
 import (
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
@@ -10,29 +12,30 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 )
 
-func CompileStatementDefinition(context *compiler_context.AwooCompilerContext, s statement.AwooParserStatement, d []byte) ([]byte, error) {
-	tNode := statement.GetStatementDefinitionVariableType(&s)
+func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
+	details := compiler_details.CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero}
+
+	variableTypeNode := statement.GetStatementDefinitionVariableType(&s)
+	nameNode := statement.GetStatementDefinitionVariableIdentifier(&s)
 	entry := compiler_context.AwooCompilerContextMemoryEntry{}
-	switch tNode.Type {
+	switch variableTypeNode.Type {
 	case node.ParserNodeTypeType:
-		entry.Type = node.GetNodeTypeType(&tNode)
+		entry.Type = node.GetNodeTypeType(&variableTypeNode)
 	case node.ParserNodeTypePointer:
 		entry.Type = types.AwooTypePointer
 		// TODO: chaining pointers
-		tNode = node.GetNodeSingleValue(&tNode)
-		entry.Data = node.GetNodeTypeType(&tNode)
+		variableTypeNode = node.GetNodeSingleValue(&variableTypeNode)
+		entry.Data = node.GetNodeTypeType(&variableTypeNode)
 	}
-	entry.Size = context.Parser.Lexer.Types.All[entry.Type].Size
-
-	nameNode := statement.GetStatementDefinitionVariableIdentifier(&s)
+	entry.Size = ccompiler.Context.Parser.Lexer.Types.All[entry.Type].Size
 	entry.Name = node.GetNodeIdentifierValue(&nameNode)
-	valueNode := statement.GetStatementDefinitionVariableValue(&s)
-	dest, err := compiler_context.PushCompilerScopeCurrentBlockMemory(context, entry)
+
+	variableValueNode := statement.GetStatementDefinitionVariableValue(&s)
+	variableMemory, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, entry)
 	if err != nil {
 		return d, err
 	}
-	details := compiler_context.CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero}
-	d, err = CompileNodeValueFast(context, valueNode, d, &details)
+	d, err = CompileNodeValue(ccompiler, variableValueNode, d, &details)
 	if err != nil {
 		return d, err
 	}
@@ -41,6 +44,6 @@ func CompileStatementDefinition(context *compiler_context.AwooCompilerContext, s
 		Instruction: instruction.AwooInstructionSW,
 		SourceOne:   cpu.AwooRegisterSavedZero,
 		SourceTwo:   details.Register,
-		Immediate:   uint32(dest),
+		Immediate:   uint32(variableMemory),
 	}, d)
 }

@@ -22,7 +22,9 @@ type AwooParser struct {
 	Settings AwooParserSettings
 }
 
-type AwooParserSettings struct{}
+type AwooParserSettings struct {
+	Mappings AwooParserMappings
+}
 
 func SetupParser(settings AwooParserSettings, context lexer_context.AwooLexerContext) AwooParser {
 	parser := AwooParser{
@@ -76,12 +78,24 @@ func FetchTokenParser(cparser *AwooParser) (lexer_token.AwooLexerToken, error) {
 	return cparser.Current, nil
 }
 
-func ExpectTokenParser(cparser *AwooParser, tokenTypes []uint16, tokenName string) (lexer_token.AwooLexerToken, error) {
+func ExpectTokensParser(cparser *AwooParser, tokenTypes []uint16, tokenName string) (lexer_token.AwooLexerToken, error) {
 	t, err := FetchTokenParser(cparser)
 	if err != nil {
 		return t, err
 	}
 	if !util.Contains(tokenTypes, t.Type) {
+		return t, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red(tokenName))
+	}
+
+	return t, nil
+}
+
+func ExpectTokenParser(cparser *AwooParser, tokenType uint16, tokenName string) (lexer_token.AwooLexerToken, error) {
+	t, err := FetchTokenParser(cparser)
+	if err != nil {
+		return t, err
+	}
+	if t.Type != tokenType {
 		return t, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red(tokenName))
 	}
 

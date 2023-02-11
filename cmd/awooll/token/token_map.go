@@ -53,6 +53,7 @@ func SetupTokenMap() AwooTokenMap {
 	AddToken(m, "}", "}", TokenTypeBracketCurlyRight)
 	AddToken(m, "!", "!", TokenTypeNot)
 	AddToken(m, "&", "&", TokenTypeReference)
+	AddToken(m, ",", ",", TokenTypeComma)
 
 	// Operators
 	AddToken(m, "+", "+", TokenOperatorAddition)

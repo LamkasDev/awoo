@@ -11,6 +11,7 @@ const TokenTypeBracketCurlyLeft = 0x006
 const TokenTypeBracketCurlyRight = 0x007
 const TokenTypeNot = 0x008
 const TokenTypeReference = 0x009
+const TokenTypeComma = 0x010
 
 func IsTokenTypeGeneral(t uint16) bool {
 	return t < 0x100

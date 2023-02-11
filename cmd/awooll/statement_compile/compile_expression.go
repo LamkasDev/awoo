@@ -4,7 +4,8 @@ import (
 	"fmt"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
@@ -12,7 +13,7 @@ import (
 	"github.com/jwalton/gchalk"
 )
 
-func CompileNodeExpressionOp(context *compiler_context.AwooCompilerContext, ins instruction.AwooInstruction, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
+func CompileNodeExpressionOp(ccompiler *compiler.AwooCompiler, ins instruction.AwooInstruction, d []byte, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) ([]byte, error) {
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: ins,
 		SourceOne:   leftDetails.Register,
@@ -21,24 +22,24 @@ func CompileNodeExpressionOp(context *compiler_context.AwooCompilerContext, ins 
 	}, d)
 }
 
-func CompileNodeExpressionAdd(context *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
-	return CompileNodeExpressionOp(context, instruction.AwooInstructionADD, d, leftDetails, rightDetails)
+func CompileNodeExpressionAdd(ccompiler *compiler.AwooCompiler, d []byte, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) ([]byte, error) {
+	return CompileNodeExpressionOp(ccompiler, instruction.AwooInstructionADD, d, leftDetails, rightDetails)
 }
 
-func CompileNodeExpressionSubstract(context *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
-	return CompileNodeExpressionOp(context, instruction.AwooInstructionSUB, d, leftDetails, rightDetails)
+func CompileNodeExpressionSubstract(ccompiler *compiler.AwooCompiler, d []byte, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) ([]byte, error) {
+	return CompileNodeExpressionOp(ccompiler, instruction.AwooInstructionSUB, d, leftDetails, rightDetails)
 }
 
-func CompileNodeExpressionMultiply(context *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
-	return CompileNodeExpressionOp(context, instruction.AwooInstructionMUL, d, leftDetails, rightDetails)
+func CompileNodeExpressionMultiply(ccompiler *compiler.AwooCompiler, d []byte, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) ([]byte, error) {
+	return CompileNodeExpressionOp(ccompiler, instruction.AwooInstructionMUL, d, leftDetails, rightDetails)
 }
 
-func CompileNodeExpressionDivide(context *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
-	return CompileNodeExpressionOp(context, instruction.AwooInstructionDIV, d, leftDetails, rightDetails)
+func CompileNodeExpressionDivide(ccompiler *compiler.AwooCompiler, d []byte, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) ([]byte, error) {
+	return CompileNodeExpressionOp(ccompiler, instruction.AwooInstructionDIV, d, leftDetails, rightDetails)
 }
 
-func CompileNodeExpressionEqEq(context *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
-	d, err := CompileNodeExpressionOp(context, instruction.AwooInstructionSUB, d, leftDetails, rightDetails)
+func CompileNodeExpressionEqEq(ccompiler *compiler.AwooCompiler, d []byte, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) ([]byte, error) {
+	d, err := CompileNodeExpressionOp(ccompiler, instruction.AwooInstructionSUB, d, leftDetails, rightDetails)
 	if err != nil {
 		return d, err
 	}
@@ -50,8 +51,8 @@ func CompileNodeExpressionEqEq(context *compiler_context.AwooCompilerContext, d 
 	}, d)
 }
 
-func CompileNodeExpressionNotEq(context *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
-	d, err := CompileNodeExpressionOp(context, instruction.AwooInstructionSUB, d, leftDetails, rightDetails)
+func CompileNodeExpressionNotEq(ccompiler *compiler.AwooCompiler, d []byte, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) ([]byte, error) {
+	d, err := CompileNodeExpressionOp(ccompiler, instruction.AwooInstructionSUB, d, leftDetails, rightDetails)
 	if err != nil {
 		return d, err
 	}
@@ -63,7 +64,7 @@ func CompileNodeExpressionNotEq(context *compiler_context.AwooCompilerContext, d
 	}, d)
 }
 
-func CompileNodeExpressionLT(_ *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
+func CompileNodeExpressionLT(ccompiler *compiler.AwooCompiler, d []byte, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) ([]byte, error) {
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionSLT,
 		SourceOne:   leftDetails.Register,
@@ -72,8 +73,8 @@ func CompileNodeExpressionLT(_ *compiler_context.AwooCompilerContext, d []byte, 
 	}, d)
 }
 
-func CompileNodeExpressionLTEQ(context *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
-	d, err := CompileNodeExpressionGT(context, d, leftDetails, rightDetails)
+func CompileNodeExpressionLTEQ(ccompiler *compiler.AwooCompiler, d []byte, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) ([]byte, error) {
+	d, err := CompileNodeExpressionGT(ccompiler, d, leftDetails, rightDetails)
 	if err != nil {
 		return d, err
 	}
@@ -85,7 +86,7 @@ func CompileNodeExpressionLTEQ(context *compiler_context.AwooCompilerContext, d 
 	}, d)
 }
 
-func CompileNodeExpressionGT(_ *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
+func CompileNodeExpressionGT(ccompiler *compiler.AwooCompiler, d []byte, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) ([]byte, error) {
 	return encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionSLT,
 		SourceOne:   rightDetails.Register,
@@ -94,8 +95,8 @@ func CompileNodeExpressionGT(_ *compiler_context.AwooCompilerContext, d []byte, 
 	}, d)
 }
 
-func CompileNodeExpressionGTEQ(context *compiler_context.AwooCompilerContext, d []byte, leftDetails *compiler_context.CompileNodeValueDetails, rightDetails *compiler_context.CompileNodeValueDetails) ([]byte, error) {
-	d, err := CompileNodeExpressionLT(context, d, leftDetails, rightDetails)
+func CompileNodeExpressionGTEQ(ccompiler *compiler.AwooCompiler, d []byte, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) ([]byte, error) {
+	d, err := CompileNodeExpressionLT(ccompiler, d, leftDetails, rightDetails)
 	if err != nil {
 		return d, err
 	}
@@ -107,27 +108,23 @@ func CompileNodeExpressionGTEQ(context *compiler_context.AwooCompilerContext, d 
 	}, d)
 }
 
-func CompileNodeExpression(context *compiler_context.AwooCompilerContext, n node.AwooParserNode, d []byte, details *compiler_context.CompileNodeValueDetails) ([]byte, error) {
-	entry, ok := context.MappingsNodeExpression[n.Token.Type]
+func CompileNodeExpression(ccompiler *compiler.AwooCompiler, n node.AwooParserNode, d []byte, details *compiler_details.CompileNodeValueDetails) ([]byte, error) {
+	entry, ok := ccompiler.Settings.Mappings.NodeExpression[n.Token.Type]
 	if !ok {
-		return d, fmt.Errorf("%w: %s", awerrors.ErrorCantCompileOperator, gchalk.Red(context.Parser.Lexer.Tokens.All[n.Token.Type].Name))
+		return d, fmt.Errorf("%w: %s", awerrors.ErrorCantCompileOperator, gchalk.Red(ccompiler.Context.Parser.Lexer.Tokens.All[n.Token.Type].Name))
 	}
 	left := node.GetNodeExpressionLeft(&n)
-	leftDetails := compiler_context.CompileNodeValueDetails{Register: details.Register}
-	rightDetails := compiler_context.CompileNodeValueDetails{Register: cpu.GetNextTemporaryRegister(details.Register)}
-	d, err := CompileNodeValue(context, left, d, &leftDetails)
+	leftDetails := compiler_details.CompileNodeValueDetails{Register: details.Register}
+	rightDetails := compiler_details.CompileNodeValueDetails{Register: cpu.GetNextTemporaryRegister(details.Register)}
+	d, err := CompileNodeValue(ccompiler, left, d, &leftDetails)
 	if err != nil {
 		return d, err
 	}
 	right := node.GetNodeExpressionRight(&n)
-	d, err = CompileNodeValue(context, right, d, &rightDetails)
-	if err != nil {
-		return d, err
-	}
-	d, err = entry(context, d, &leftDetails, &rightDetails)
+	d, err = CompileNodeValue(ccompiler, right, d, &rightDetails)
 	if err != nil {
 		return d, err
 	}
 
-	return d, nil
+	return entry(ccompiler, d, &leftDetails, &rightDetails)
 }

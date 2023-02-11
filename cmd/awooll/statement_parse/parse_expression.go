@@ -7,60 +7,32 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/types"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_details"
 	"github.com/jwalton/gchalk"
 )
 
-type ConstructExpressionDetails struct {
-	Type            types.AwooType
-	PendingBrackets uint8
-	EndWithCurly    bool
-}
-
-func ConstructExpressionAccumulate(cparser *parser.AwooParser, leftNode node.AwooParserNodeResult, details *ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
+func ConstructExpressionAccumulate(cparser *parser.AwooParser, leftNode node.AwooParserNodeResult, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
 	op, err := parser.FetchTokenParser(cparser)
 	if err != nil {
 		return leftNode, err
 	}
-	// TODO: refactor using a map
-	switch op.Type {
-	case token.TokenTypeEndStatement:
-		if !details.EndWithCurly {
-			return ConstructExpressionEndStatement(leftNode.Node, details)
+	if op.Type == details.EndToken {
+		return ConstructExpressionEndStatement(cparser, leftNode, op, details)
+	}
+	entry, ok := cparser.Settings.Mappings.NodeExpression[op.Type]
+	if !ok {
+		opSymbol := "operator, <, >"
+		if details.PendingBrackets > 0 {
+			opSymbol += ", )"
 		}
-	case token.TokenTypeBracketCurlyLeft:
-		if details.EndWithCurly {
-			return ConstructExpressionEndStatement(leftNode.Node, details)
-		}
-	case token.TokenTypeBracketRight:
-		return ConstructExpressionEndBracket(leftNode.Node, details)
-	case token.TokenOperatorAddition,
-		token.TokenOperatorSubstraction,
-		token.TokenOperatorMultiplication,
-		token.TokenOperatorDivision:
-		return ConstructExpressionUnary(cparser, leftNode, op, details)
-	case token.TokenOperatorEq:
-		return ConstructExpressionEquality(cparser, leftNode, details)
-	case token.TokenTypeNot:
-		return ConstructExpressionNotEquality(cparser, leftNode, details)
-	case token.TokenOperatorLT,
-		token.TokenOperatorGT:
-		return ConstructExpressionComparison(cparser, leftNode, op, details)
+		endSymbol := cparser.Context.Lexer.Tokens.All[details.EndToken].Name
+		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red(fmt.Sprintf("%s or %s", opSymbol, endSymbol)))
 	}
 
-	opSymbol := "operator, <, >"
-	if details.PendingBrackets > 0 {
-		opSymbol += ", )"
-	}
-	endSymbol := ";"
-	if details.EndWithCurly {
-		endSymbol = "{"
-	}
-	return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red(fmt.Sprintf("%s or %s", opSymbol, endSymbol)))
+	return entry(cparser, leftNode, op, details)
 }
 
-func ConstructExpressionBracket(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
+func ConstructExpressionBracket(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
 	leftNode, err := ConstructExpressionReference(cparser, t, details)
 	for err == nil && !leftNode.End && !leftNode.EndBracket {
 		leftNode, err = ConstructExpressionAccumulate(cparser, leftNode, details)
@@ -76,7 +48,7 @@ func ConstructExpressionBracket(cparser *parser.AwooParser, t lexer_token.AwooLe
 	return leftNode, err
 }
 
-func ConstructExpressionBracketFast(cparser *parser.AwooParser, details *ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
+func ConstructExpressionBracketFast(cparser *parser.AwooParser, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
 	t, err := parser.FetchTokenParser(cparser)
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
@@ -85,7 +57,7 @@ func ConstructExpressionBracketFast(cparser *parser.AwooParser, details *Constru
 	return ConstructExpressionBracket(cparser, t, details)
 }
 
-func ConstructExpressionStart(cparser *parser.AwooParser, details *ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
+func ConstructExpressionStart(cparser *parser.AwooParser, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
 	leftNode, err := ConstructExpressionReferenceFast(cparser, details)
 	for err == nil && !leftNode.End {
 		leftNode, err = ConstructExpressionAccumulate(cparser, leftNode, details)

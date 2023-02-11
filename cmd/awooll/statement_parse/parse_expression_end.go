@@ -4,25 +4,28 @@ import (
 	"fmt"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_details"
 	"github.com/jwalton/gchalk"
 )
 
-func ConstructExpressionEndStatement(n node.AwooParserNode, details *ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
+func ConstructExpressionEndStatement(_ *parser.AwooParser, n node.AwooParserNodeResult, _ lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
 	if details.PendingBrackets > 0 {
 		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red(")"))
 	}
 	return node.AwooParserNodeResult{
-		Node: n,
+		Node: n.Node,
 		End:  true,
 	}, nil
 }
 
-func ConstructExpressionEndBracket(n node.AwooParserNode, details *ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
+func ConstructExpressionEndBracket(_ *parser.AwooParser, n node.AwooParserNodeResult, _ lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
 	if details.PendingBrackets > 0 {
 		details.PendingBrackets--
 		return node.AwooParserNodeResult{
-			Node:       n,
+			Node:       n.Node,
 			EndBracket: true,
 		}, nil
 	}

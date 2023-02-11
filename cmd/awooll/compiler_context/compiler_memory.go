@@ -21,7 +21,6 @@ type AwooCompilerContextMemoryEntry struct {
 }
 
 func PushCompilerScopeBlockMemory(context *AwooCompilerContext, funcId uint16, blockId uint16, entry AwooCompilerContextMemoryEntry) (uint16, error) {
-	// TODO: error checking.
 	block := context.Scopes.Functions[funcId].Blocks[blockId]
 	entry.Start = block.Memory.Position
 	block.Memory.Position += entry.Size

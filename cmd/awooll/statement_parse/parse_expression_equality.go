@@ -4,11 +4,12 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
 )
 
-func ConstructExpressionEquality(cparser *parser.AwooParser, leftNode node.AwooParserNodeResult, details *ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
-	op, err := parser.ExpectTokenParser(cparser, []uint16{token.TokenOperatorEq}, "==")
+func ConstructExpressionEquality(cparser *parser.AwooParser, leftNode node.AwooParserNodeResult, _ lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
+	op, err := parser.ExpectTokenParser(cparser, token.TokenOperatorEq, "==")
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
@@ -24,8 +25,8 @@ func ConstructExpressionEquality(cparser *parser.AwooParser, leftNode node.AwooP
 	}, nil
 }
 
-func ConstructExpressionNotEquality(cparser *parser.AwooParser, leftNode node.AwooParserNodeResult, details *ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
-	op, err := parser.ExpectTokenParser(cparser, []uint16{token.TokenOperatorEq}, "!=")
+func ConstructExpressionNotEquality(cparser *parser.AwooParser, leftNode node.AwooParserNodeResult, _ lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
+	op, err := parser.ExpectTokenParser(cparser, token.TokenOperatorEq, "!=")
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
