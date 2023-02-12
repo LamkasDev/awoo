@@ -10,7 +10,7 @@ import (
 
 func ConstructExpressionReference(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
 	switch t.Type {
-	case token.TokenOperatorMultiplication:
+	case token.TokenOperatorDereference:
 		n, err := CreateNodeIdentifierVariableSafeFast(cparser)
 		if err != nil {
 			return node.AwooParserNodeResult{}, err

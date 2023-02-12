@@ -50,12 +50,13 @@ func main() {
 	parSettings := parser.AwooParserSettings{
 		Mappings: parser.AwooParserMappings{
 			Statement: map[uint16]parser.AwooParseStatement{
-				token.TokenTypeType:           statement_parse.ConstructStatementDefinitionVariable,
-				token.TokenTypeIdentifier:     statement_parse.ConstructStatementAssignment,
-				token.TokenTypeTypeDefinition: statement_parse.ConstructStatementDefinitionType,
-				token.TokenTypeIf:             statement_parse.ConstructStatementIf,
-				token.TokenTypeFunc:           statement_parse.ConstructStatementFunc,
-				token.TokenTypeReturn:         statement_parse.ConstructStatementReturn,
+				token.TokenTypeType:            statement_parse.ConstructStatementDefinitionVariable,
+				token.TokenTypeIdentifier:      statement_parse.ConstructStatementAssignment,
+				token.TokenTypeTypeDefinition:  statement_parse.ConstructStatementDefinitionType,
+				token.TokenTypeIf:              statement_parse.ConstructStatementIf,
+				token.TokenTypeFunc:            statement_parse.ConstructStatementFunc,
+				token.TokenTypeReturn:          statement_parse.ConstructStatementReturn,
+				token.TokenOperatorDereference: statement_parse.ConstructStatementAssignment,
 			},
 			NodeExpression: map[uint16]parser.AwooParseNodeExpression{
 				token.TokenTypeBracketRight:       statement_parse.ConstructExpressionEndBracket,

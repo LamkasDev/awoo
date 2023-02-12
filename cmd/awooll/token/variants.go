@@ -21,6 +21,7 @@ func IsTokenTypeGeneral(t uint16) bool {
 const TokenOperatorAddition = 0x100
 const TokenOperatorSubstraction = 0x101
 const TokenOperatorMultiplication = 0x102
+const TokenOperatorDereference = 0x102
 const TokenOperatorDivision = 0x103
 const TokenOperatorEq = 0x104
 const TokenOperatorEqEq = 0x105

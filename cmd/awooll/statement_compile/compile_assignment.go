@@ -14,6 +14,10 @@ import (
 func CompileStatementAssignment(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
 	details := compiler_details.CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero}
 	variableNameNode := statement.GetStatementAssignmentIdentifier(&s)
+	variableNameNodeType := variableNameNode.Type
+	if variableNameNodeType == node.ParserNodeTypePointer {
+		variableNameNode = node.GetNodeSingleValue(&variableNameNode)
+	}
 	variableName := node.GetNodeIdentifierValue(&variableNameNode)
 	variableMemory, err := compiler_context.GetCompilerScopeCurrentFunctionMemory(&ccompiler.Context, variableName)
 	if err != nil {
@@ -23,6 +27,23 @@ func CompileStatementAssignment(ccompiler *compiler.AwooCompiler, s statement.Aw
 	d, err = CompileNodeValue(ccompiler, assignmentValueNode, d, &details)
 	if err != nil {
 		return d, err
+	}
+	if variableNameNodeType == node.ParserNodeTypePointer {
+		nextRegister := cpu.GetNextTemporaryRegister(details.Register)
+		d, err = encoder.Encode(encoder.AwooEncodedInstruction{
+			Instruction: *instruction.AwooInstructionsLoad[ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type].Size],
+			SourceOne:   cpu.AwooRegisterSavedZero,
+			Destination: nextRegister,
+			Immediate:   uint32(variableMemory.Start),
+		}, d)
+		if err != nil {
+			return d, err
+		}
+		return encoder.Encode(encoder.AwooEncodedInstruction{
+			Instruction: *instruction.AwooInstructionsSave[ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type].Size],
+			SourceOne:   nextRegister,
+			SourceTwo:   details.Register,
+		}, d)
 	}
 
 	return encoder.Encode(encoder.AwooEncodedInstruction{

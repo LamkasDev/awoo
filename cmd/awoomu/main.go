@@ -6,7 +6,7 @@ import (
 	"os/user"
 	"path"
 
-	"github.com/LamkasDev/awoo-emu/cmd/awoomu/emu"
+	"github.com/LamkasDev/awoo-emu/cmd/awoomu/emu_run"
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/flags"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
@@ -28,7 +28,7 @@ func main() {
 	flags.ResolveColor()
 	input = paths.ResolvePath(input, ".awoobj")
 
-	emu.Load(input)
+	emu_run.Load(input)
 
 	logger.Log("bay! :33")
 }

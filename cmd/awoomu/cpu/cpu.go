@@ -6,13 +6,13 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 )
 
+// TODO: move memory into internals
 type AwooCPU struct {
 	Registers [31]arch.AwooRegister
 	Counter   arch.AwooRegister
 	Advance   bool
 	Memory    memory.AwooMemory
-
-	Table instruction.AwooInstructionTable
+	Table     instruction.AwooInstructionTable
 }
 
 var AwooRegisterNames = map[arch.AwooRegister]string{
@@ -93,7 +93,7 @@ func GetNextTemporaryRegister(r uint8) uint8 {
 func SetupCPU() AwooCPU {
 	return AwooCPU{
 		Advance: true,
-		Memory:  memory.SetupMemory(4096),
+		Memory:  memory.SetupMemory(16777216),
 		Table:   SetupDecoderInstructionTable(),
 	}
 }
