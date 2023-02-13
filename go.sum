@@ -8,6 +8,8 @@ github.com/jwalton/go-supportscolor v1.1.0 h1:HsXFJdMPjRUAx8cIW6g30hVSFYaxh9yRQw
 github.com/jwalton/go-supportscolor v1.1.0/go.mod h1:hFVUAZV2cWg+WFFC4v8pT2X/S2qUUBYMioBD9AINXGs=
 github.com/manifoldco/promptui v0.9.0 h1:3V4HzJk1TtXW1MTZMP7mdlwbBpIinw3HztaIlYthEiA=
 github.com/manifoldco/promptui v0.9.0/go.mod h1:ka04sppxSGFAtxX0qhlYQjISsg9mR4GWtQEhdbn6Pgg=
+github.com/veandco/go-sdl2 v0.4.33 h1:cxQ0OdUBEByHxvCyrGxy9F8WpL38Ya6hzV4n27QL84M=
+github.com/veandco/go-sdl2 v0.4.33/go.mod h1:OROqMhHD43nT4/i9crJukyVecjPNYYuCofep6SNiAjY=
 golang.org/x/exp v0.0.0-20230118134722-a68e582fa157 h1:fiNkyhJPUvxbRPbCqY/D9qdjmPzfHcpK3P4bM4gioSY=
 golang.org/x/exp v0.0.0-20230118134722-a68e582fa157/go.mod h1:CxIveKay+FTh1D0yPZemJVgC/95VzuuOLq5Qi4xnoYc=
 golang.org/x/sys v0.0.0-20181122145206-62eef0e2fa9b/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=

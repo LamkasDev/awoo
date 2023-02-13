@@ -16,13 +16,24 @@ func Load(path string) {
 }
 
 func Run(emulator *emu.AwooEmulator) {
-	for emulator.Running {
-		internal.TickInternal(&emulator.Internal)
-		for i, driver := range emulator.Drivers {
-			driver.Tick(&emulator.Internal, &driver)
-			emulator.Drivers[i] = driver
+	go func() {
+		for emulator.Running {
+			internal.TickInternal(&emulator.Internal)
+			for i, driver := range emulator.Drivers {
+				driver.Tick(&emulator.Internal, &driver)
+				emulator.Drivers[i] = driver
+			}
+			emulator.Running = emulator.Internal.CPU.Counter < emulator.Internal.ROM.Length
 		}
-		emulator.Running = emulator.Internal.CPU.Counter < emulator.Internal.ROM.Length
+	}
+	rendererElapsed := uint16(0)
+	rendererTiming := 1000 / vga
+	for nes.Cycling {
+		if rendererElapsed >= nes.Timings.Renderer {
+			
+		}
+		time.Sleep(time.Millisecond)
+		rendererElapsed++
 	}
 	n1 := int(memory.ReadMemory32(&emulator.Internal.CPU.Memory, 0))
 	n2 := int(memory.ReadMemory32(&emulator.Internal.CPU.Memory, 4))

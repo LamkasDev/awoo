@@ -7,6 +7,11 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/internal"
 )
 
+var (
+	winmmDLL            = syscall.NewLazyDLL("winmm.dll")
+	procTimeBeginPeriod = winmmDLL.NewProc("timeBeginPeriod")
+)
+
 type AwooEmulator struct {
 	Running  bool
 	Internal internal.AwooEmulatorInternal
@@ -14,6 +19,7 @@ type AwooEmulator struct {
 }
 
 func SetupEmulator() AwooEmulator {
+	procTimeBeginPeriod.Call(uintptr(1))
 	emulator := AwooEmulator{
 		Running: true,
 		Internal: internal.AwooEmulatorInternal{

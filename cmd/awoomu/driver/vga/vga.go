@@ -12,6 +12,7 @@ const AwooDriverVGAVector = uint32(0xb8000)
 
 type AwooDriverDataVGA struct {
 	Position uint32
+	Renderer AwooDriverVGARenderer
 }
 
 func SetupDriverVGA() driver.AwooDriver {
