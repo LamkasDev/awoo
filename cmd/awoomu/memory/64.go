@@ -16,6 +16,10 @@ func WriteMemoryWordHalf(mem *AwooMemory, n arch.AwooRegister, data arch.AwooWor
 	WriteMemory32(mem, n, (int32)(data))
 }
 
+func WriteMemoryWordByte(mem *AwooMemory, n arch.AwooRegister, data arch.AwooWordByte) {
+	WriteMemory8(mem, n, (int8)(data))
+}
+
 func ReadMemoryWordDouble(mem *AwooMemory, n arch.AwooRegister) arch.AwooWordDouble {
 	return arch.AwooWordDouble(ReadMemory128(mem, n))
 }
@@ -26,4 +30,8 @@ func ReadMemoryWord(mem *AwooMemory, n arch.AwooRegister) arch.AwooWord {
 
 func ReadMemoryWordHalf(mem *AwooMemory, n arch.AwooRegister) arch.AwooWordHalf {
 	return arch.AwooWordHalf(ReadMemory32(mem, n))
+}
+
+func ReadMemoryWordByte(mem *AwooMemory, n arch.AwooRegister) arch.AwooWordByte {
+	return arch.AwooWordByte(ReadMemory8(mem, n))
 }

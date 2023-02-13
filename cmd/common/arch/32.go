@@ -15,5 +15,7 @@ type AwooWord int32
 type AwooWordU uint32
 type AwooWordHalf int16
 type AwooWordHalfU uint16
+type AwooWordByte int8
+type AwooWordByteU uint8
 
 const AwooImmediateSmallMax = 2047

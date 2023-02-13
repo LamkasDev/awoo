@@ -10,13 +10,13 @@ import (
 } */
 
 func ProcessSW(cpu *AwooCPU, ins AwooDecodedInstruction) {
-	memory.WriteMemoryWord(&cpu.Memory, cpu.Registers[ins.SourceOne]+ins.Immediate, arch.AwooWord(cpu.Registers[ins.SourceTwo]))
+	memory.WriteMemorySafe(&cpu.Memory, cpu.Registers[ins.SourceOne]+ins.Immediate, arch.AwooWord(cpu.Registers[ins.SourceTwo]), memory.WriteMemoryWord)
 }
 
 func ProcessSH(cpu *AwooCPU, ins AwooDecodedInstruction) {
-	memory.WriteMemoryWordHalf(&cpu.Memory, cpu.Registers[ins.SourceOne]+ins.Immediate, arch.AwooWordHalf(cpu.Registers[ins.SourceTwo]))
+	memory.WriteMemorySafe(&cpu.Memory, cpu.Registers[ins.SourceOne]+ins.Immediate, arch.AwooWordHalf(cpu.Registers[ins.SourceTwo]), memory.WriteMemoryWordHalf)
 }
 
 func ProcessSB(cpu *AwooCPU, ins AwooDecodedInstruction) {
-	memory.WriteMemory8(&cpu.Memory, cpu.Registers[ins.SourceOne]+ins.Immediate, byte(cpu.Registers[ins.SourceTwo]))
+	memory.WriteMemorySafe(&cpu.Memory, cpu.Registers[ins.SourceOne]+ins.Immediate, arch.AwooWordByte(cpu.Registers[ins.SourceTwo]), memory.WriteMemoryWordByte)
 }

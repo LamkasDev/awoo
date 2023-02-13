@@ -1,6 +1,9 @@
 package emu_run
 
 import (
+	"time"
+
+	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/emu"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/internal"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/memory"
@@ -17,24 +20,37 @@ func Load(path string) {
 
 func Run(emulator *emu.AwooEmulator) {
 	go func() {
-		for emulator.Running {
-			internal.TickInternal(&emulator.Internal)
-			for i, driver := range emulator.Drivers {
-				driver.Tick(&emulator.Internal, &driver)
+		cycles := cpu.AwooCPURate / 1000
+		for emulator.Internal.Executing {
+			for i := uint32(0); i < cycles; i++ {
+				internal.TickInternal(&emulator.Internal)
+				for i, driver := range emulator.Drivers {
+					if driver.Tick != nil {
+						driver.Tick(&emulator.Internal, &driver)
+						emulator.Drivers[i] = driver
+					}
+				}
+				emulator.Internal.Executing = emulator.Internal.CPU.Counter < emulator.Internal.ROM.Length
+			}
+			time.Sleep(time.Millisecond)
+		}
+	}()
+	for emulator.Internal.Running {
+		// TODO: this will need a proper lock system, if a driver has both tick and tick long
+		for i, driver := range emulator.Drivers {
+			if driver.TickLong != nil {
+				driver.TickLong(&emulator.Internal, &driver)
 				emulator.Drivers[i] = driver
 			}
-			emulator.Running = emulator.Internal.CPU.Counter < emulator.Internal.ROM.Length
-		}
-	}
-	rendererElapsed := uint16(0)
-	rendererTiming := 1000 / vga
-	for nes.Cycling {
-		if rendererElapsed >= nes.Timings.Renderer {
-			
 		}
 		time.Sleep(time.Millisecond)
-		rendererElapsed++
 	}
+	for _, driver := range emulator.Drivers {
+		if driver.Clean != nil {
+			driver.Clean(&emulator.Internal, &driver)
+		}
+	}
+
 	n1 := int(memory.ReadMemory32(&emulator.Internal.CPU.Memory, 0))
 	n2 := int(memory.ReadMemory32(&emulator.Internal.CPU.Memory, 4))
 	logger.Log("%d %d\n", n1, n2)

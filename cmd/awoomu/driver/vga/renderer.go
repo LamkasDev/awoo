@@ -10,6 +10,7 @@ import (
 const AwooDriverVgaFps = 90
 const AwooDriverVgaFrameWidth = 80
 const AwooDriverVgaFrameHeight = 25
+const AwooDriverVgaFrameSize = AwooDriverVgaFrameWidth * AwooDriverVgaFrameHeight
 
 type AwooDriverVGARenderer struct {
 	Window   *sdl.Window
@@ -26,12 +27,14 @@ func SetupRenderer() AwooDriverVGARenderer {
 		panic(err)
 	}
 
-	w, h := int32(AwooDriverVgaFrameWidth*3), int32(AwooDriverVgaFrameHeight*3)
+	w, h := int32(800), int32(600)
 	renderer.Window, err = sdl.CreateWindow(fmt.Sprintf("Emulator (%s)", arch.AwooPlatform), sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, w, h, sdl.WINDOW_SHOWN)
 	renderer.Surface, err = renderer.Window.GetSurface()
 	renderer.Renderer, err = sdl.CreateRenderer(renderer.Window, -1, sdl.RENDERER_ACCELERATED)
 	renderer.Texture, err = renderer.Renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_STREAMING, AwooDriverVgaFrameWidth, AwooDriverVgaFrameHeight)
 	renderer.Pitch = int(AwooDriverVgaFrameWidth * 4)
+
+	return renderer
 }
 
 func CleanRenderer(renderer *AwooDriverVGARenderer) {

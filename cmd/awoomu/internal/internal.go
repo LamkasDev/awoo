@@ -12,8 +12,10 @@ import (
 )
 
 type AwooEmulatorInternal struct {
-	CPU cpu.AwooCPU
-	ROM rom.AwooRom
+	Running   bool
+	Executing bool
+	CPU       cpu.AwooCPU
+	ROM       rom.AwooRom
 }
 
 func TickInternal(internal *AwooEmulatorInternal) {

@@ -1,15 +1,41 @@
 package memory
 
-import "github.com/LamkasDev/awoo-emu/cmd/common/arch"
+import (
+	"sync"
+
+	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
+	"golang.org/x/exp/constraints"
+)
+
+type WriteMemoryFunc[K constraints.Integer] func(mem *AwooMemory, n arch.AwooRegister, data K)
+type ReadMemoryFunc[K constraints.Integer] func(mem *AwooMemory, n arch.AwooRegister) K
 
 type AwooMemory struct {
-	Data []byte
+	Data     []byte
+	Lockable []AwooMemoryLockable
+}
+
+type AwooMemoryLockable struct {
+	Start arch.AwooRegister
+	End   arch.AwooRegister
+	Lock  sync.Mutex
 }
 
 func SetupMemory(n arch.AwooRegisterU) AwooMemory {
 	return AwooMemory{
 		Data: make([]byte, n),
 	}
+}
+
+func WriteMemorySafe[K constraints.Integer](mem *AwooMemory, n arch.AwooRegister, data K, write WriteMemoryFunc[K]) {
+	for i := 0; i < len(mem.Lockable); i++ {
+		if n >= mem.Lockable[i].Start && n <= mem.Lockable[i].End {
+			mem.Lockable[i].Lock.Lock()
+			defer mem.Lockable[i].Lock.Unlock()
+			write(mem, n, data)
+		}
+	}
+	write(mem, n, data)
 }
 
 func WriteMemory64(mem *AwooMemory, n arch.AwooRegister, data int64) {
@@ -35,8 +61,19 @@ func WriteMemory16(mem *AwooMemory, n arch.AwooRegister, data int16) {
 	mem.Data[n+1] = byte(data)
 }
 
-func WriteMemory8(mem *AwooMemory, n arch.AwooRegister, data byte) {
+func WriteMemory8(mem *AwooMemory, n arch.AwooRegister, data int8) {
 	mem.Data[n] = byte(data)
+}
+
+func ReadMemorySafe[K constraints.Integer](mem *AwooMemory, n arch.AwooRegister, read ReadMemoryFunc[K]) K {
+	for i := 0; i < len(mem.Lockable); i++ {
+		if n >= mem.Lockable[i].Start && n <= mem.Lockable[i].End {
+			mem.Lockable[i].Lock.Lock()
+			defer mem.Lockable[i].Lock.Unlock()
+			return read(mem, n)
+		}
+	}
+	return read(mem, n)
 }
 
 func ReadMemory64(mem *AwooMemory, n arch.AwooRegister) int64 {
