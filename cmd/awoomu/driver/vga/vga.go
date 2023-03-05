@@ -1,8 +1,6 @@
 package vga
 
 import (
-	"unsafe"
-
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/driver"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/internal"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/memory"
@@ -10,55 +8,65 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-const AwooDriverIdVGA = 0x000
-const AwooDriverVGAVector = arch.AwooRegister(0xb8000)
-
-type AwooDriverDataVGA struct {
+type AwooDriverDataVga struct {
 	Ticks    uint32
-	Frame    [AwooDriverVgaFrameSize]uint32
 	Renderer AwooDriverVGARenderer
 }
 
-func SetupDriverVGA(internal *internal.AwooEmulatorInternal) driver.AwooDriver {
+func SetupDriverVga(internal *internal.AwooEmulatorInternal) driver.AwooDriver {
 	internal.CPU.Memory.Lockable = append(internal.CPU.Memory.Lockable, memory.AwooMemoryLockable{
-		Start: AwooDriverVGAVector,
-		End:   AwooDriverVGAVector + 32768,
+		Start: AwooDriverVgaVector,
+		End:   AwooDriverVgaVector + AwooDriverVgaSize,
 	})
+	renderer, err := SetupRenderer()
+	if err != nil {
+		panic(err)
+	}
 
 	return driver.AwooDriver{
-		Id:       AwooDriverIdVGA,
+		Id:       AwooDriverIdVga,
 		Name:     "VGA",
-		TickLong: TickLongDriverVGA,
-		Clean:    CleanDriverVGA,
-		Data: AwooDriverDataVGA{
-			Renderer: SetupRenderer(),
+		TickLong: TickLongDriverVga,
+		Clean:    CleanDriverVga,
+		Data: AwooDriverDataVga{
+			Renderer: renderer,
 		},
 	}
 }
 
-func ReadDriverVGA(internal *internal.AwooEmulatorInternal, driver *driver.AwooDriver, pos arch.AwooRegister) int16 {
-	return memory.ReadMemorySafe(&internal.CPU.Memory, arch.AwooRegister(AwooDriverVGAVector+pos), memory.ReadMemory16)
+func ReadDriverVga(internal *internal.AwooEmulatorInternal, driver *driver.AwooDriver, offset arch.AwooRegister) int16 {
+	return memory.ReadMemorySafe(&internal.CPU.Memory, arch.AwooRegister(AwooDriverVgaVector+offset), memory.ReadMemory16)
 }
 
-func TickLongDriverVGA(internal *internal.AwooEmulatorInternal, driver *driver.AwooDriver) {
-	data := driver.Data.(AwooDriverDataVGA)
+func TickLongDriverVga(internal *internal.AwooEmulatorInternal, driver *driver.AwooDriver) {
+	data := driver.Data.(AwooDriverDataVga)
 	if data.Ticks > 1000/AwooDriverVgaFps {
-		// TODO: construct frame
-		for x := 0; x < AwooDriverVgaFrameWidth; x++ {
-			for y := 0; y < AwooDriverVgaFrameHeight; y++ {
-				sdlAddress := (y * AwooDriverVgaFrameWidth) + x
-				memAddress := arch.AwooRegister((y * AwooDriverVgaFrameWidth * 2) + (x * 2))
-				characterData := ReadDriverVGA(internal, driver, memAddress)
-				if characterData != 0 {
-					data.Frame[sdlAddress] = 0xff0000ff
+		data.Renderer.Surface.FillRect(nil, 0)
+		fontX, fontY := 0, 0
+		for y := 0; y < AwooDriverVgaFrameHeight; y++ {
+			for x := 0; x < AwooDriverVgaFrameWidth; x++ {
+				characterOffset := arch.AwooRegister((y * AwooDriverVgaFrameWidth * AwooDriverVgaCharacterSize) + (x * AwooDriverVgaCharacterSize))
+				characterData := ReadDriverVga(internal, driver, characterOffset)
+				if characterData == 0 {
+					continue
 				}
-			}
-		}
 
-		data.Renderer.Texture.Update(nil, unsafe.Pointer(&data.Frame), data.Renderer.Pitch)
-		data.Renderer.Renderer.Clear()
-		data.Renderer.Renderer.Copy(data.Renderer.Texture, nil, nil)
-		data.Renderer.Renderer.Present()
+				fgColor := uint8(characterData & 0b1111)
+				bgColor := uint8((characterData >> 4) & 0b0111)
+				asciiCode := uint8(characterData >> 8)
+				sheetCode := uint16(asciiCode) + uint16(fgColor)
+				text, ok := data.Renderer.Fontsheet[sheetCode]
+				if !ok {
+					text, _ = data.Renderer.Font.RenderUTF8Blended(string(rune(asciiCode)), AwooDriverVGAColors[fgColor])
+					data.Renderer.Fontsheet[sheetCode] = text
+				}
+				data.Renderer.Surface.FillRect(&sdl.Rect{X: int32(fontX), Y: int32(fontY), W: text.W, H: text.H}, AwooDriverVGAColors[bgColor].Uint32())
+				text.Blit(nil, data.Renderer.Surface, &sdl.Rect{X: int32(fontX), Y: int32(fontY), W: 0, H: 0})
+				fontX += int(text.W)
+			}
+			fontY += data.Renderer.Font.Height()
+		}
+		data.Renderer.Window.UpdateSurface()
 		data.Ticks = 0
 	}
 	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
@@ -73,7 +81,7 @@ func TickLongDriverVGA(internal *internal.AwooEmulatorInternal, driver *driver.A
 	driver.Data = data
 }
 
-func CleanDriverVGA(_ *internal.AwooEmulatorInternal, driver *driver.AwooDriver) {
-	data := driver.Data.(AwooDriverDataVGA)
+func CleanDriverVga(_ *internal.AwooEmulatorInternal, driver *driver.AwooDriver) {
+	data := driver.Data.(AwooDriverDataVga)
 	CleanRenderer(&data.Renderer)
 }

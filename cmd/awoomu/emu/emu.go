@@ -29,7 +29,7 @@ func SetupEmulator() AwooEmulator {
 		},
 		Drivers: map[uint16]driver.AwooDriver{},
 	}
-	AddEmulatorDriver(&emulator, vga.SetupDriverVGA(&emulator.Internal))
+	AddEmulatorDriver(&emulator, vga.SetupDriverVga(&emulator.Internal))
 
 	return emulator
 }
