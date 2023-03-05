@@ -6,9 +6,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/emu"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/internal"
-	"github.com/LamkasDev/awoo-emu/cmd/awoomu/memory"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/rom"
-	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 )
 
 func Load(path string) {
@@ -50,8 +48,4 @@ func Run(emulator *emu.AwooEmulator) {
 			driver.Clean(&emulator.Internal, &driver)
 		}
 	}
-
-	n1 := int(memory.ReadMemory32(&emulator.Internal.CPU.Memory, 0))
-	n2 := int(memory.ReadMemory32(&emulator.Internal.CPU.Memory, 4))
-	logger.Log("%d %d\n", n1, n2)
 }
