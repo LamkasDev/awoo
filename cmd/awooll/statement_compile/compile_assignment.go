@@ -30,26 +30,32 @@ func CompileStatementAssignment(ccompiler *compiler.AwooCompiler, s statement.Aw
 	}
 	if variableNameNodeType == node.ParserNodeTypePointer {
 		nextRegister := cpu.GetNextTemporaryRegister(details.Register)
-		d, err = encoder.Encode(encoder.AwooEncodedInstruction{
+		loadInstruction := encoder.AwooEncodedInstruction{
 			Instruction: *instruction.AwooInstructionsLoad[ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type].Size],
-			SourceOne:   cpu.AwooRegisterSavedZero,
 			Destination: nextRegister,
 			Immediate:   uint32(variableMemory.Start),
-		}, d)
+		}
+		if !variableMemory.Global {
+			loadInstruction.SourceOne = cpu.AwooRegisterSavedZero
+		}
+		d, err = encoder.Encode(loadInstruction, d)
 		if err != nil {
 			return d, err
 		}
 		return encoder.Encode(encoder.AwooEncodedInstruction{
-			Instruction: *instruction.AwooInstructionsSave[ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type].Size],
+			Instruction: *instruction.AwooInstructionsSave[ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Data.(uint16)].Size],
 			SourceOne:   nextRegister,
 			SourceTwo:   details.Register,
 		}, d)
 	}
 
-	return encoder.Encode(encoder.AwooEncodedInstruction{
+	saveInstruction := encoder.AwooEncodedInstruction{
 		Instruction: *instruction.AwooInstructionsSave[ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type].Size],
-		SourceOne:   cpu.AwooRegisterSavedZero,
 		SourceTwo:   details.Register,
 		Immediate:   uint32(variableMemory.Start),
-	}, d)
+	}
+	if !variableMemory.Global {
+		saveInstruction.SourceOne = cpu.AwooRegisterSavedZero
+	}
+	return encoder.Encode(saveInstruction, d)
 }

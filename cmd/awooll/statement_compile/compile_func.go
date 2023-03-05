@@ -26,12 +26,17 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, s statement.AwooPars
 		return d, err
 	}
 	compiler_context.PopCompilerScopeCurrentFunction(&ccompiler.Context)
+
 	compiler_context.PushCompilerFunction(&ccompiler.Context, compiler_context.AwooCompilerFunction{
 		Name:      functionName,
 		Start:     compiler_context.GetProgramHeaderSize() + ccompiler.Context.CurrentAddress,
 		Size:      uint16(len(d)),
 		Arguments: statement.GetStatementFuncArguments(&s),
 	})
+	if ccompiler.Context.Functions.Start == "" {
+		ccompiler.Context.Functions.Start = functionName
+		d = append(make([]byte, compiler_context.GetProgramHeaderSize()), d...)
+	}
 
 	return d, nil
 }

@@ -8,7 +8,6 @@ import (
 	"sort"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler"
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement_compile"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
@@ -30,7 +29,6 @@ func RunCompiler(ccompiler *compiler.AwooCompiler) {
 	}
 
 	writer := bufio.NewWriter(file)
-	file.Seek(int64(compiler_context.GetProgramHeaderSize()), 0)
 	for ok := true; ok; ok = compiler.AdvanceCompiler(ccompiler) {
 		statement.PrintStatement(&ccompiler.Context.Parser.Lexer, &ccompiler.Current)
 		data, err := statement_compile.CompileStatement(ccompiler, ccompiler.Current, []byte{})
@@ -45,16 +43,10 @@ func RunCompiler(ccompiler *compiler.AwooCompiler) {
 		ccompiler.Context.CurrentAddress += uint16(len(data))
 	}
 	writer.Flush()
-	file.Seek(0, 0)
-	d, err := CompileProgramHeader(ccompiler)
+	err = CompileProgramHeader(ccompiler, file, writer)
 	if err != nil {
 		panic(err)
 	}
-	_, err = writer.Write(d)
-	if err != nil {
-		panic(err)
-	}
-	writer.Flush()
 	file.Close()
 
 	logger.Log(gchalk.Yellow("\n> Memory map\n"))

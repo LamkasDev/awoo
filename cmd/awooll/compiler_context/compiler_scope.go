@@ -1,6 +1,7 @@
 package compiler_context
 
 type AwooCompilerScopeContainer struct {
+	Global    AwooCompilerMemory
 	Functions map[uint16]AwooCompilerScopeFunction
 }
 
@@ -49,7 +50,7 @@ func PushCompilerScopeBlock(context *AwooCompilerContext, funcId uint16, name st
 }
 
 func PushCompilerScopeCurrentBlock(context *AwooCompilerContext, name string) uint16 {
-	return PushCompilerScopeBlock(context, uint16(len(context.Functions.Entries)-1), name)
+	return PushCompilerScopeBlock(context, uint16(len(context.Scopes.Functions)-1), name)
 }
 
 func PopCompilerScopeCurrentFunction(context *AwooCompilerContext) {
@@ -70,6 +71,9 @@ func GetCompilerScopeCurrentFunctionSize(context *AwooCompilerContext) uint16 {
 
 func SetupCompilerScopeContainer() AwooCompilerScopeContainer {
 	container := AwooCompilerScopeContainer{
+		Global: AwooCompilerMemory{
+			Entries: map[string]AwooCompilerContextMemoryEntry{},
+		},
 		Functions: map[uint16]AwooCompilerScopeFunction{},
 	}
 

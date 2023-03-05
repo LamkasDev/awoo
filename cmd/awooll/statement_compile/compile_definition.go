@@ -16,7 +16,7 @@ func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, s statement.Aw
 	details := compiler_details.CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero}
 
 	variableTypeNode := statement.GetStatementDefinitionVariableType(&s)
-	nameNode := statement.GetStatementDefinitionVariableIdentifier(&s)
+	variableNameNode := statement.GetStatementDefinitionVariableIdentifier(&s)
 	entry := compiler_context.AwooCompilerContextMemoryEntry{}
 	switch variableTypeNode.Type {
 	case node.ParserNodeTypeType:
@@ -28,7 +28,7 @@ func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, s statement.Aw
 		entry.Data = node.GetNodeTypeType(&variableTypeNode)
 	}
 	entry.Size = ccompiler.Context.Parser.Lexer.Types.All[entry.Type].Size
-	entry.Name = node.GetNodeIdentifierValue(&nameNode)
+	entry.Name = node.GetNodeIdentifierValue(&variableNameNode)
 
 	variableValueNode := statement.GetStatementDefinitionVariableValue(&s)
 	variableMemory, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, entry)
@@ -40,10 +40,13 @@ func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, s statement.Aw
 		return d, err
 	}
 
-	return encoder.Encode(encoder.AwooEncodedInstruction{
-		Instruction: instruction.AwooInstructionSW,
-		SourceOne:   cpu.AwooRegisterSavedZero,
+	saveInstruction := encoder.AwooEncodedInstruction{
+		Instruction: *instruction.AwooInstructionsSave[ccompiler.Context.Parser.Lexer.Types.All[entry.Type].Size],
 		SourceTwo:   details.Register,
-		Immediate:   uint32(variableMemory),
-	}, d)
+		Immediate:   uint32(variableMemory.Start),
+	}
+	if !variableMemory.Global {
+		saveInstruction.SourceOne = cpu.AwooRegisterSavedZero
+	}
+	return encoder.Encode(saveInstruction, d)
 }

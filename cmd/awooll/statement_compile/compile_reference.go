@@ -34,9 +34,10 @@ func CompileNodeDereference(ccompiler *compiler.AwooCompiler, n node.AwooParserN
 
 	// TODO: merge this logic with identifiers
 	// TODO: fix da 4
-	return encoder.Encode(encoder.AwooEncodedInstruction{
+	loadInstruction := encoder.AwooEncodedInstruction{
 		Instruction: *instruction.AwooInstructionsLoad[4],
 		Destination: details.Register,
 		SourceOne:   details.Register,
-	}, d)
+	}
+	return encoder.Encode(loadInstruction, d)
 }

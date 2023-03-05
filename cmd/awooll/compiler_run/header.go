@@ -1,7 +1,8 @@
 package compiler_run
 
 import (
-	"fmt"
+	"bufio"
+	"os"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler"
@@ -11,19 +12,33 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 )
 
-func CompileProgramHeader(ccompiler *compiler.AwooCompiler) ([]byte, error) {
-	f, ok := compiler_context.GetCompilerFunction(&ccompiler.Context, "main")
+func CompileProgramHeader(ccompiler *compiler.AwooCompiler, file *os.File, writer *bufio.Writer) error {
+	// TODO: this is very stupid way to skip to the main function
+	mainFunc, ok := compiler_context.GetCompilerFunction(&ccompiler.Context, "main")
 	if !ok {
-		return []byte{}, awerrors.ErrorFailedToCompileProgramHeader
+		return awerrors.ErrorFailedToCompileProgramHeader
 	}
+	firstFuncStart := ccompiler.Context.Functions.Entries[ccompiler.Context.Functions.Start].Start - compiler_context.GetProgramHeaderSize()
+	file.Seek(int64(firstFuncStart), 0)
 	d, err := encoder.Encode(encoder.AwooEncodedInstruction{
-		Instruction: instruction.AwooInstructionJAL,
-		Destination: cpu.AwooRegisterStackPointer,
-		Immediate:   uint32(f.Start),
+		Instruction: instruction.AwooInstructionADDI,
+		Destination: cpu.AwooRegisterSavedZero,
+		Immediate:   uint32(ccompiler.Context.Scopes.Global.Position),
 	}, []byte{})
 	if err != nil {
-		return d, fmt.Errorf("%w: %w", awerrors.ErrorFailedToCompileProgramHeader, err)
+		panic(err)
 	}
+	// TODO: this is not correct
+	d, err = encoder.Encode(encoder.AwooEncodedInstruction{
+		Instruction: instruction.AwooInstructionJAL,
+		Destination: cpu.AwooRegisterStackPointer,
+		Immediate:   uint32(mainFunc.Start - firstFuncStart - 12),
+	}, d)
+	if err != nil {
+		panic(err)
+	}
+	writer.Write(d)
+	writer.Flush()
 
-	return d, nil
+	return nil
 }

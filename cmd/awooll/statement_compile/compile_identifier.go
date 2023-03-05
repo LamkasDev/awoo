@@ -17,10 +17,13 @@ func CompileNodeIdentifier(ccompiler *compiler.AwooCompiler, n node.AwooParserNo
 		return d, err
 	}
 
-	return encoder.Encode(encoder.AwooEncodedInstruction{
+	loadInstruction := encoder.AwooEncodedInstruction{
 		Instruction: *instruction.AwooInstructionsLoad[ccompiler.Context.Parser.Lexer.Types.All[identifierMemory.Type].Size],
-		SourceOne:   cpu.AwooRegisterSavedZero,
 		Destination: details.Register,
 		Immediate:   uint32(identifierMemory.Start),
-	}, d)
+	}
+	if !identifierMemory.Global {
+		loadInstruction.SourceOne = cpu.AwooRegisterSavedZero
+	}
+	return encoder.Encode(loadInstruction, d)
 }

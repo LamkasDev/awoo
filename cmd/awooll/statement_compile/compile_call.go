@@ -37,12 +37,13 @@ func CompileNodeCall(ccompiler *compiler.AwooCompiler, n node.AwooParserNode, d 
 		if err != nil {
 			return d, err
 		}
-		d, err = encoder.Encode(encoder.AwooEncodedInstruction{
-			Instruction: instruction.AwooInstructionSW,
+		saveInstruction := encoder.AwooEncodedInstruction{
+			Instruction: *instruction.AwooInstructionsSave[function.Arguments[i].Size],
 			SourceOne:   cpu.AwooRegisterSavedZero,
 			SourceTwo:   details.Register,
 			Immediate:   argumentsOffset,
-		}, d)
+		}
+		d, err = encoder.Encode(saveInstruction, d)
 		argumentsOffset += uint32(function.Arguments[i].Size)
 		if err != nil {
 			return d, err

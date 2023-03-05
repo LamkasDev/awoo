@@ -35,16 +35,18 @@ func ConstructStatementFunc(cparser *parser.AwooParser, _ lexer_token.AwooLexerT
 	for t, ok := parser.PeekParser(cparser); ok && t.Type == token.TokenTypeIdentifier; t, ok = parser.PeekParser(cparser) {
 		parser.AdvanceParser(cparser)
 		argumentIdentifier := lexer_token.GetTokenIdentifierValue(&t)
-		t, err = parser.ExpectTokenParser(cparser, token.TokenTypeType, "type")
+		argumentTypeNode, err := ConstructNodeTypeFast(cparser)
 		if err != nil {
 			return statement.AwooParserStatement{}, err
 		}
-		argumentType := lexer_token.GetTokenTypeId(&t)
+		argumentType := node.GetNodeTypeType(&argumentTypeNode.Node)
+		// TODO: support pointers
 		statement.SetStatementFuncArguments(&funcStatement, append(statement.GetStatementFuncArguments(&funcStatement), statement.AwooParserStatementFuncArgument{
 			Name: argumentIdentifier,
 			Size: cparser.Context.Lexer.Types.All[argumentType].Size,
 			Type: argumentType,
 		}))
+
 		// TODO: setup a proper scoped system for variables.
 		contextArg := parser_context.AwooParserContextVariable{
 			Name: argumentIdentifier, Type: argumentType,

@@ -5,7 +5,6 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
-	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
 )
 
 type AwooCompiler struct {
@@ -27,10 +26,6 @@ func SetupCompiler(settings AwooCompilerSettings, context parser_context.AwooPar
 		Context: compiler_context.AwooCompilerContext{
 			Parser: context,
 			Scopes: compiler_context.SetupCompilerScopeContainer(),
-			Registers: compiler_context.AwooCompilerRegisters{
-				Entries:  map[string]compiler_context.AwooCompilerContextRegisterEntry{},
-				Position: cpu.AwooRegisterFunctionZero,
-			},
 			Functions: compiler_context.AwooCompilerFunctionContainer{
 				Entries: map[string]compiler_context.AwooCompilerFunction{},
 			},

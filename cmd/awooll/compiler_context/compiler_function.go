@@ -3,6 +3,7 @@ package compiler_context
 import "github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
 
 type AwooCompilerFunctionContainer struct {
+	Start   string
 	Entries map[string]AwooCompilerFunction
 }
 
