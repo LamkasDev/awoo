@@ -16,13 +16,13 @@ func PrintInternalInstruction(internal *AwooEmulatorInternal, raw []byte, ins cp
 	if logger.AwooLoggerExtraEnabled {
 		extraDetails := PrintInternalInstructionExtra(internal, ins)
 		if extraDetails != "" {
-			baseDetails = fmt.Sprintf("%s; %s", baseDetails, extraDetails)
+			baseDetails = fmt.Sprintf("%s %s", baseDetails, extraDetails)
 		}
 	}
 
 	logger.Log(
 		"c: %s; r: %s; %s\n",
-		gchalk.Red(fmt.Sprintf("%#x", internal.CPU.Counter)),
+		gchalk.Red(fmt.Sprintf("%#6x", internal.CPU.Counter)),
 		gchalk.Cyan(fmt.Sprintf("%#x %#x %#x %#x", raw[0:1], raw[1:2], raw[2:3], raw[3:4])),
 		baseDetails,
 	)
@@ -36,6 +36,18 @@ func PrintInternalInstructionExtra(internal *AwooEmulatorInternal, ins cpu.AwooD
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne]+internal.CPU.Registers[ins.SourceTwo])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
+		)
+	case instruction.AwooInstructionSUB.Code:
+		return fmt.Sprintf("%s = %s (%s - %s)",
+			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne]-internal.CPU.Registers[ins.SourceTwo])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
+		)
+	case instruction.AwooInstructionLUI.Code:
+		return fmt.Sprintf("%s = %s",
+			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
+			gchalk.Magenta(fmt.Sprint(ins.Immediate)),
 		)
 	case instruction.AwooInstructionADDI.Code:
 		return fmt.Sprintf("%s = %s (%s + %s)",
@@ -65,6 +77,18 @@ func PrintInternalInstructionExtra(internal *AwooEmulatorInternal, ins cpu.AwooD
 		return fmt.Sprintf("mem[%s] = %s",
 			gchalk.BrightGreen(fmt.Sprintf("%#x", internal.CPU.Registers[ins.SourceOne]+ins.Immediate)),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
+		)
+	case instruction.AwooInstructionJAL.Code:
+		return fmt.Sprintf("%s = %s (c = %s)",
+			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
+			gchalk.BrightGreen(fmt.Sprintf("%#x", internal.CPU.Counter+4)),
+			gchalk.BrightGreen(fmt.Sprintf("%#x", internal.CPU.Counter+ins.Immediate)),
+		)
+	case instruction.AwooInstructionJALR.Code:
+		return fmt.Sprintf("%s = %s (c = %s)",
+			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
+			gchalk.BrightGreen(fmt.Sprintf("%#x", internal.CPU.Counter+4)),
+			gchalk.BrightGreen(fmt.Sprintf("%#x", (internal.CPU.Registers[ins.SourceOne]+ins.Immediate)&^1)),
 		)
 	}
 

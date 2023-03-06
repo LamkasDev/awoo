@@ -17,7 +17,7 @@ func ConstructExpressionPriority(cparser *parser.AwooParser, t lexer_token.AwooL
 }
 
 func ConstructExpressionPriorityFast(cparser *parser.AwooParser, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
-	t, err := parser.ExpectTokensParser(cparser, []uint16{token.TokenTypePrimitive, node.ParserNodeTypeIdentifier, token.TokenOperatorEq, token.TokenOperatorLT, token.TokenOperatorGT, token.TokenTypeBracketLeft}, "primitive, identifier, =, <, > or (")
+	t, err := parser.ExpectTokens(cparser, []uint16{token.TokenTypePrimitive, node.ParserNodeTypeIdentifier, token.TokenOperatorEq, token.TokenOperatorLT, token.TokenOperatorGT, token.TokenTypeBracketLeft}, "primitive, identifier, =, <, > or (")
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}

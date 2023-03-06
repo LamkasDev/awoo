@@ -9,8 +9,7 @@ import (
 
 func ConstructNodeType(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) node.AwooParserNodeResult {
 	n := node.CreateNodeType(t)
-	for t, ok := parser.PeekParser(cparser); ok && t.Type == token.TokenOperatorDereference; t, ok = parser.PeekParser(cparser) {
-		parser.AdvanceParser(cparser)
+	for dereferenceToken, _ := parser.ExpectTokenOptional(cparser, token.TokenOperatorDereference); dereferenceToken != nil; dereferenceToken, _ = parser.ExpectTokenOptional(cparser, token.TokenOperatorDereference) {
 		n = node.CreateNodePointer(t, n.Node)
 	}
 
@@ -18,7 +17,7 @@ func ConstructNodeType(cparser *parser.AwooParser, t lexer_token.AwooLexerToken)
 }
 
 func ConstructNodeTypeFast(cparser *parser.AwooParser) (node.AwooParserNodeResult, error) {
-	t, err := parser.ExpectTokenParser(cparser, token.TokenTypeType, "type")
+	t, err := parser.ExpectToken(cparser, token.TokenTypeType, "type")
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}

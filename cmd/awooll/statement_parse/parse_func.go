@@ -1,9 +1,6 @@
 package statement_parse
 
 import (
-	"fmt"
-
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
@@ -11,61 +8,67 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
-	"github.com/jwalton/gchalk"
 )
 
 func ConstructStatementFunc(cparser *parser.AwooParser, _ lexer_token.AwooLexerToken, _ *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
-	t, err := parser.ExpectTokenParser(cparser, token.TokenTypeIdentifier, "identifier")
+	t, err := parser.ExpectToken(cparser, token.TokenTypeIdentifier, "identifier")
 	if err != nil {
 		return statement.AwooParserStatement{}, err
 	}
-	identifier := lexer_token.GetTokenIdentifierValue(&t)
-	if _, ok := parser_context.GetContextFunction(&cparser.Context, identifier); ok {
-		return statement.AwooParserStatement{}, fmt.Errorf("%w: %s", awerrors.ErrorAlreadyDefinedFunction, gchalk.Red(identifier))
+	functionNameNode := node.CreateNodeIdentifier(t)
+	functionName := lexer_token.GetTokenIdentifierValue(&t)
+	functionStatement := statement.CreateStatementFunc(functionNameNode.Node)
+	parser_context.PushParserScopeFunction(&cparser.Context, parser_context.AwooParserScopeFunction{
+		Name: functionName,
+	})
+
+	if _, err = parser.ExpectToken(cparser, token.TokenTypeBracketLeft, "("); err != nil {
+		return functionStatement, err
 	}
-	identifierNode := node.CreateNodeIdentifier(t)
-	funcStatement := statement.CreateStatementFunc(identifierNode.Node)
-	contextFunc := parser_context.AwooParserContextFunction{
-		Name:      identifier,
-		Arguments: []parser_context.AwooParserContextVariable{},
-	}
-	if _, err = parser.ExpectTokenParser(cparser, token.TokenTypeBracketLeft, "("); err != nil {
-		return funcStatement, err
-	}
-	for t, ok := parser.PeekParser(cparser); ok && t.Type == token.TokenTypeIdentifier; t, ok = parser.PeekParser(cparser) {
-		parser.AdvanceParser(cparser)
-		argumentIdentifier := lexer_token.GetTokenIdentifierValue(&t)
+	for argumentToken, _ := parser.ExpectTokenOptional(cparser, token.TokenTypeIdentifier); argumentToken != nil; argumentToken, _ = parser.ExpectTokenOptional(cparser, token.TokenTypeIdentifier) {
+		argumentName := lexer_token.GetTokenIdentifierValue(argumentToken)
 		argumentTypeNode, err := ConstructNodeTypeFast(cparser)
 		if err != nil {
 			return statement.AwooParserStatement{}, err
 		}
 		argumentType := node.GetNodeTypeType(&argumentTypeNode.Node)
+
 		// TODO: support pointers
-		statement.SetStatementFuncArguments(&funcStatement, append(statement.GetStatementFuncArguments(&funcStatement), statement.AwooParserStatementFuncArgument{
-			Name: argumentIdentifier,
+		statement.SetStatementFuncArguments(&functionStatement, append(statement.GetStatementFuncArguments(&functionStatement), statement.AwooParserStatementFuncArgument{
+			Name: argumentName,
 			Size: cparser.Context.Lexer.Types.All[argumentType].Size,
 			Type: argumentType,
 		}))
+		parser_context.PushParserScopeCurrentBlockMemory(&cparser.Context, parser_context.AwooParserMemoryEntry{
+			Name: argumentName,
+			Type: argumentType,
+		})
+	}
+	if _, err = parser.ExpectToken(cparser, token.TokenTypeBracketRight, ")"); err != nil {
+		return functionStatement, err
+	}
 
-		// TODO: setup a proper scoped system for variables.
-		contextArg := parser_context.AwooParserContextVariable{
-			Name: argumentIdentifier, Type: argumentType,
-		}
-		parser_context.SetContextVariable(&cparser.Context, contextArg)
-		contextFunc.Arguments = append(contextFunc.Arguments, contextArg)
+	var functionReturnType *uint16
+	if returnTypeToken, _ := parser.ExpectTokenOptional(cparser, token.TokenTypeType); returnTypeToken != nil {
+		returnTypeNode := ConstructNodeType(cparser, *returnTypeToken)
+		statement.SetStatementFuncReturnType(&functionStatement, &returnTypeNode.Node)
 	}
-	if _, err = parser.ExpectTokenParser(cparser, token.TokenTypeBracketRight, ")"); err != nil {
-		return funcStatement, err
+
+	if _, err = parser.ExpectToken(cparser, token.TokenTypeBracketCurlyLeft, "{"); err != nil {
+		return functionStatement, err
 	}
-	if _, err = parser.ExpectTokenParser(cparser, token.TokenTypeBracketCurlyLeft, "{"); err != nil {
-		return funcStatement, err
-	}
-	funcGroup, err := ConstructStatementGroup(cparser, &parser_details.ConstructStatementDetails{CanReturn: true})
+	functionBody, err := ConstructStatementGroup(cparser, &parser_details.ConstructStatementDetails{CanReturn: true})
 	if err != nil {
-		return funcStatement, err
+		return functionStatement, err
 	}
-	statement.SetStatementFuncBody(&funcStatement, funcGroup)
-	parser_context.SetContextFunction(&cparser.Context, contextFunc)
+	statement.SetStatementFuncBody(&functionStatement, functionBody)
 
-	return funcStatement, nil
+	parser_context.PopParserScopeCurrentFunction(&cparser.Context)
+	parser_context.PushParserFunction(&cparser.Context, parser_context.AwooParserFunction{
+		Name:       functionName,
+		ReturnType: functionReturnType,
+		Arguments:  statement.GetStatementFuncArguments(&functionStatement),
+	})
+
+	return functionStatement, nil
 }

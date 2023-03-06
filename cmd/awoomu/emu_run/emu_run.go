@@ -45,7 +45,10 @@ func Run(emulator *emu.AwooEmulator) {
 	}
 	for _, driver := range emulator.Drivers {
 		if driver.Clean != nil {
-			driver.Clean(&emulator.Internal, &driver)
+			err := driver.Clean(&emulator.Internal, &driver)
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 }

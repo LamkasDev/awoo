@@ -12,7 +12,7 @@ import (
 )
 
 func ConstructExpressionAccumulate(cparser *parser.AwooParser, leftNode node.AwooParserNodeResult, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
-	op, err := parser.FetchTokenParser(cparser)
+	op, err := parser.FetchToken(cparser)
 	if err != nil {
 		return leftNode, err
 	}
@@ -49,7 +49,7 @@ func ConstructExpressionBracket(cparser *parser.AwooParser, t lexer_token.AwooLe
 }
 
 func ConstructExpressionBracketFast(cparser *parser.AwooParser, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
-	t, err := parser.FetchTokenParser(cparser)
+	t, err := parser.FetchToken(cparser)
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}

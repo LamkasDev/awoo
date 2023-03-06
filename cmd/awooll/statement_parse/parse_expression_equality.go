@@ -9,7 +9,7 @@ import (
 )
 
 func ConstructExpressionEquality(cparser *parser.AwooParser, leftNode node.AwooParserNodeResult, _ lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
-	op, err := parser.ExpectTokenParser(cparser, token.TokenOperatorEq, "==")
+	op, err := parser.ExpectToken(cparser, token.TokenOperatorEq, "==")
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
@@ -26,7 +26,7 @@ func ConstructExpressionEquality(cparser *parser.AwooParser, leftNode node.AwooP
 }
 
 func ConstructExpressionNotEquality(cparser *parser.AwooParser, leftNode node.AwooParserNodeResult, _ lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
-	op, err := parser.ExpectTokenParser(cparser, token.TokenOperatorEq, "!=")
+	op, err := parser.ExpectToken(cparser, token.TokenOperatorEq, "!=")
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}

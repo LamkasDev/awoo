@@ -15,16 +15,16 @@ import (
 
 func CreateNodeIdentifierVariableSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, error) {
 	identifier := lexer_token.GetTokenIdentifierValue(&t)
-	_, ok := parser_context.GetContextVariable(&cparser.Context, identifier)
-	if ok {
-		return node.CreateNodeIdentifier(t), nil
+	_, err := parser_context.GetParserScopeCurrentFunctionMemory(&cparser.Context, identifier)
+	if err != nil {
+		return node.AwooParserNodeResult{}, err
 	}
 
-	return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorUnknownVariable, gchalk.Red(identifier))
+	return node.CreateNodeIdentifier(t), nil
 }
 
 func CreateNodeIdentifierVariableSafeFast(cparser *parser.AwooParser) (node.AwooParserNodeResult, error) {
-	t, err := parser.ExpectTokensParser(cparser, []uint16{token.TokenTypeIdentifier}, "identifier")
+	t, err := parser.ExpectTokens(cparser, []uint16{token.TokenTypeIdentifier}, "identifier")
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
@@ -33,14 +33,14 @@ func CreateNodeIdentifierVariableSafeFast(cparser *parser.AwooParser) (node.Awoo
 }
 
 func CreateNodeIdentifierCallSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, error) {
-	identifier := lexer_token.GetTokenIdentifierValue(&t)
-	_, err := parser.ExpectTokensParser(cparser, []uint16{token.TokenTypeBracketLeft}, "(")
+	callFunctionName := lexer_token.GetTokenIdentifierValue(&t)
+	_, err := parser.ExpectTokens(cparser, []uint16{token.TokenTypeBracketLeft}, "(")
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
-	callFunction, ok := parser_context.GetContextFunction(&cparser.Context, identifier)
+	callFunction, ok := parser_context.GetParserFunction(&cparser.Context, callFunctionName)
 	if !ok {
-		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorUnknownFunction, gchalk.Red(identifier))
+		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorUnknownFunction, gchalk.Red(callFunctionName))
 	}
 
 	callNode := node.CreateNodeCall(t)
@@ -59,7 +59,7 @@ func CreateNodeIdentifierCallSafe(cparser *parser.AwooParser, t lexer_token.Awoo
 		node.SetNodeCallArguments(&callNode.Node, append(node.GetNodeCallArguments(&callNode.Node), argNode.Node))
 	}
 	if len(callFunction.Arguments) == 0 {
-		if _, err := parser.ExpectTokenParser(cparser, token.TokenTypeBracketRight, ")"); err != nil {
+		if _, err := parser.ExpectToken(cparser, token.TokenTypeBracketRight, ")"); err != nil {
 			return callNode, err
 		}
 	}
@@ -68,7 +68,7 @@ func CreateNodeIdentifierCallSafe(cparser *parser.AwooParser, t lexer_token.Awoo
 }
 
 func CreateNodeIdentifierCallSafeFast(cparser *parser.AwooParser) (node.AwooParserNodeResult, error) {
-	t, err := parser.ExpectTokensParser(cparser, []uint16{node.ParserNodeTypeIdentifier}, "identifier")
+	t, err := parser.ExpectTokens(cparser, []uint16{node.ParserNodeTypeIdentifier}, "identifier")
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
@@ -90,7 +90,7 @@ func CreateNodeIdentifierSafe(cparser *parser.AwooParser, t lexer_token.AwooLexe
 }
 
 func CreateNodeIdentifierSafeFast(cparser *parser.AwooParser) (node.AwooParserNodeResult, error) {
-	t, err := parser.ExpectTokenParser(cparser, token.TokenTypeIdentifier, "identifier")
+	t, err := parser.ExpectToken(cparser, token.TokenTypeIdentifier, "identifier")
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}

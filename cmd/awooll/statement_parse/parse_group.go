@@ -9,7 +9,7 @@ import (
 
 func ConstructStatementGroup(cparser *parser.AwooParser, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
 	body := []statement.AwooParserStatement{}
-	for t, err := parser.FetchTokenParser(cparser); err == nil && t.Type != token.TokenTypeBracketCurlyRight; t, err = parser.FetchTokenParser(cparser) {
+	for t, err := parser.FetchToken(cparser); err == nil && t.Type != token.TokenTypeBracketCurlyRight; t, err = parser.FetchToken(cparser) {
 		bodyStatement, err := ConstructStatement(cparser, t, details)
 		if err != nil {
 			return statement.AwooParserStatement{}, err

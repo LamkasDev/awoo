@@ -9,7 +9,7 @@ import (
 )
 
 func ConstructExpressionComparison(cparser *parser.AwooParser, leftNode node.AwooParserNodeResult, op lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
-	t, err := parser.FetchTokenParser(cparser)
+	t, err := parser.FetchToken(cparser)
 	if err != nil {
 		return leftNode, err
 	}
@@ -19,7 +19,7 @@ func ConstructExpressionComparison(cparser *parser.AwooParser, leftNode node.Awo
 		} else {
 			op.Type = token.TokenOperatorGTEQ
 		}
-		t, err = parser.FetchTokenParser(cparser)
+		t, err = parser.FetchToken(cparser)
 		if err != nil {
 			return leftNode, err
 		}

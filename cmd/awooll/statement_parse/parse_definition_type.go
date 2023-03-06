@@ -12,7 +12,7 @@ import (
 )
 
 func ConstructStatementDefinitionType(cparser *parser.AwooParser, _ lexer_token.AwooLexerToken, _ *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
-	t, err := parser.ExpectTokenParser(cparser, token.TokenTypeIdentifier, "identifier")
+	t, err := parser.ExpectToken(cparser, token.TokenTypeIdentifier, "identifier")
 	if err != nil {
 		return statement.AwooParserStatement{}, err
 	}
@@ -24,7 +24,7 @@ func ConstructStatementDefinitionType(cparser *parser.AwooParser, _ lexer_token.
 	defStatement := statement.CreateStatementDefinitionType(newIdentifierNode.Node)
 
 	// TODO: this is a placeholder i promise.
-	t, err = parser.ExpectTokenParser(cparser, token.TokenTypeType, "type")
+	t, err = parser.ExpectToken(cparser, token.TokenTypeType, "type")
 	if err != nil {
 		return statement.AwooParserStatement{}, err
 	}
@@ -34,7 +34,7 @@ func ConstructStatementDefinitionType(cparser *parser.AwooParser, _ lexer_token.
 	statement.SetStatementDefinitionTypeValue(&defStatement, originalIdentifierNode.Node)
 	lexer_context.AddContextTypeAlias(&cparser.Context.Lexer, originalType, newType)
 	// end
-	if _, err = parser.ExpectTokenParser(cparser, token.TokenTypeEndStatement, ";"); err != nil {
+	if _, err = parser.ExpectToken(cparser, token.TokenTypeEndStatement, ";"); err != nil {
 		return statement.AwooParserStatement{}, err
 	}
 

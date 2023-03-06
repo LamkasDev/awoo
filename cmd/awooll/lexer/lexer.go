@@ -22,7 +22,9 @@ type AwooLexer struct {
 	Settings AwooLexerSettings
 }
 
-type AwooLexerSettings struct{}
+type AwooLexerSettings struct {
+	Mappings AwooLexerMappings
+}
 
 func SetupLexer(settings AwooLexerSettings) AwooLexer {
 	lexer := AwooLexer{

@@ -10,11 +10,16 @@ import (
 )
 
 func CompileStatementReturn(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
-	d, err := CompileNodeValue(ccompiler, statement.GetStatementReturnValue(&s), d, &compiler_details.CompileNodeValueDetails{
-		Register: cpu.AwooRegisterFunctionZero,
-	})
-	if err != nil {
-		return d, err
+	currentScopeFunction := ccompiler.Context.Scopes.Functions[uint16(len(ccompiler.Context.Scopes.Functions)-1)]
+	currentFunction := ccompiler.Context.Functions.Entries[currentScopeFunction.Name]
+	if currentFunction.ReturnType != nil {
+		returnValue := statement.GetStatementReturnValue(&s)
+		d, err := CompileNodeValue(ccompiler, *returnValue, d, &compiler_details.CompileNodeValueDetails{
+			Register: cpu.AwooRegisterFunctionZero,
+		})
+		if err != nil {
+			return d, err
+		}
 	}
 
 	// TODO: setup a proper return address stack.

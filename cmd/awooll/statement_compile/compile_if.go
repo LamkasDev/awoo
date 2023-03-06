@@ -18,7 +18,9 @@ func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 	switch s.Type {
 	case statement.ParserStatementTypeIf:
 		// We need to compile the body first to determine comparison jump address.
-		compiler_context.PushCompilerScopeCurrentBlock(&ccompiler.Context, "if")
+		compiler_context.PushCompilerScopeCurrentBlock(&ccompiler.Context, compiler_context.AwooCompilerScopeBlock{
+			Name: "if",
+		})
 		nodeBody, err = CompileStatementGroup(ccompiler, statement.GetStatementIfBody(&s), nodeBody)
 		if err != nil {
 			return bodies, jump, err
@@ -41,7 +43,9 @@ func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 		}
 		nodeBody = append(ifHeader, nodeBody...)
 	case statement.ParserStatementTypeGroup:
-		compiler_context.PushCompilerScopeCurrentBlock(&ccompiler.Context, "else")
+		compiler_context.PushCompilerScopeCurrentBlock(&ccompiler.Context, compiler_context.AwooCompilerScopeBlock{
+			Name: "else",
+		})
 		nodeBody, err = CompileStatementGroup(ccompiler, s, []byte{})
 		if err != nil {
 			return bodies, jump, err

@@ -5,14 +5,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler"
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement_compile"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/jwalton/gchalk"
-	"golang.org/x/exp/maps"
 )
 
 func RunCompiler(ccompiler *compiler.AwooCompiler) {
@@ -30,7 +28,7 @@ func RunCompiler(ccompiler *compiler.AwooCompiler) {
 
 	writer := bufio.NewWriter(file)
 	for ok := true; ok; ok = compiler.AdvanceCompiler(ccompiler) {
-		statement.PrintStatement(&ccompiler.Context.Parser.Lexer, &ccompiler.Current)
+		parser.PrintStatement(&ccompiler.Context.Parser, &ccompiler.Current)
 		data, err := statement_compile.CompileStatement(ccompiler, ccompiler.Current, []byte{})
 		if err != nil {
 			panic(err)
@@ -48,31 +46,4 @@ func RunCompiler(ccompiler *compiler.AwooCompiler) {
 		panic(err)
 	}
 	file.Close()
-
-	logger.Log(gchalk.Yellow("\n> Memory map\n"))
-	for _, f := range ccompiler.Context.Scopes.Functions {
-		logger.Log("┏━ %s (%s)\n", f.Name, gchalk.Green(fmt.Sprintf("%#x", f.Id)))
-		blocks := maps.Values(f.Blocks)
-		sort.Slice(blocks, func(i, j int) bool {
-			return blocks[i].Memory.Position < blocks[j].Memory.Position
-		})
-		for _, block := range blocks {
-			entries := maps.Values(block.Memory.Entries)
-			sort.Slice(entries, func(i, j int) bool {
-				return entries[i].Start < entries[j].Start
-			})
-			for _, entry := range entries {
-				t := ccompiler.Context.Parser.Lexer.Types.All[entry.Type]
-				logger.Log("┣━ %s %s  %s (%s)\n",
-					gchalk.Green(fmt.Sprintf("%#x - %#x", entry.Start, entry.Start+uint16(entry.Size)-1)),
-					gchalk.Gray("➔"),
-					entry.Name,
-					gchalk.Cyan(t.Key),
-				)
-				logger.Log("┗━━► %s entries\n", gchalk.Blue(fmt.Sprint(len(block.Memory.Entries))))
-			}
-		}
-		logger.Log("┗━━► %s blocks\n", gchalk.Blue(fmt.Sprint(len(f.Blocks))))
-	}
-	logger.Log("┗━━► %s functions\n", gchalk.Blue(fmt.Sprint(len(ccompiler.Context.Scopes.Functions))))
 }

@@ -17,40 +17,36 @@ type AwooCompilerScopeBlock struct {
 	Memory AwooCompilerMemory
 }
 
-func PushCompilerScopeFunction(context *AwooCompilerContext, name string) uint16 {
-	scope := AwooCompilerScopeFunction{
-		Id:     uint16(len(context.Scopes.Functions)),
-		Name:   name,
-		Blocks: map[uint16]AwooCompilerScopeBlock{},
-	}
-	context.Scopes.Functions[scope.Id] = scope
-	PushCompilerScopeBlock(context, scope.Id, "body")
+func PushCompilerScopeFunction(context *AwooCompilerContext, scopeFunction AwooCompilerScopeFunction) AwooCompilerScopeFunction {
+	scopeFunction.Id = uint16(len(context.Scopes.Functions))
+	scopeFunction.Blocks = map[uint16]AwooCompilerScopeBlock{}
+	context.Scopes.Functions[scopeFunction.Id] = scopeFunction
+	PushCompilerScopeBlock(context, scopeFunction.Id, AwooCompilerScopeBlock{
+		Name: "body",
+	})
 
-	return scope.Id
+	return scopeFunction
 }
 
-func PushCompilerScopeBlock(context *AwooCompilerContext, funcId uint16, name string) uint16 {
-	f := context.Scopes.Functions[funcId]
-	pos := uint16(0)
-	if len(f.Blocks) > 0 {
-		pos = f.Blocks[uint16(len(f.Blocks)-1)].Memory.Position
+func PushCompilerScopeBlock(context *AwooCompilerContext, funcId uint16, functionBlock AwooCompilerScopeBlock) AwooCompilerScopeBlock {
+	scopeFunction := context.Scopes.Functions[funcId]
+	functionBlockPosition := uint16(0)
+	if len(scopeFunction.Blocks) > 0 {
+		functionBlockPosition = scopeFunction.Blocks[uint16(len(scopeFunction.Blocks)-1)].Memory.Position
 	}
-	scope := AwooCompilerScopeBlock{
-		Id:   uint16(len(f.Blocks)),
-		Name: name,
-		Memory: AwooCompilerMemory{
-			Entries:  map[string]AwooCompilerContextMemoryEntry{},
-			Position: pos,
-		},
+	functionBlock.Id = uint16(len(scopeFunction.Blocks))
+	functionBlock.Memory = AwooCompilerMemory{
+		Entries:  map[string]AwooCompilerMemoryEntry{},
+		Position: functionBlockPosition,
 	}
-	f.Blocks[scope.Id] = scope
-	context.Scopes.Functions[funcId] = f
+	scopeFunction.Blocks[functionBlock.Id] = functionBlock
+	context.Scopes.Functions[funcId] = scopeFunction
 
-	return scope.Id
+	return functionBlock
 }
 
-func PushCompilerScopeCurrentBlock(context *AwooCompilerContext, name string) uint16 {
-	return PushCompilerScopeBlock(context, uint16(len(context.Scopes.Functions)-1), name)
+func PushCompilerScopeCurrentBlock(context *AwooCompilerContext, functionBlock AwooCompilerScopeBlock) AwooCompilerScopeBlock {
+	return PushCompilerScopeBlock(context, uint16(len(context.Scopes.Functions)-1), functionBlock)
 }
 
 func PopCompilerScopeCurrentFunction(context *AwooCompilerContext) {
@@ -59,20 +55,20 @@ func PopCompilerScopeCurrentFunction(context *AwooCompilerContext) {
 
 func PopCompilerScopeCurrentBlock(context *AwooCompilerContext) {
 	funcId := uint16(len(context.Scopes.Functions) - 1)
-	f := context.Scopes.Functions[funcId]
-	delete(f.Blocks, uint16(len(f.Blocks)-1))
-	context.Scopes.Functions[funcId] = f
+	scopeFunction := context.Scopes.Functions[funcId]
+	delete(scopeFunction.Blocks, uint16(len(scopeFunction.Blocks)-1))
+	context.Scopes.Functions[funcId] = scopeFunction
 }
 
 func GetCompilerScopeCurrentFunctionSize(context *AwooCompilerContext) uint16 {
-	f := context.Scopes.Functions[uint16(len(context.Scopes.Functions)-1)]
-	return f.Blocks[uint16(len(f.Blocks)-1)].Memory.Position
+	scopeFunction := context.Scopes.Functions[uint16(len(context.Scopes.Functions)-1)]
+	return scopeFunction.Blocks[uint16(len(scopeFunction.Blocks)-1)].Memory.Position
 }
 
 func SetupCompilerScopeContainer() AwooCompilerScopeContainer {
 	container := AwooCompilerScopeContainer{
 		Global: AwooCompilerMemory{
-			Entries: map[string]AwooCompilerContextMemoryEntry{},
+			Entries: map[string]AwooCompilerMemoryEntry{},
 		},
 		Functions: map[uint16]AwooCompilerScopeFunction{},
 	}

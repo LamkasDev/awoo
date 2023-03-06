@@ -20,7 +20,7 @@ func ConstructNodeValue(cparser *parser.AwooParser, t lexer_token.AwooLexerToken
 }
 
 func ConstructNodeValueFast(cparser *parser.AwooParser) (node.AwooParserNodeResult, error) {
-	t, err := parser.FetchTokenParser(cparser)
+	t, err := parser.FetchToken(cparser)
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}

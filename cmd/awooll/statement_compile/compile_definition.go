@@ -12,41 +12,55 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 )
 
+func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement) compiler_context.AwooCompilerMemoryEntry {
+	variableTypeNode := statement.GetStatementDefinitionVariableType(&s)
+	variableNameNode := statement.GetStatementDefinitionVariableIdentifier(&s)
+	variableName := node.GetNodeIdentifierValue(&variableNameNode)
+	switch variableTypeNode.Type {
+	case node.ParserNodeTypeType:
+		variableType := node.GetNodeTypeType(&variableTypeNode)
+		return compiler_context.AwooCompilerMemoryEntry{
+			Name: variableName,
+			Type: variableType,
+			Size: ccompiler.Context.Parser.Lexer.Types.All[variableType].Size,
+		}
+	case node.ParserNodeTypePointer:
+		// TODO: chaining pointers
+		pointedTypeNode := node.GetNodeSingleValue(&variableTypeNode)
+		pointedType := node.GetNodeTypeType(&pointedTypeNode)
+		return compiler_context.AwooCompilerMemoryEntry{
+			Name: variableName,
+			Type: types.AwooTypePointer,
+			Data: pointedType,
+			Size: ccompiler.Context.Parser.Lexer.Types.All[types.AwooTypePointer].Size,
+		}
+	}
+
+	return compiler_context.AwooCompilerMemoryEntry{}
+}
+
 func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
 	details := compiler_details.CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero}
 
-	variableTypeNode := statement.GetStatementDefinitionVariableType(&s)
-	variableNameNode := statement.GetStatementDefinitionVariableIdentifier(&s)
-	entry := compiler_context.AwooCompilerContextMemoryEntry{}
-	switch variableTypeNode.Type {
-	case node.ParserNodeTypeType:
-		entry.Type = node.GetNodeTypeType(&variableTypeNode)
-	case node.ParserNodeTypePointer:
-		entry.Type = types.AwooTypePointer
-		// TODO: chaining pointers
-		variableTypeNode = node.GetNodeSingleValue(&variableTypeNode)
-		entry.Data = node.GetNodeTypeType(&variableTypeNode)
-	}
-	entry.Size = ccompiler.Context.Parser.Lexer.Types.All[entry.Type].Size
-	entry.Name = node.GetNodeIdentifierValue(&variableNameNode)
-
-	variableValueNode := statement.GetStatementDefinitionVariableValue(&s)
-	variableMemory, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, entry)
+	variableMemory, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, GetCompilerMemoryEntry(ccompiler, s))
 	if err != nil {
 		return d, err
 	}
+
+	variableValueNode := statement.GetStatementDefinitionVariableValue(&s)
 	d, err = CompileNodeValue(ccompiler, variableValueNode, d, &details)
 	if err != nil {
 		return d, err
 	}
 
 	saveInstruction := encoder.AwooEncodedInstruction{
-		Instruction: *instruction.AwooInstructionsSave[ccompiler.Context.Parser.Lexer.Types.All[entry.Type].Size],
+		Instruction: *instruction.AwooInstructionsSave[ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type].Size],
 		SourceTwo:   details.Register,
 		Immediate:   uint32(variableMemory.Start),
 	}
 	if !variableMemory.Global {
 		saveInstruction.SourceOne = cpu.AwooRegisterSavedZero
 	}
+
 	return encoder.Encode(saveInstruction, d)
 }

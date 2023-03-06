@@ -58,14 +58,24 @@ func SetupRenderer() (AwooDriverVGARenderer, error) {
 	return renderer, nil
 }
 
-func CleanRenderer(renderer *AwooDriverVGARenderer) {
-	renderer.Texture.Destroy()
-	renderer.Renderer.Destroy()
-	renderer.Window.Destroy()
+func CleanRenderer(renderer *AwooDriverVGARenderer) error {
+	err := renderer.Texture.Destroy()
+	if err != nil {
+		return fmt.Errorf("failed to destroy surface texture: %w", err)
+	}
+	err = renderer.Renderer.Destroy()
+	if err != nil {
+		return fmt.Errorf("failed to destroy renderer: %w", err)
+	}
+	err = renderer.Window.Destroy()
+	if err != nil {
+		return fmt.Errorf("failed to destroy window: %w", err)
+	}
 	renderer.Font.Close()
 	for _, c := range renderer.Fontsheet {
 		c.Free()
 	}
 
 	sdl.Quit()
+	return nil
 }

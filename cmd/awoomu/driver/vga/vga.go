@@ -81,7 +81,7 @@ func TickLongDriverVga(internal *internal.AwooEmulatorInternal, driver *driver.A
 	driver.Data = data
 }
 
-func CleanDriverVga(_ *internal.AwooEmulatorInternal, driver *driver.AwooDriver) {
+func CleanDriverVga(_ *internal.AwooEmulatorInternal, driver *driver.AwooDriver) error {
 	data := driver.Data.(AwooDriverDataVga)
-	CleanRenderer(&data.Renderer)
+	return CleanRenderer(&data.Renderer)
 }
