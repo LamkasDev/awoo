@@ -23,6 +23,7 @@ type AwooParser struct {
 }
 
 type AwooParserSettings struct {
+	Lexer    lexer.AwooLexerSettings
 	Mappings AwooParserMappings
 }
 
@@ -75,7 +76,7 @@ func FetchToken(cparser *AwooParser) (lexer_token.AwooLexerToken, error) {
 	if err := AdvanceParser(cparser); err != nil {
 		return lexer_token.AwooLexerToken{}, err
 	}
-	logger.Log("┣━ %s\n", lexer_token.PrintToken(&cparser.Contents.Context, &cparser.Current))
+	logger.Log("┣━ %s\n", lexer.PrintToken(&cparser.Settings.Lexer, &cparser.Current))
 	return cparser.Current, nil
 }
 

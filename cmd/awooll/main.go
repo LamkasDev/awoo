@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"os/user"
 	"path"
@@ -20,7 +19,6 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/flags"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/LamkasDev/awoo-emu/cmd/common/paths"
-	"github.com/jwalton/gchalk"
 )
 
 func main() {
@@ -45,57 +43,18 @@ func main() {
 	}
 
 	lexSettings := lexer.AwooLexerSettings{
+		Tokens: token.SetupTokenMap(),
 		Mappings: lexer.AwooLexerMappings{
 			PrintNode: map[uint16]lexer.AwooPrintNode{
-				node.ParserNodeTypeIdentifier: func(clexer *lexer.AwooLexer, n *node.AwooParserNode) string {
-					return node.GetNodeIdentifierValue(n)
-				},
-				node.ParserNodeTypeType: func(clexer *lexer.AwooLexer, n *node.AwooParserNode) string {
-					return clexer.Context.Types.All[node.GetNodeTypeType(n)].Key
-				},
-				node.ParserNodeTypePointer: func(clexer *lexer.AwooLexer, n *node.AwooParserNode) string {
-					s := node.GetNodeSingleValue(n)
-					return fmt.Sprintf("*%s", lexer.PrintNode(clexer, &s))
-				},
-				node.ParserNodeTypePrimitive: func(clexer *lexer.AwooLexer, n *node.AwooParserNode) string {
-					return fmt.Sprintf("%v", node.GetNodePrimitiveValue(n))
-				},
-				node.ParserNodeTypeExpression: func(clexer *lexer.AwooLexer, n *node.AwooParserNode) string {
-					l := node.GetNodeExpressionLeft(n)
-					r := node.GetNodeExpressionRight(n)
-					if node.GetNodeExpressionIsBracket(n) {
-						return fmt.Sprintf(
-							"%s%s %s %s%s",
-							gchalk.Red("("),
-							lexer.PrintNode(clexer, &l),
-							clexer.Context.Tokens.All[n.Token.Type].Name,
-							lexer.PrintNode(clexer, &r),
-							gchalk.Red(")"),
-						)
-					}
-					return fmt.Sprintf(
-						"(%s %s %s)",
-						lexer.PrintNode(clexer, &l),
-						clexer.Context.Tokens.All[n.Token.Type].Name,
-						lexer.PrintNode(clexer, &r),
-					)
-				},
-				node.ParserNodeTypeNegative: func(clexer *lexer.AwooLexer, n *node.AwooParserNode) string {
-					v := node.GetNodeSingleValue(n)
-					return fmt.Sprintf("-%s", lexer.PrintNode(clexer, &v))
-				},
-				node.ParserNodeTypeReference: func(clexer *lexer.AwooLexer, n *node.AwooParserNode) string {
-					v := node.GetNodeSingleValue(n)
-					return fmt.Sprintf("&%s", lexer.PrintNode(clexer, &v))
-				},
-				node.ParserNodeTypeDereference: func(clexer *lexer.AwooLexer, n *node.AwooParserNode) string {
-					v := node.GetNodeSingleValue(n)
-					return fmt.Sprintf("*%s", lexer.PrintNode(clexer, &v))
-				},
-				node.ParserNodeTypeCall: func(_ *lexer.AwooLexer, n *node.AwooParserNode) string {
-					v := node.GetNodeCallValue(n)
-					return fmt.Sprintf("%s()", v)
-				},
+				node.ParserNodeTypeIdentifier:  lexer.PrintNodeIdentifier,
+				node.ParserNodeTypeType:        lexer.PrintNodeType,
+				node.ParserNodeTypePointer:     lexer.PrintNodePointer,
+				node.ParserNodeTypePrimitive:   lexer.PrintNodePrimitive,
+				node.ParserNodeTypeExpression:  lexer.PrintNodeExpression,
+				node.ParserNodeTypeNegative:    lexer.PrintNodeNegative,
+				node.ParserNodeTypeReference:   lexer.PrintNodeReference,
+				node.ParserNodeTypeDereference: lexer.PrintNodeDereference,
+				node.ParserNodeTypeCall:        lexer.PrintNodeCall,
 			},
 		},
 	}
@@ -104,6 +63,7 @@ func main() {
 	lexRes := lexer.RunLexer(&lex)
 
 	parSettings := parser.AwooParserSettings{
+		Lexer: lexSettings,
 		Mappings: parser.AwooParserMappings{
 			Statement: map[uint16]parser.AwooParseStatement{
 				token.TokenTypeType:            statement_parse.ConstructStatementDefinitionVariable,
@@ -129,6 +89,13 @@ func main() {
 				token.TokenTypePrimitive:      statement_parse.CreateNodePrimitiveSafe,
 				node.ParserNodeTypeIdentifier: statement_parse.CreateNodeIdentifierSafe,
 			},
+			PrintStatement: map[uint16]parser.AwooPrintStatement{
+				statement.ParserStatementTypeDefinitionVariable: parser.PrintStatementDefinitionVariable,
+				statement.ParserStatementTypeAssignment:         parser.PrintStatementAssignment,
+				statement.ParserStatementTypeDefinitionType:     parser.PrintStatementDefinitionType,
+				statement.ParserStatementTypeIf:                 parser.PrintStatementIf,
+				statement.ParserStatementTypeFunc:               parser.PrintStatementFunc,
+			},
 		},
 	}
 	par := parser.SetupParser(parSettings, lex.Context)
@@ -136,7 +103,8 @@ func main() {
 	parRes := parser_run.RunParser(&par)
 
 	compSettings := compiler.AwooCompilerSettings{
-		Path: output,
+		Path:   output,
+		Parser: parSettings,
 		Mappings: compiler.AwooCompilerMappings{
 			Statement: map[uint16]compiler.AwooCompileStatement{
 				statement.ParserStatementTypeDefinitionVariable: statement_compile.CompileStatementDefinition,

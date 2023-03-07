@@ -10,7 +10,6 @@ import (
 	"github.com/jwalton/gchalk"
 )
 
-// TODO: align this stuff.
 func PrintInternalInstruction(internal *AwooEmulatorInternal, raw []byte, ins cpu.AwooDecodedInstruction) {
 	baseDetails := cpu.PrintDecodedInstruction(ins)
 	if logger.AwooLoggerExtraEnabled {
@@ -28,6 +27,7 @@ func PrintInternalInstruction(internal *AwooEmulatorInternal, raw []byte, ins cp
 	)
 }
 
+// TODO: refactor to a map.
 func PrintInternalInstructionExtra(internal *AwooEmulatorInternal, ins cpu.AwooDecodedInstruction) string {
 	switch ins.Instruction.Code {
 	case instruction.AwooInstructionADD.Code:

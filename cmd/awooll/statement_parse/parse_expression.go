@@ -25,7 +25,7 @@ func ConstructExpressionAccumulate(cparser *parser.AwooParser, leftNode node.Awo
 		if details.PendingBrackets > 0 {
 			opSymbol += ", )"
 		}
-		endSymbol := cparser.Context.Lexer.Tokens.All[details.EndToken].Name
+		endSymbol := cparser.Settings.Lexer.Tokens.All[details.EndToken].Name
 		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red(fmt.Sprintf("%s or %s", opSymbol, endSymbol)))
 	}
 

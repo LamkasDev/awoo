@@ -28,12 +28,12 @@ func RunCompiler(ccompiler *compiler.AwooCompiler) {
 
 	writer := bufio.NewWriter(file)
 	for ok := true; ok; ok = compiler.AdvanceCompiler(ccompiler) {
-		parser.PrintStatement(&ccompiler.Context.Parser, &ccompiler.Current)
+		parser.PrintStatement(&ccompiler.Settings.Parser, &ccompiler.Context.Parser, &ccompiler.Current)
 		data, err := statement_compile.CompileStatement(ccompiler, ccompiler.Current, []byte{})
 		if err != nil {
 			panic(err)
 		}
-		compiler.PrintNewCompile(&ccompiler.Context.Parser.Lexer, &ccompiler.Current, data)
+		compiler.PrintNewCompile(ccompiler, &ccompiler.Current, data)
 		_, err = writer.Write(data)
 		if err != nil {
 			panic(err)

@@ -29,7 +29,7 @@ func ConstructStatementFunc(cparser *parser.AwooParser, _ lexer_token.AwooLexerT
 		argumentName := lexer_token.GetTokenIdentifierValue(argumentToken)
 		argumentTypeNode, err := ConstructNodeTypeFast(cparser)
 		if err != nil {
-			return statement.AwooParserStatement{}, err
+			return functionStatement, err
 		}
 		argumentType := node.GetNodeTypeType(&argumentTypeNode.Node)
 
@@ -39,10 +39,13 @@ func ConstructStatementFunc(cparser *parser.AwooParser, _ lexer_token.AwooLexerT
 			Size: cparser.Context.Lexer.Types.All[argumentType].Size,
 			Type: argumentType,
 		}))
-		parser_context.PushParserScopeCurrentBlockMemory(&cparser.Context, parser_context.AwooParserMemoryEntry{
+		_, err = parser_context.PushParserScopeCurrentBlockMemory(&cparser.Context, parser_context.AwooParserMemoryEntry{
 			Name: argumentName,
 			Type: argumentType,
 		})
+		if err != nil {
+			return functionStatement, err
+		}
 	}
 	if _, err = parser.ExpectToken(cparser, token.TokenTypeBracketRight, ")"); err != nil {
 		return functionStatement, err

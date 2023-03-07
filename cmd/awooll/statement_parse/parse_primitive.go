@@ -12,27 +12,24 @@ import (
 	"github.com/jwalton/gchalk"
 )
 
-func CreateNodePrimitiveSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, error) {
+func GetPrimitiveLimits(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (int64, int64) {
 	primType := cparser.Context.Lexer.Types.All[lexer_token.GetTokenPrimitiveType(&t)]
-	primValue := lexer_token.GetTokenPrimitiveValue(&t).(int64)
 	primBytes := float64(8 * primType.Size)
 	if primType.Flags&types.AwooTypeFlagsSign == 1 {
-		up := int64(math.Pow(2, primBytes-1)) - 1
-		if primValue > up {
-			return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s > %s", awerrors.ErrorPrimitiveOverflow, gchalk.Red(fmt.Sprint(primValue)), gchalk.Green(fmt.Sprint(up)))
-		}
-		down := -int64(math.Pow(2, primBytes-1))
-		if primValue < down {
-			return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s < %s", awerrors.ErrorPrimitiveUnderflow, gchalk.Red(fmt.Sprint(primValue)), gchalk.Green(fmt.Sprint(down)))
-		}
+		return int64(math.Pow(2, primBytes-1)) - 1, -int64(math.Pow(2, primBytes-1))
 	} else {
-		up := int64(math.Pow(2, primBytes)) - 1
-		if primValue > up {
-			return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s > %s", awerrors.ErrorPrimitiveOverflow, gchalk.Red(fmt.Sprint(primValue)), gchalk.Green(fmt.Sprint(up)))
-		}
-		if primValue < 0 {
-			return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s < %s", awerrors.ErrorPrimitiveUnderflow, gchalk.Red(fmt.Sprint(primValue)), gchalk.Green("0"))
-		}
+		return int64(math.Pow(2, primBytes)) - 1, 0
+	}
+}
+
+func CreateNodePrimitiveSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, error) {
+	primValue := lexer_token.GetTokenPrimitiveValue(&t).(int64)
+	primUp, primDown := GetPrimitiveLimits(cparser, t)
+	if primValue > primUp {
+		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s > %s", awerrors.ErrorPrimitiveOverflow, gchalk.Red(fmt.Sprint(primValue)), gchalk.Green(fmt.Sprint(primUp)))
+	}
+	if primValue < primDown {
+		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s < %s", awerrors.ErrorPrimitiveUnderflow, gchalk.Red(fmt.Sprint(primValue)), gchalk.Green(fmt.Sprint(primDown)))
 	}
 
 	return node.CreateNodePrimitive(t), nil

@@ -10,7 +10,7 @@ func CreateTokenCouple(lexer *AwooLexer) (lexer_token.AwooLexerToken, string, bo
 	matchedString := ConstructChunkFast(lexer, string(lexer.Current), func(c rune) bool {
 		return unicode.IsPunct(c) || unicode.IsSymbol(c)
 	})
-	couple, ok := lexer.Context.Tokens.Couple[matchedString]
+	couple, ok := lexer.Settings.Tokens.Couple[matchedString]
 	if ok {
 		return lexer_token.CreateToken(lexer.Position, couple), matchedString, true
 	}

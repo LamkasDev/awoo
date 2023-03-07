@@ -26,7 +26,7 @@ func CompileProgramHeader(ccompiler *compiler.AwooCompiler, file *os.File, write
 		Immediate:   uint32(ccompiler.Context.Scopes.Global.Position),
 	}, []byte{})
 	if err != nil {
-		panic(err)
+		return err
 	}
 	// TODO: this is not correct
 	d, err = encoder.Encode(encoder.AwooEncodedInstruction{
@@ -35,10 +35,16 @@ func CompileProgramHeader(ccompiler *compiler.AwooCompiler, file *os.File, write
 		Immediate:   uint32(mainFunc.Start - firstFuncStart - 12),
 	}, d)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	writer.Write(d)
-	writer.Flush()
+	_, err = writer.Write(d)
+	if err != nil {
+		return err
+	}
+	err = writer.Flush()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

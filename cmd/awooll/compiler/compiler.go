@@ -18,6 +18,7 @@ type AwooCompiler struct {
 
 type AwooCompilerSettings struct {
 	Path     string
+	Parser   parser.AwooParserSettings
 	Mappings AwooCompilerMappings
 }
 

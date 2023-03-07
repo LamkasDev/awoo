@@ -16,12 +16,15 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, s statement.AwooPars
 
 	functionArguments := statement.GetStatementFuncArguments(&s)
 	for _, argument := range functionArguments {
-		compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, compiler_context.AwooCompilerMemoryEntry{
+		_, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, compiler_context.AwooCompilerMemoryEntry{
 			Name: argument.Name,
 			Size: argument.Size,
 			Type: argument.Type,
 			Data: argument.Data,
 		})
+		if err != nil {
+			return d, err
+		}
 	}
 
 	functionReturnTypeNode := statement.GetStatementFuncReturnType(&s)

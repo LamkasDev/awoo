@@ -41,7 +41,10 @@ func ReadDriverVga(internal *internal.AwooEmulatorInternal, driver *driver.AwooD
 func TickLongDriverVga(internal *internal.AwooEmulatorInternal, driver *driver.AwooDriver) {
 	data := driver.Data.(AwooDriverDataVga)
 	if data.Ticks > 1000/AwooDriverVgaFps {
-		data.Renderer.Surface.FillRect(nil, 0)
+		err := data.Renderer.Surface.FillRect(nil, 0)
+		if err != nil {
+			panic(err)
+		}
 		fontX, fontY := 0, 0
 		for y := 0; y < AwooDriverVgaFrameHeight; y++ {
 			for x := 0; x < AwooDriverVgaFrameWidth; x++ {
@@ -60,13 +63,22 @@ func TickLongDriverVga(internal *internal.AwooEmulatorInternal, driver *driver.A
 					text, _ = data.Renderer.Font.RenderUTF8Blended(string(rune(asciiCode)), AwooDriverVGAColors[fgColor])
 					data.Renderer.Fontsheet[sheetCode] = text
 				}
-				data.Renderer.Surface.FillRect(&sdl.Rect{X: int32(fontX), Y: int32(fontY), W: text.W, H: text.H}, AwooDriverVGAColors[bgColor].Uint32())
-				text.Blit(nil, data.Renderer.Surface, &sdl.Rect{X: int32(fontX), Y: int32(fontY), W: 0, H: 0})
+				err = data.Renderer.Surface.FillRect(&sdl.Rect{X: int32(fontX), Y: int32(fontY), W: text.W, H: text.H}, AwooDriverVGAColors[bgColor].Uint32())
+				if err != nil {
+					panic(err)
+				}
+				err = text.Blit(nil, data.Renderer.Surface, &sdl.Rect{X: int32(fontX), Y: int32(fontY), W: 0, H: 0})
+				if err != nil {
+					panic(err)
+				}
 				fontX += int(text.W)
 			}
 			fontY += data.Renderer.Font.Height()
 		}
-		data.Renderer.Window.UpdateSurface()
+		err = data.Renderer.Window.UpdateSurface()
+		if err != nil {
+			panic(err)
+		}
 		data.Ticks = 0
 	}
 	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {

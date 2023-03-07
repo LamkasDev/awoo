@@ -23,14 +23,14 @@ type AwooLexer struct {
 }
 
 type AwooLexerSettings struct {
+	Tokens   token.AwooTokenMap
 	Mappings AwooLexerMappings
 }
 
 func SetupLexer(settings AwooLexerSettings) AwooLexer {
 	lexer := AwooLexer{
 		Context: lexer_context.AwooLexerContext{
-			Tokens: token.SetupTokenMap(),
-			Types:  types.SetupTypeMap(),
+			Types: types.SetupTypeMap(),
 		},
 		Settings: settings,
 	}
@@ -80,16 +80,16 @@ func RunLexer(lexer *AwooLexer) AwooLexerResult {
 			continue
 		}
 
-		single, ok := lexer.Context.Tokens.Single[lexer.Current]
+		single, ok := lexer.Settings.Tokens.Single[lexer.Current]
 		if ok {
 			token := lexer_token.CreateToken(lexer.Position, single)
-			lexer_token.PrintNewToken(&lexer.Context, string(lexer.Current), &token)
+			PrintNewToken(&lexer.Settings, string(lexer.Current), &token)
 			result.Tokens = append(result.Tokens, token)
 			continue
 		}
 		if unicode.IsLetter(lexer.Current) {
 			token, matchedString := CreateTokenLetter(lexer)
-			lexer_token.PrintNewToken(&lexer.Context, matchedString, &token)
+			PrintNewToken(&lexer.Settings, matchedString, &token)
 			result.Tokens = append(result.Tokens, token)
 			continue
 		}
@@ -99,7 +99,7 @@ func RunLexer(lexer *AwooLexer) AwooLexerResult {
 				result.Error = err
 				break
 			}
-			lexer_token.PrintNewToken(&lexer.Context, matchedString, &token)
+			PrintNewToken(&lexer.Settings, matchedString, &token)
 			result.Tokens = append(result.Tokens, token)
 			continue
 		}
@@ -109,7 +109,7 @@ func RunLexer(lexer *AwooLexer) AwooLexerResult {
 			result.Error = fmt.Errorf("%w: %s", awerrors.ErrorIllegalCharacter, gchalk.Red((string)(lexer.Current)))
 			break
 		}
-		lexer_token.PrintNewToken(&lexer.Context, matchedString, &token)
+		PrintNewToken(&lexer.Settings, matchedString, &token)
 		result.Tokens = append(result.Tokens, token)
 		break
 	}

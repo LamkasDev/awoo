@@ -111,7 +111,7 @@ func CompileNodeExpressionGTEQ(ccompiler *compiler.AwooCompiler, d []byte, leftD
 func CompileNodeExpression(ccompiler *compiler.AwooCompiler, n node.AwooParserNode, d []byte, details *compiler_details.CompileNodeValueDetails) ([]byte, error) {
 	entry, ok := ccompiler.Settings.Mappings.NodeExpression[n.Token.Type]
 	if !ok {
-		return d, fmt.Errorf("%w: %s", awerrors.ErrorCantCompileOperator, gchalk.Red(ccompiler.Context.Parser.Lexer.Tokens.All[n.Token.Type].Name))
+		return d, fmt.Errorf("%w: %s", awerrors.ErrorCantCompileOperator, gchalk.Red(ccompiler.Settings.Parser.Lexer.Tokens.All[n.Token.Type].Name))
 	}
 	left := node.GetNodeExpressionLeft(&n)
 	leftDetails := compiler_details.CompileNodeValueDetails{Register: details.Register}
