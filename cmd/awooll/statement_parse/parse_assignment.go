@@ -15,6 +15,7 @@ func ConstructStatementAssignment(cparser *parser.AwooParser, variableNameNode n
 		return statement.AwooParserStatement{}, err
 	}
 	assignmentStatement := statement.CreateStatementAssignment(variableNameNode)
+	assignmentOperator, _ := parser.ExpectTokensOptional(cparser, []uint16{token.TokenOperatorAddition, token.TokenOperatorSubstraction, token.TokenOperatorMultiplication, token.TokenOperatorDivision})
 	if _, err := parser.ExpectToken(cparser, token.TokenOperatorEq, "="); err != nil {
 		return statement.AwooParserStatement{}, err
 	}
@@ -24,6 +25,11 @@ func ConstructStatementAssignment(cparser *parser.AwooParser, variableNameNode n
 	})
 	if err != nil {
 		return statement.AwooParserStatement{}, err
+	}
+	if assignmentOperator != nil {
+		variableValueNode = node.AwooParserNodeResult{
+			Node: node.CreateNodeExpression(*assignmentOperator, variableNameNode, variableValueNode.Node),
+		}
 	}
 	statement.SetStatementAssignmentValue(&assignmentStatement, variableValueNode.Node)
 
