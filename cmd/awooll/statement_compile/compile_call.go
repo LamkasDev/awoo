@@ -7,9 +7,15 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 )
+
+func CompileStatementCall(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
+	details := compiler_details.CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero}
+	return CompileNodeCall(ccompiler, statement.GetStatementCallNode(&s), d, &details)
+}
 
 func CompileNodeCall(ccompiler *compiler.AwooCompiler, n node.AwooParserNode, d []byte, details *compiler_details.CompileNodeValueDetails) ([]byte, error) {
 	functionName := node.GetNodeCallValue(&n)

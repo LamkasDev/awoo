@@ -67,12 +67,12 @@ func main() {
 		Mappings: parser.AwooParserMappings{
 			Statement: map[uint16]parser.AwooParseStatement{
 				token.TokenTypeType:            statement_parse.ConstructStatementDefinitionVariable,
-				token.TokenTypeIdentifier:      statement_parse.ConstructStatementAssignment,
+				token.TokenTypeIdentifier:      statement_parse.ConstructStatementIdentifier,
 				token.TokenTypeTypeDefinition:  statement_parse.ConstructStatementDefinitionType,
 				token.TokenTypeIf:              statement_parse.ConstructStatementIf,
 				token.TokenTypeFunc:            statement_parse.ConstructStatementFunc,
 				token.TokenTypeReturn:          statement_parse.ConstructStatementReturn,
-				token.TokenOperatorDereference: statement_parse.ConstructStatementAssignment,
+				token.TokenOperatorDereference: statement_parse.ConstructStatementIdentifier,
 			},
 			NodeExpression: map[uint16]parser.AwooParseNodeExpression{
 				token.TokenTypeBracketRight:       statement_parse.ConstructExpressionEndBracket,
@@ -116,6 +116,7 @@ func main() {
 				statement.ParserStatementTypeGroup:  statement_compile.CompileStatementGroup,
 				statement.ParserStatementTypeFunc:   statement_compile.CompileStatementFunc,
 				statement.ParserStatementTypeReturn: statement_compile.CompileStatementReturn,
+				statement.ParserStatementTypeCall:   statement_compile.CompileStatementCall,
 			},
 			NodeExpression: map[uint16]compiler.AwooCompileNodeExpression{
 				token.TokenOperatorAddition:       statement_compile.CompileNodeExpressionAdd,

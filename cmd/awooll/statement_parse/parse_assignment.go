@@ -1,7 +1,6 @@
 package statement_parse
 
 import (
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_context"
@@ -10,34 +9,12 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
 )
 
-func ConstructStatementAssignment(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, _ *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
-	var variableNameNode node.AwooParserNodeResult
-	var variableName string
-	var err error
-	switch t.Type {
-	case token.TokenOperatorDereference:
-		idToken, err := parser.ExpectToken(cparser, token.TokenTypeIdentifier, "identifier")
-		if err != nil {
-			return statement.AwooParserStatement{}, err
-		}
-		variableNameNode, err = CreateNodeIdentifierSafe(cparser, idToken)
-		if err != nil {
-			return statement.AwooParserStatement{}, err
-		}
-		variableName = node.GetNodeIdentifierValue(&variableNameNode.Node)
-		variableNameNode = node.CreateNodePointer(t, variableNameNode.Node)
-	case token.TokenTypeIdentifier:
-		variableNameNode, err = CreateNodeIdentifierSafe(cparser, t)
-		if err != nil {
-			return statement.AwooParserStatement{}, err
-		}
-		variableName = node.GetNodeIdentifierValue(&variableNameNode.Node)
-	}
+func ConstructStatementAssignment(cparser *parser.AwooParser, variableNameNode node.AwooParserNode, variableName string) (statement.AwooParserStatement, error) {
 	variableMemory, err := parser_context.GetParserScopeCurrentFunctionMemory(&cparser.Context, variableName)
 	if err != nil {
 		return statement.AwooParserStatement{}, err
 	}
-	assignmentStatement := statement.CreateStatementAssignment(variableNameNode.Node)
+	assignmentStatement := statement.CreateStatementAssignment(variableNameNode)
 	if _, err := parser.ExpectToken(cparser, token.TokenOperatorEq, "="); err != nil {
 		return statement.AwooParserStatement{}, err
 	}

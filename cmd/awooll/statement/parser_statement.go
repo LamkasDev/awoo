@@ -7,6 +7,7 @@ const ParserStatementTypeIf = 0x003
 const ParserStatementTypeGroup = 0x004
 const ParserStatementTypeFunc = 0x005
 const ParserStatementTypeReturn = 0x006
+const ParserStatementTypeCall = 0x007
 
 type AwooParserStatement struct {
 	Type uint16
