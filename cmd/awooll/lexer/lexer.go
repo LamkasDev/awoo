@@ -45,27 +45,27 @@ func LoadLexer(lexer *AwooLexer, contents []rune) {
 	lexer.Current = lexer.Contents[lexer.Position]
 }
 
-func AdvanceLexerFor(lexer *AwooLexer, n int16) (rune, bool) {
+func AdvanceLexerFor(lexer *AwooLexer, n int16) (rune, error) {
 	lexer.Position = (uint16)((int16)(lexer.Position) + n)
 	if lexer.Position >= lexer.Length {
-		return 0, false
+		return 0, awerrors.ErrorNoMoreTokens
 	}
 	lexer.Current = lexer.Contents[lexer.Position]
-	return lexer.Current, true
+	return lexer.Current, nil
 }
 
-func AdvanceLexer(lexer *AwooLexer) (rune, bool) {
+func AdvanceLexer(lexer *AwooLexer) (rune, error) {
 	return AdvanceLexerFor(lexer, 1)
 }
 
-func PeekLexer(lexer *AwooLexer) (rune, bool) {
+func PeekLexer(lexer *AwooLexer) (rune, error) {
 	if lexer.Position+1 >= lexer.Length {
-		return 0, false
+		return 0, awerrors.ErrorNoMoreTokens
 	}
-	return lexer.Contents[lexer.Position+1], true
+	return lexer.Contents[lexer.Position+1], nil
 }
 
-func StepbackLexer(lexer *AwooLexer) (rune, bool) {
+func StepbackLexer(lexer *AwooLexer) (rune, error) {
 	return AdvanceLexerFor(lexer, -1)
 }
 
@@ -75,7 +75,8 @@ func RunLexer(lexer *AwooLexer) AwooLexerResult {
 	}
 	logger.Log(gchalk.Yellow("> Lexer\n"))
 	logger.Log("Input: %s\n", gchalk.Magenta(string(lexer.Contents)))
-	for ok := true; ok; _, ok = AdvanceLexer(lexer) {
+	var err error
+	for ; err == nil; _, err = AdvanceLexer(lexer) {
 		if unicode.IsSpace(lexer.Current) {
 			continue
 		}
@@ -84,6 +85,16 @@ func RunLexer(lexer *AwooLexer) AwooLexerResult {
 		if ok {
 			token := lexer_token.CreateToken(lexer.Position, single)
 			PrintNewToken(&lexer.Settings, string(lexer.Current), &token)
+			result.Tokens = append(result.Tokens, token)
+			continue
+		}
+		if lexer.Current == '\'' {
+			token, matchedString, err := CreateTokenChar(lexer)
+			if err != nil {
+				result.Error = err
+				break
+			}
+			PrintNewToken(&lexer.Settings, matchedString, &token)
 			result.Tokens = append(result.Tokens, token)
 			continue
 		}

@@ -45,7 +45,7 @@ func SetupTypeMap() AwooTypeMap {
 	})
 	AddTypeBuiltin(&m, AwooType{
 		Key: "char", Id: AwooTypeChar, Type: AwooTypeChar,
-		Size: 1,
+		Size: 4, Flags: AwooTypeFlagsSign,
 	})
 	AddTypeBuiltin(&m, AwooType{
 		Key: "ptr", Id: AwooTypePointer, Type: AwooTypePointer,

@@ -13,7 +13,7 @@ func ConstructExpressionPriority(cparser *parser.AwooParser, t lexer_token.AwooL
 		details.PendingBrackets++
 		return ConstructExpressionBracketFast(cparser, details)
 	}
-	return ConstructNodeValue(cparser, t)
+	return ConstructNodeValue(cparser, t, details)
 }
 
 func ConstructExpressionPriorityFast(cparser *parser.AwooParser, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {

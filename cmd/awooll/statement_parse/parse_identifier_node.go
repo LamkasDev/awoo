@@ -76,7 +76,7 @@ func CreateNodeIdentifierCallSafeFast(cparser *parser.AwooParser) (node.AwooPars
 	return CreateNodeIdentifierCallSafe(cparser, t)
 }
 
-func CreateNodeIdentifierSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, error) {
+func CreateNodeIdentifierSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, _ *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
 	variableNode, variableErr := CreateNodeIdentifierVariableSafe(cparser, t)
 	if variableErr == nil {
 		return variableNode, nil
@@ -89,11 +89,11 @@ func CreateNodeIdentifierSafe(cparser *parser.AwooParser, t lexer_token.AwooLexe
 	return node.AwooParserNodeResult{}, variableErr
 }
 
-func CreateNodeIdentifierSafeFast(cparser *parser.AwooParser) (node.AwooParserNodeResult, error) {
+func CreateNodeIdentifierSafeFast(cparser *parser.AwooParser, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
 	t, err := parser.ExpectToken(cparser, token.TokenTypeIdentifier, "identifier")
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
 
-	return CreateNodeIdentifierSafe(cparser, t)
+	return CreateNodeIdentifierSafe(cparser, t, details)
 }

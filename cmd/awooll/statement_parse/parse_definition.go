@@ -46,7 +46,7 @@ func ConstructStatementDefinitionVariable(cparser *parser.AwooParser, t lexer_to
 		statement.SetStatementDefinitionVariableValue(&definitionStatement, variableValueNode.Node)
 	} else {
 		// TODO: create set for uninitialized nodes
-		variableValueNode := node.CreateNodePrimitive(lexer_token.CreateTokenPrimitive(0, types.AwooTypeInt64, int64(0), nil))
+		variableValueNode := node.CreateNodePrimitive(lexer_token.CreateTokenPrimitive(0, types.AwooTypeInt32, int32(0), nil))
 		statement.SetStatementDefinitionVariableValue(&definitionStatement, variableValueNode.Node)
 	}
 

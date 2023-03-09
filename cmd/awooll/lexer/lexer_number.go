@@ -13,12 +13,12 @@ import (
 func CreateTokenNumber(lexer *AwooLexer) (lexer_token.AwooLexerToken, string, error) {
 	base, baseMatchedString, baseSkipper, baseValidator := ResolveBase(lexer)
 	matchedString := ConstructChunk(lexer, string(lexer.Current), baseSkipper, baseValidator)
-	number, err := strconv.ParseInt(matchedString, base, 64)
+	number, err := strconv.ParseInt(matchedString, base, 32)
 	if err != nil {
 		return lexer_token.AwooLexerToken{}, matchedString, fmt.Errorf("%w: %w", awerrors.ErrorFailedToParse, err)
 	}
 
-	return lexer_token.CreateTokenPrimitive(lexer.Position, types.AwooTypeInt64, number, base), (baseMatchedString + matchedString), nil
+	return lexer_token.CreateTokenPrimitive(lexer.Position, types.AwooTypeInt32, int32(number), base), (baseMatchedString + matchedString), nil
 }
 
 func BaseSkipper(c rune) bool {
@@ -35,8 +35,8 @@ func Base16Validator(c rune) bool {
 
 func ResolveBase(lexer *AwooLexer) (int, string, ConstructChunkValidator, ConstructChunkValidator) {
 	if lexer.Current == '0' {
-		c, ok := PeekLexer(lexer)
-		if !ok {
+		c, err := PeekLexer(lexer)
+		if err != nil {
 			return 10, "", ConstructChunkSkipperDefault, BaseValidator
 		}
 		switch unicode.ToLower(c) {

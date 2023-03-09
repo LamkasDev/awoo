@@ -7,7 +7,7 @@ type ConstructChunkValidator func(rune) bool
 func ConstructChunkSkipperDefault(r rune) bool { return false }
 
 func ConstructChunk(lexer *AwooLexer, cs string, skip ConstructChunkValidator, validate ConstructChunkValidator) string {
-	for _, ok := AdvanceLexer(lexer); ok; _, ok = AdvanceLexer(lexer) {
+	for _, err := AdvanceLexer(lexer); err == nil; _, err = AdvanceLexer(lexer) {
 		if skip(unicode.ToLower(lexer.Current)) {
 			continue
 		}

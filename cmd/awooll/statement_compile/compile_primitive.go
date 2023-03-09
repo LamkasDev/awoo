@@ -10,7 +10,8 @@ import (
 )
 
 func CompileNodePrimitive(ccompiler *compiler.AwooCompiler, n node.AwooParserNode, d []byte, details *compiler_details.CompileNodeValueDetails) ([]byte, error) {
-	primitiveValue := node.GetNodePrimitiveValue(&n).(int64)
+	// TODO: handle unsigned.
+	primitiveValue := node.GetNodePrimitiveValueFormat[int64](ccompiler.Context.Parser.Lexer, &n)
 	if primitiveValue > arch.AwooImmediateSmallMax {
 		luiValue := (primitiveValue >> 12) << 12
 		addiValue := primitiveValue - luiValue

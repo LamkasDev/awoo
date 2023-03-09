@@ -12,7 +12,7 @@ type AwooParseStatement func(cparser *AwooParser, t lexer_token.AwooLexerToken, 
 
 type AwooParseNodeExpression func(cparser *AwooParser, leftNode node.AwooParserNodeResult, op lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error)
 
-type AwooParseNodeValue func(cparser *AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, error)
+type AwooParseNodeValue func(cparser *AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error)
 
 type AwooPrintStatement func(settings *AwooParserSettings, context *parser_context.AwooParserContext, s *statement.AwooParserStatement) string
 
