@@ -28,7 +28,7 @@ func SetupRenderer() (AwooDriverVGARenderer, error) {
 	}
 
 	w, h := int32(800), int32(600)
-	renderer.Window, err = sdl.CreateWindow(fmt.Sprintf("Emulator (%s)", arch.AwooPlatform), sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, w, h, sdl.WINDOW_SHOWN)
+	renderer.Window, err = sdl.CreateWindow(fmt.Sprintf("Emulator (%s)", arch.AwooPlatform), sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, w, h, sdl.WINDOW_SHOWN|sdl.WINDOW_RESIZABLE)
 	if err != nil {
 		return renderer, fmt.Errorf("failed to create window: %w", err)
 	}
