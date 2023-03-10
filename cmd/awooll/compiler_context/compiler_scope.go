@@ -60,6 +60,10 @@ func PopCompilerScopeCurrentBlock(context *AwooCompilerContext) {
 	context.Scopes.Functions[funcId] = scopeFunction
 }
 
+func GetCompilerScopeCurrentFunction(context *AwooCompilerContext) AwooCompilerScopeFunction {
+	return context.Scopes.Functions[uint16(len(context.Scopes.Functions)-1)]
+}
+
 func GetCompilerScopeCurrentFunctionSize(context *AwooCompilerContext) uint16 {
 	scopeFunction := context.Scopes.Functions[uint16(len(context.Scopes.Functions)-1)]
 	return scopeFunction.Blocks[uint16(len(scopeFunction.Blocks)-1)].Memory.Position

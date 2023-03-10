@@ -31,7 +31,7 @@ func CompileProgramHeader(ccompiler *compiler.AwooCompiler, file *os.File, write
 	// TODO: this is not correct
 	d, err = encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionJAL,
-		Destination: cpu.AwooRegisterStackPointer,
+		Destination: cpu.AwooRegisterReturnAddress,
 		Immediate:   uint32(mainFunc.Start - firstFuncStart - 12),
 	}, d)
 	if err != nil {

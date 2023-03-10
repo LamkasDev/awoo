@@ -24,7 +24,7 @@ func CompileNodeCall(ccompiler *compiler.AwooCompiler, n node.AwooParserNode, d 
 		return d, awerrors.ErrorFailedToGetFunctionFromScope
 	}
 
-	stackOffset := uint32(compiler_context.GetCompilerScopeCurrentFunctionSize(&ccompiler.Context))
+	stackOffset := uint32(compiler_context.GetCompilerScopeCurrentFunctionSize(&ccompiler.Context) + 4)
 	d, err := encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionADDI,
 		SourceOne:   cpu.AwooRegisterSavedZero,
@@ -35,31 +35,30 @@ func CompileNodeCall(ccompiler *compiler.AwooCompiler, n node.AwooParserNode, d 
 		return d, err
 	}
 
-	arguments := node.GetNodeCallArguments(&n)
-	argumentsOffset := uint32(0)
+	functionArguments := node.GetNodeCallArguments(&n)
+	functionArgumentsOffset := uint32(0)
 	for i := 0; i < len(function.Arguments); i++ {
 		argDetails := compiler_details.CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero}
-		d, err = CompileNodeValue(ccompiler, arguments[i], d, &argDetails)
+		d, err = CompileNodeValue(ccompiler, functionArguments[i], d, &argDetails)
 		if err != nil {
 			return d, err
 		}
-		saveInstruction := encoder.AwooEncodedInstruction{
+		d, err = encoder.Encode(encoder.AwooEncodedInstruction{
 			Instruction: *instruction.AwooInstructionsSave[function.Arguments[i].Size],
 			SourceOne:   cpu.AwooRegisterSavedZero,
 			SourceTwo:   details.Register,
-			Immediate:   argumentsOffset,
-		}
-		d, err = encoder.Encode(saveInstruction, d)
-		argumentsOffset += uint32(function.Arguments[i].Size)
+			Immediate:   functionArgumentsOffset,
+		}, d)
 		if err != nil {
 			return d, err
 		}
+		functionArgumentsOffset += uint32(function.Arguments[i].Size)
 	}
 
 	details.Register = cpu.AwooRegisterFunctionZero
 	d, err = encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionJALR,
-		Destination: cpu.AwooRegisterStackPointer,
+		Destination: cpu.AwooRegisterReturnAddress,
 		Immediate:   uint32(function.Start),
 	}, d)
 	if err != nil {

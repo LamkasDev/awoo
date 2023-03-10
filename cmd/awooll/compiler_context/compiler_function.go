@@ -23,3 +23,11 @@ func GetCompilerFunction(context *AwooCompilerContext, name string) (AwooCompile
 	f, ok := context.Functions.Entries[name]
 	return f, ok
 }
+
+func GetCompilerFunctionArgumentsSize(function AwooCompilerFunction) uint16 {
+	offset := uint16(0)
+	for _, argument := range function.Arguments {
+		offset += argument.Size
+	}
+	return offset
+}

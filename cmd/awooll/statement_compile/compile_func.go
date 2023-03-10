@@ -3,8 +3,11 @@ package statement_compile
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_context"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
+	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
+	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 )
 
 func CompileStatementFunc(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
@@ -15,6 +18,7 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, s statement.AwooPars
 	})
 
 	functionArguments := statement.GetStatementFuncArguments(&s)
+	functionArgumentsOffset := uint32(0)
 	for _, argument := range functionArguments {
 		_, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, compiler_context.AwooCompilerMemoryEntry{
 			Name: argument.Name,
@@ -25,6 +29,7 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, s statement.AwooPars
 		if err != nil {
 			return d, err
 		}
+		functionArgumentsOffset += uint32(argument.Size)
 	}
 
 	functionReturnTypeNode := statement.GetStatementFuncReturnType(&s)
@@ -34,12 +39,16 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, s statement.AwooPars
 		functionReturnType = &returnType
 	}
 
-	d, err := CompileStatementGroup(ccompiler, statement.GetStatementFuncBody(&s), d)
+	d, err := encoder.Encode(encoder.AwooEncodedInstruction{
+		Instruction: instruction.AwooInstructionSW,
+		SourceOne:   cpu.AwooRegisterSavedZero,
+		SourceTwo:   cpu.AwooRegisterReturnAddress,
+		Immediate:   functionArgumentsOffset,
+	}, d)
 	if err != nil {
 		return d, err
 	}
 
-	compiler_context.PopCompilerScopeCurrentFunction(&ccompiler.Context)
 	compiler_context.PushCompilerFunction(&ccompiler.Context, compiler_context.AwooCompilerFunction{
 		Name:       functionName,
 		ReturnType: functionReturnType,
@@ -47,6 +56,12 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, s statement.AwooPars
 		Start:      compiler_context.GetProgramHeaderSize() + ccompiler.Context.CurrentAddress,
 		Size:       uint16(len(d)),
 	})
+	d, err = CompileStatementGroup(ccompiler, statement.GetStatementFuncBody(&s), d)
+	if err != nil {
+		return d, err
+	}
+
+	compiler_context.PopCompilerScopeCurrentFunction(&ccompiler.Context)
 	if ccompiler.Context.Functions.Start == "" {
 		ccompiler.Context.Functions.Start = functionName
 		d = append(make([]byte, compiler_context.GetProgramHeaderSize()), d...)
