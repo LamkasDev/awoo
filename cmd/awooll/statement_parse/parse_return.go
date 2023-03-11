@@ -5,7 +5,6 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/types"
 )
 
@@ -16,14 +15,14 @@ func ConstructStatementReturn(cparser *parser.AwooParser, _ lexer_token.AwooLexe
 	if currentFunction.ReturnType != nil {
 		returnValue, err := ConstructExpressionStart(cparser, &parser_details.ConstructExpressionDetails{
 			Type:     cparser.Context.Lexer.Types.All[types.AwooTypeInt32],
-			EndToken: token.TokenTypeEndStatement,
+			EndToken: details.EndToken,
 		})
 		if err != nil {
 			return returnStatement, err
 		}
 		statement.SetStatementReturnValue(&returnStatement, &returnValue.Node)
 	} else {
-		if _, err := parser.ExpectToken(cparser, token.TokenTypeEndStatement, ";"); err != nil {
+		if _, err := parser.ExpectToken(cparser, details.EndToken); err != nil {
 			return returnStatement, err
 		}
 	}

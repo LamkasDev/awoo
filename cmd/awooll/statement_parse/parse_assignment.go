@@ -9,19 +9,19 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
 )
 
-func ConstructStatementAssignment(cparser *parser.AwooParser, variableNameNode node.AwooParserNode, variableName string) (statement.AwooParserStatement, error) {
+func ConstructStatementAssignment(cparser *parser.AwooParser, variableNameNode node.AwooParserNode, variableName string, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
 	variableMemory, err := parser_context.GetParserScopeCurrentFunctionMemory(&cparser.Context, variableName)
 	if err != nil {
 		return statement.AwooParserStatement{}, err
 	}
 	assignmentStatement := statement.CreateStatementAssignment(variableNameNode)
 	assignmentOperator, _ := parser.ExpectTokensOptional(cparser, []uint16{token.TokenOperatorAddition, token.TokenOperatorSubstraction, token.TokenOperatorMultiplication, token.TokenOperatorDivision})
-	if _, err := parser.ExpectToken(cparser, token.TokenOperatorEq, "="); err != nil {
+	if _, err := parser.ExpectToken(cparser, token.TokenOperatorEq); err != nil {
 		return statement.AwooParserStatement{}, err
 	}
 	variableValueNode, err := ConstructExpressionStart(cparser, &parser_details.ConstructExpressionDetails{
 		Type:     cparser.Context.Lexer.Types.All[variableMemory.Type],
-		EndToken: token.TokenTypeEndStatement,
+		EndToken: details.EndToken,
 	})
 	if err != nil {
 		return statement.AwooParserStatement{}, err

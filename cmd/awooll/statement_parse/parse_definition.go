@@ -11,12 +11,12 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/types"
 )
 
-func ConstructStatementDefinitionVariable(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, _ *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
+func ConstructStatementDefinitionVariable(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
 	variableTypeNode := ConstructNodeType(cparser, t)
 	variableType := cparser.Context.Lexer.Types.All[lexer_token.GetTokenTypeId(&t)]
 	definitionStatement := statement.CreateStatementDefinitionVariable(variableTypeNode.Node)
 
-	t, err := parser.ExpectToken(cparser, token.TokenTypeIdentifier, "identifier")
+	t, err := parser.ExpectToken(cparser, token.TokenTypeIdentifier)
 	if err != nil {
 		return statement.AwooParserStatement{}, err
 	}
@@ -31,14 +31,14 @@ func ConstructStatementDefinitionVariable(cparser *parser.AwooParser, t lexer_to
 	}
 	statement.SetStatementDefinitionVariableIdentifier(&definitionStatement, variableNameNode.Node)
 
-	t, err = parser.ExpectTokens(cparser, []uint16{token.TokenOperatorEq, token.TokenTypeEndStatement}, "= or ;")
+	t, err = parser.ExpectTokens(cparser, []uint16{token.TokenOperatorEq, details.EndToken})
 	if err != nil {
 		return statement.AwooParserStatement{}, err
 	}
 	if t.Type == token.TokenOperatorEq {
 		variableValueNode, err := ConstructExpressionStart(cparser, &parser_details.ConstructExpressionDetails{
 			Type:     variableType,
-			EndToken: token.TokenTypeEndStatement,
+			EndToken: details.EndToken,
 		})
 		if err != nil {
 			return statement.AwooParserStatement{}, err

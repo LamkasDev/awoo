@@ -13,10 +13,10 @@ import (
 	"github.com/jwalton/gchalk"
 )
 
-func ConstructStatementIdentifier(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, _ *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
+func ConstructStatementIdentifier(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
 	switch t.Type {
 	case token.TokenOperatorDereference:
-		t, err := parser.ExpectToken(cparser, token.TokenTypeIdentifier, "identifier")
+		t, err := parser.ExpectToken(cparser, token.TokenTypeIdentifier)
 		if err != nil {
 			return statement.AwooParserStatement{}, err
 		}
@@ -27,7 +27,7 @@ func ConstructStatementIdentifier(cparser *parser.AwooParser, t lexer_token.Awoo
 		identifier := node.GetNodeIdentifierValue(&identifierNode.Node)
 		identifierNode = node.CreateNodePointer(t, identifierNode.Node)
 
-		return ConstructStatementAssignment(cparser, identifierNode.Node, identifier)
+		return ConstructStatementAssignment(cparser, identifierNode.Node, identifier, details)
 	case token.TokenTypeIdentifier:
 		identifierNode, err := CreateNodeIdentifierSafe(cparser, t, &parser_details.ConstructExpressionDetails{})
 		if err != nil {
@@ -35,13 +35,13 @@ func ConstructStatementIdentifier(cparser *parser.AwooParser, t lexer_token.Awoo
 		}
 		if identifierNode.Node.Type == node.ParserNodeTypeCall {
 			callStatement := statement.CreateStatementCall(identifierNode.Node)
-			if _, err := parser.ExpectToken(cparser, token.TokenTypeEndStatement, ";"); err != nil {
+			if _, err := parser.ExpectToken(cparser, details.EndToken); err != nil {
 				return callStatement, err
 			}
 			return callStatement, nil
 		}
 
-		return ConstructStatementAssignment(cparser, identifierNode.Node, node.GetNodeIdentifierValue(&identifierNode.Node))
+		return ConstructStatementAssignment(cparser, identifierNode.Node, node.GetNodeIdentifierValue(&identifierNode.Node), details)
 	}
 
 	return statement.AwooParserStatement{}, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red("identifier"))

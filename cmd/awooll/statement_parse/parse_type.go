@@ -17,7 +17,7 @@ func ConstructNodeType(cparser *parser.AwooParser, t lexer_token.AwooLexerToken)
 }
 
 func ConstructNodeTypeFast(cparser *parser.AwooParser) (node.AwooParserNodeResult, error) {
-	t, err := parser.ExpectToken(cparser, token.TokenTypeType, "type")
+	t, err := parser.ExpectToken(cparser, token.TokenTypeType)
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}

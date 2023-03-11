@@ -80,13 +80,13 @@ func FetchToken(cparser *AwooParser) (lexer_token.AwooLexerToken, error) {
 	return cparser.Current, nil
 }
 
-func ExpectToken(cparser *AwooParser, tokenType uint16, tokenName string) (lexer_token.AwooLexerToken, error) {
+func ExpectToken(cparser *AwooParser, tokenType uint16) (lexer_token.AwooLexerToken, error) {
 	t, err := FetchToken(cparser)
 	if err != nil {
 		return t, err
 	}
 	if t.Type != tokenType {
-		return t, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red(tokenName))
+		return t, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red(cparser.Context.Lexer.Types.All[tokenType].Key))
 	}
 
 	return t, nil
@@ -105,13 +105,13 @@ func ExpectTokenOptional(cparser *AwooParser, tokenType uint16) (*lexer_token.Aw
 	return &t, nil
 }
 
-func ExpectTokens(cparser *AwooParser, tokenTypes []uint16, tokenName string) (lexer_token.AwooLexerToken, error) {
+func ExpectTokens(cparser *AwooParser, tokenTypes []uint16) (lexer_token.AwooLexerToken, error) {
 	t, err := FetchToken(cparser)
 	if err != nil {
 		return t, err
 	}
 	if !util.Contains(tokenTypes, t.Type) {
-		return t, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red(tokenName))
+		return t, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red(lexer.PrintTokenTypes(&cparser.Settings.Lexer, tokenTypes)))
 	}
 
 	return t, nil

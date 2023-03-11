@@ -4,10 +4,12 @@ import (
 	"fmt"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_details"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
 	"github.com/jwalton/gchalk"
 )
 
@@ -21,12 +23,11 @@ func ConstructExpressionAccumulate(cparser *parser.AwooParser, leftNode node.Awo
 	}
 	entry, ok := cparser.Settings.Mappings.NodeExpression[op.Type]
 	if !ok {
-		opSymbol := "operator, <, >"
+		expectedTypes := []uint16{token.TokenOperatorLT, token.TokenOperatorGT, details.EndToken}
 		if details.PendingBrackets > 0 {
-			opSymbol += ", )"
+			expectedTypes = append(expectedTypes, token.TokenTypeBracketRight)
 		}
-		endSymbol := cparser.Settings.Lexer.Tokens.All[details.EndToken].Name
-		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red(fmt.Sprintf("%s or %s", opSymbol, endSymbol)))
+		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red(fmt.Sprintf("operator, %s", lexer.PrintTokenTypes(&cparser.Settings.Lexer, expectedTypes))))
 	}
 
 	return entry(cparser, leftNode, op, details)

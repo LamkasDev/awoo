@@ -24,7 +24,7 @@ func CreateNodeIdentifierVariableSafe(cparser *parser.AwooParser, t lexer_token.
 }
 
 func CreateNodeIdentifierVariableSafeFast(cparser *parser.AwooParser) (node.AwooParserNodeResult, error) {
-	t, err := parser.ExpectTokens(cparser, []uint16{token.TokenTypeIdentifier}, "identifier")
+	t, err := parser.ExpectTokens(cparser, []uint16{token.TokenTypeIdentifier})
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
@@ -34,7 +34,7 @@ func CreateNodeIdentifierVariableSafeFast(cparser *parser.AwooParser) (node.Awoo
 
 func CreateNodeIdentifierCallSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, error) {
 	callFunctionName := lexer_token.GetTokenIdentifierValue(&t)
-	_, err := parser.ExpectTokens(cparser, []uint16{token.TokenTypeBracketLeft}, "(")
+	_, err := parser.ExpectTokens(cparser, []uint16{token.TokenTypeBracketLeft})
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
@@ -59,7 +59,7 @@ func CreateNodeIdentifierCallSafe(cparser *parser.AwooParser, t lexer_token.Awoo
 		node.SetNodeCallArguments(&callNode.Node, append(node.GetNodeCallArguments(&callNode.Node), argNode.Node))
 	}
 	if len(callFunction.Arguments) == 0 {
-		if _, err := parser.ExpectToken(cparser, token.TokenTypeBracketRight, ")"); err != nil {
+		if _, err := parser.ExpectToken(cparser, token.TokenTypeBracketRight); err != nil {
 			return callNode, err
 		}
 	}
@@ -68,7 +68,7 @@ func CreateNodeIdentifierCallSafe(cparser *parser.AwooParser, t lexer_token.Awoo
 }
 
 func CreateNodeIdentifierCallSafeFast(cparser *parser.AwooParser) (node.AwooParserNodeResult, error) {
-	t, err := parser.ExpectTokens(cparser, []uint16{node.ParserNodeTypeIdentifier}, "identifier")
+	t, err := parser.ExpectTokens(cparser, []uint16{node.ParserNodeTypeIdentifier})
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
@@ -90,7 +90,7 @@ func CreateNodeIdentifierSafe(cparser *parser.AwooParser, t lexer_token.AwooLexe
 }
 
 func CreateNodeIdentifierSafeFast(cparser *parser.AwooParser, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
-	t, err := parser.ExpectToken(cparser, token.TokenTypeIdentifier, "identifier")
+	t, err := parser.ExpectToken(cparser, token.TokenTypeIdentifier)
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}

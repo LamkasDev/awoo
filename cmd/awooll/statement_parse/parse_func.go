@@ -11,7 +11,7 @@ import (
 )
 
 func ConstructStatementFunc(cparser *parser.AwooParser, _ lexer_token.AwooLexerToken, _ *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
-	t, err := parser.ExpectToken(cparser, token.TokenTypeIdentifier, "identifier")
+	t, err := parser.ExpectToken(cparser, token.TokenTypeIdentifier)
 	if err != nil {
 		return statement.AwooParserStatement{}, err
 	}
@@ -22,7 +22,7 @@ func ConstructStatementFunc(cparser *parser.AwooParser, _ lexer_token.AwooLexerT
 		Name: functionName,
 	})
 
-	if _, err = parser.ExpectToken(cparser, token.TokenTypeBracketLeft, "("); err != nil {
+	if _, err = parser.ExpectToken(cparser, token.TokenTypeBracketLeft); err != nil {
 		return functionStatement, err
 	}
 	for argumentToken, _ := parser.ExpectTokenOptional(cparser, token.TokenTypeIdentifier); argumentToken != nil; argumentToken, _ = parser.ExpectTokenOptional(cparser, token.TokenTypeIdentifier) {
@@ -47,7 +47,7 @@ func ConstructStatementFunc(cparser *parser.AwooParser, _ lexer_token.AwooLexerT
 			return functionStatement, err
 		}
 	}
-	if _, err = parser.ExpectToken(cparser, token.TokenTypeBracketRight, ")"); err != nil {
+	if _, err = parser.ExpectToken(cparser, token.TokenTypeBracketRight); err != nil {
 		return functionStatement, err
 	}
 
@@ -57,7 +57,12 @@ func ConstructStatementFunc(cparser *parser.AwooParser, _ lexer_token.AwooLexerT
 		statement.SetStatementFuncReturnType(&functionStatement, &returnTypeNode.Node)
 	}
 
-	if _, err = parser.ExpectToken(cparser, token.TokenTypeBracketCurlyLeft, "{"); err != nil {
+	parser_context.PushParserFunction(&cparser.Context, parser_context.AwooParserFunction{
+		Name:       functionName,
+		ReturnType: functionReturnType,
+		Arguments:  statement.GetStatementFuncArguments(&functionStatement),
+	})
+	if _, err = parser.ExpectToken(cparser, token.TokenTypeBracketCurlyLeft); err != nil {
 		return functionStatement, err
 	}
 	functionBody, err := ConstructStatementGroup(cparser, &parser_details.ConstructStatementDetails{CanReturn: true})
@@ -67,11 +72,6 @@ func ConstructStatementFunc(cparser *parser.AwooParser, _ lexer_token.AwooLexerT
 	statement.SetStatementFuncBody(&functionStatement, functionBody)
 
 	parser_context.PopParserScopeCurrentFunction(&cparser.Context)
-	parser_context.PushParserFunction(&cparser.Context, parser_context.AwooParserFunction{
-		Name:       functionName,
-		ReturnType: functionReturnType,
-		Arguments:  statement.GetStatementFuncArguments(&functionStatement),
-	})
 
 	return functionStatement, nil
 }
