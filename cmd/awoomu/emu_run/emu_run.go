@@ -22,11 +22,8 @@ func Run(emulator *emu.AwooEmulator) {
 		for emulator.Internal.Executing {
 			for i := uint32(0); i < cycles; i++ {
 				internal.TickInternal(&emulator.Internal)
-				for i, driver := range emulator.Drivers {
-					if driver.Tick != nil {
-						driver.Tick(&emulator.Internal, &driver)
-						emulator.Drivers[i] = driver
-					}
+				for _, id := range emulator.TickDrivers {
+					emulator.Drivers[id] = emulator.Drivers[id].Tick(&emulator.Internal, emulator.Drivers[id])
 				}
 				emulator.Internal.Executing = emulator.Internal.CPU.Counter < emulator.Internal.ROM.Length
 			}
@@ -35,17 +32,14 @@ func Run(emulator *emu.AwooEmulator) {
 	}()
 	for emulator.Internal.Running {
 		// TODO: this will need a proper lock system, if a driver has both tick and tick long
-		for i, driver := range emulator.Drivers {
-			if driver.TickLong != nil {
-				driver.TickLong(&emulator.Internal, &driver)
-				emulator.Drivers[i] = driver
-			}
+		for _, id := range emulator.TickLongDrivers {
+			emulator.Drivers[id] = emulator.Drivers[id].TickLong(&emulator.Internal, emulator.Drivers[id])
 		}
 		time.Sleep(time.Millisecond)
 	}
 	for _, driver := range emulator.Drivers {
 		if driver.Clean != nil {
-			err := driver.Clean(&emulator.Internal, &driver)
+			_, err := driver.Clean(&emulator.Internal, driver)
 			if err != nil {
 				panic(err)
 			}

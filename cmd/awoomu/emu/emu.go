@@ -15,8 +15,10 @@ var (
 )
 
 type AwooEmulator struct {
-	Internal internal.AwooEmulatorInternal
-	Drivers  map[uint16]driver.AwooDriver
+	Internal        internal.AwooEmulatorInternal
+	Drivers         map[uint16]driver.AwooDriver
+	TickDrivers     []uint16
+	TickLongDrivers []uint16
 }
 
 func SetupEmulator() AwooEmulator {
@@ -27,7 +29,9 @@ func SetupEmulator() AwooEmulator {
 			Executing: true,
 			CPU:       cpu.SetupCPU(),
 		},
-		Drivers: map[uint16]driver.AwooDriver{},
+		Drivers:         map[uint16]driver.AwooDriver{},
+		TickDrivers:     []uint16{},
+		TickLongDrivers: []uint16{},
 	}
 	AddEmulatorDriver(&emulator, vga.SetupDriverVga(&emulator.Internal))
 
@@ -36,4 +40,10 @@ func SetupEmulator() AwooEmulator {
 
 func AddEmulatorDriver(emulator *AwooEmulator, driver driver.AwooDriver) {
 	emulator.Drivers[driver.Id] = driver
+	if driver.Tick != nil {
+		emulator.TickDrivers = append(emulator.TickDrivers, driver.Id)
+	}
+	if driver.TickLong != nil {
+		emulator.TickLongDrivers = append(emulator.TickLongDrivers, driver.Id)
+	}
 }

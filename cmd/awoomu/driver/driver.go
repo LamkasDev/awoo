@@ -4,8 +4,8 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/internal"
 )
 
-type AwooDriverAction func(internal *internal.AwooEmulatorInternal, driver *AwooDriver)
-type AwooDriverActionError func(internal *internal.AwooEmulatorInternal, driver *AwooDriver) error
+type AwooDriverAction func(internal *internal.AwooEmulatorInternal, driver AwooDriver) AwooDriver
+type AwooDriverActionError func(internal *internal.AwooEmulatorInternal, driver AwooDriver) (AwooDriver, error)
 
 type AwooDriver struct {
 	Id       uint16

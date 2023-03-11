@@ -34,11 +34,44 @@ func SetupDriverVga(internal *internal.AwooEmulatorInternal) driver.AwooDriver {
 	}
 }
 
-func ReadDriverVga(internal *internal.AwooEmulatorInternal, driver *driver.AwooDriver, offset arch.AwooRegister) int16 {
-	return memory.ReadMemorySafe(&internal.CPU.Memory, arch.AwooRegister(AwooDriverVgaVector+offset), memory.ReadMemory16)
+func ReadCharacterDriverVga(internal *internal.AwooEmulatorInternal, data *AwooDriverDataVga, offset arch.AwooRegister) (*sdl.Surface, uint8, bool) {
+	characterData := memory.ReadMemorySafe(&internal.CPU.Memory, arch.AwooRegister(AwooDriverVgaVector+offset), memory.ReadMemory16)
+	if characterData == 0 {
+		return nil, 0, false
+	}
+
+	fgColor := uint8(characterData & 0b1111)
+	bgColor := uint8((characterData >> 4) & 0b0111)
+	asciiCode := uint8(characterData >> 8)
+	sheetCode := uint16(asciiCode) + uint16(fgColor)
+	text, ok := data.Renderer.Fontsheet[sheetCode]
+	if !ok {
+		text, _ = data.Renderer.Font.RenderUTF8Blended(string(rune(asciiCode)), AwooDriverVGAColors[fgColor])
+		data.Renderer.Fontsheet[sheetCode] = text
+	}
+
+	return text, bgColor, true
 }
 
-func TickLongDriverVga(internal *internal.AwooEmulatorInternal, driver *driver.AwooDriver) {
+func HandleEventsDriverVga(internal *internal.AwooEmulatorInternal, data *AwooDriverDataVga) {
+	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+		switch event.(type) {
+		case *sdl.QuitEvent:
+			internal.Executing = false
+			internal.Running = false
+		case *sdl.WindowEvent:
+			switch event.(*sdl.WindowEvent).Event {
+			case sdl.WINDOWEVENT_RESIZED:
+				var err error
+				if data.Renderer.Surface, err = data.Renderer.Window.GetSurface(); err != nil {
+					panic(err)
+				}
+			}
+		}
+	}
+}
+
+func TickLongDriverVga(internal *internal.AwooEmulatorInternal, driver driver.AwooDriver) driver.AwooDriver {
 	data := driver.Data.(AwooDriverDataVga)
 	if data.Ticks > 1000/AwooDriverVgaFps {
 		if err := data.Renderer.Surface.FillRect(nil, 0); err != nil {
@@ -47,20 +80,10 @@ func TickLongDriverVga(internal *internal.AwooEmulatorInternal, driver *driver.A
 		fontX, fontY := 0, 0
 		for y := 0; y < AwooDriverVgaFrameHeight; y++ {
 			for x := 0; x < AwooDriverVgaFrameWidth; x++ {
-				characterOffset := arch.AwooRegister((y * AwooDriverVgaFrameWidth * AwooDriverVgaCharacterSize) + (x * AwooDriverVgaCharacterSize))
-				characterData := ReadDriverVga(internal, driver, characterOffset)
-				if characterData == 0 {
-					continue
-				}
-
-				fgColor := uint8(characterData & 0b1111)
-				bgColor := uint8((characterData >> 4) & 0b0111)
-				asciiCode := uint8(characterData >> 8)
-				sheetCode := uint16(asciiCode) + uint16(fgColor)
-				text, ok := data.Renderer.Fontsheet[sheetCode]
+				offset := arch.AwooRegister((y * AwooDriverVgaFrameWidth * AwooDriverVgaCharacterSize) + (x * AwooDriverVgaCharacterSize))
+				text, bgColor, ok := ReadCharacterDriverVga(internal, &data, offset)
 				if !ok {
-					text, _ = data.Renderer.Font.RenderUTF8Blended(string(rune(asciiCode)), AwooDriverVGAColors[fgColor])
-					data.Renderer.Fontsheet[sheetCode] = text
+					break
 				}
 				if err := data.Renderer.Surface.FillRect(&sdl.Rect{X: int32(fontX), Y: int32(fontY), W: text.W, H: text.H}, AwooDriverVGAColors[bgColor].Uint32()); err != nil {
 					panic(err)
@@ -77,27 +100,14 @@ func TickLongDriverVga(internal *internal.AwooEmulatorInternal, driver *driver.A
 		}
 		data.Ticks = 0
 	}
-	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-		switch event.(type) {
-		case *sdl.QuitEvent:
-			internal.Executing = false
-			internal.Running = false
-		case *sdl.WindowEvent:
-			switch event.(*sdl.WindowEvent).Event {
-			case sdl.WINDOWEVENT_RESIZED:
-				var err error
-				if data.Renderer.Surface, err = data.Renderer.Window.GetSurface(); err != nil {
-					panic(err)
-				}
-			}
-		}
-	}
-
+	HandleEventsDriverVga(internal, &data)
 	data.Ticks++
 	driver.Data = data
+
+	return driver
 }
 
-func CleanDriverVga(_ *internal.AwooEmulatorInternal, driver *driver.AwooDriver) error {
+func CleanDriverVga(_ *internal.AwooEmulatorInternal, driver driver.AwooDriver) (driver.AwooDriver, error) {
 	data := driver.Data.(AwooDriverDataVga)
-	return CleanRenderer(&data.Renderer)
+	return driver, CleanRenderer(&data.Renderer)
 }
