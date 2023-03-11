@@ -80,7 +80,6 @@ func CompileStatementIf(_ *compiler.AwooCompiler, s statement.AwooParserStatemen
 		}
 		bodies[i], err = encoder.Encode(encoder.AwooEncodedInstruction{
 			Instruction: instruction.AwooInstructionJAL,
-			Destination: cpu.AwooRegisterZero,
 			Immediate:   jump,
 		}, bodies[i])
 		if err != nil {

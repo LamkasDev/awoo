@@ -6,6 +6,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/types"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 )
@@ -32,6 +33,15 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, s statement.AwooPars
 		functionArgumentsOffset += uint32(argument.Size)
 	}
 
+	_, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, compiler_context.AwooCompilerMemoryEntry{
+		Name: "_returnAddress",
+		Size: 4,
+		Type: types.AwooTypePointer,
+	})
+	if err != nil {
+		return d, err
+	}
+
 	functionReturnTypeNode := statement.GetStatementFuncReturnType(&s)
 	var functionReturnType *uint16
 	if functionReturnTypeNode != nil {
@@ -39,7 +49,7 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, s statement.AwooPars
 		functionReturnType = &returnType
 	}
 
-	d, err := encoder.Encode(encoder.AwooEncodedInstruction{
+	d, err = encoder.Encode(encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionSW,
 		SourceOne:   cpu.AwooRegisterSavedZero,
 		SourceTwo:   cpu.AwooRegisterReturnAddress,
