@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
+	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 )
@@ -32,6 +33,11 @@ func SetupRenderer() (AwooDriverVGARenderer, error) {
 	if err != nil {
 		return renderer, fmt.Errorf("failed to create window: %w", err)
 	}
+	icon, err := img.Load("../../resources/icons/awoo.png")
+	if err != nil {
+		return renderer, fmt.Errorf("failed to load icon: %w", err)
+	}
+	renderer.Window.SetIcon(icon)
 	renderer.Surface, err = renderer.Window.GetSurface()
 	if err != nil {
 		return renderer, fmt.Errorf("failed to get surface: %w", err)

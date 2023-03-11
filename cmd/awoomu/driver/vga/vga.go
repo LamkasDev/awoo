@@ -93,6 +93,7 @@ func TickLongDriverVga(internal *internal.AwooEmulatorInternal, driver driver.Aw
 				}
 				fontX += int(text.W)
 			}
+			fontX = 0
 			fontY += data.Renderer.Font.Height()
 		}
 		if err := data.Renderer.Window.UpdateSurface(); err != nil {
