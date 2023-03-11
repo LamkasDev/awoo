@@ -6,8 +6,6 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 )
 
-const AwooCPURate = uint32(1000)
-
 // TODO: move memory into internals
 type AwooCPU struct {
 	Registers [31]arch.AwooRegister

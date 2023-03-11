@@ -1,8 +1,12 @@
 package emu
 
 import (
+	"os"
+	"os/user"
+	"path/filepath"
 	"syscall"
 
+	"github.com/LamkasDev/awoo-emu/cmd/awoomu/config"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/driver"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/driver/vga"
@@ -15,6 +19,7 @@ var (
 )
 
 type AwooEmulator struct {
+	Config          config.AwooConfig
 	Internal        internal.AwooEmulatorInternal
 	Drivers         map[uint16]driver.AwooDriver
 	TickDrivers     []uint16
@@ -24,6 +29,7 @@ type AwooEmulator struct {
 func SetupEmulator() AwooEmulator {
 	procTimeBeginPeriod.Call(uintptr(1))
 	emulator := AwooEmulator{
+		Config: config.NewAwooConfig(),
 		Internal: internal.AwooEmulatorInternal{
 			Running:   true,
 			Executing: true,
@@ -34,6 +40,17 @@ func SetupEmulator() AwooEmulator {
 		TickLongDrivers: []uint16{},
 	}
 	AddEmulatorDriver(&emulator, vga.SetupDriverVga(&emulator.Internal))
+
+	u, err := user.Current()
+	if err != nil {
+		panic(err)
+	}
+	if err = os.MkdirAll(filepath.Join(u.HomeDir, "Documents", "awoo", "config"), 0755); err != nil {
+		panic(err)
+	}
+	if emulator.Config, err = config.ReadConfig(emulator.Config); err != nil {
+		panic(err)
+	}
 
 	return emulator
 }

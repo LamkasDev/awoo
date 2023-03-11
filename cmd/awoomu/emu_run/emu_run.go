@@ -3,7 +3,6 @@ package emu_run
 import (
 	"time"
 
-	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/emu"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/internal"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/rom"
@@ -18,7 +17,7 @@ func Load(path string) {
 
 func Run(emulator *emu.AwooEmulator) {
 	go func() {
-		cycles := cpu.AwooCPURate / 1000
+		cycles := emulator.Config.CPU.Speed / 1000
 		for emulator.Internal.Executing {
 			for i := uint32(0); i < cycles; i++ {
 				internal.TickInternal(&emulator.Internal)
