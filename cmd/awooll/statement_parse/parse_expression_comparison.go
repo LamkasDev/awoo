@@ -9,22 +9,25 @@ import (
 )
 
 func ConstructExpressionComparison(cparser *parser.AwooParser, leftNode node.AwooParserNodeResult, op lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
-	t, err := parser.FetchToken(cparser)
-	if err != nil {
-		return leftNode, err
-	}
-	if t.Type == token.TokenOperatorEq {
-		if op.Type == token.TokenOperatorLT {
-			op.Type = token.TokenOperatorLTEQ
-		} else {
-			op.Type = token.TokenOperatorGTEQ
+	if t, _ := parser.ExpectTokensOptional(cparser, []uint16{token.TokenOperatorEq, op.Type}); t != nil {
+		switch op.Type {
+		case token.TokenOperatorLT:
+			switch t.Type {
+			case token.TokenOperatorEq:
+				op.Type = token.TokenOperatorLTEQ
+			case token.TokenOperatorLT:
+				op.Type = token.TokenOperatorLS
+			}
+		case token.TokenOperatorGT:
+			switch t.Type {
+			case token.TokenOperatorEq:
+				op.Type = token.TokenOperatorGTEQ
+			case token.TokenOperatorGT:
+				op.Type = token.TokenOperatorRS
+			}
 		}
-		t, err = parser.FetchToken(cparser)
-		if err != nil {
-			return leftNode, err
-		}
 	}
-	rightNode, err := ConstructExpressionReference(cparser, t, details)
+	rightNode, err := ConstructExpressionReferenceFast(cparser, details)
 	if err != nil {
 		return rightNode, err
 	}

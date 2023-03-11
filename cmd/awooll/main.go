@@ -17,6 +17,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement_parse"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
 	"github.com/LamkasDev/awoo-emu/cmd/common/flags"
+	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/LamkasDev/awoo-emu/cmd/common/paths"
 )
@@ -85,6 +86,8 @@ func main() {
 				token.TokenOperatorNotEq:          statement_parse.ConstructExpressionNotEquality,
 				token.TokenOperatorLT:             statement_parse.ConstructExpressionComparison,
 				token.TokenOperatorGT:             statement_parse.ConstructExpressionComparison,
+				token.TokenOperatorAnd:            statement_parse.ConstructExpressionAnd,
+				token.TokenOperatorOr:             statement_parse.ConstructExpressionOr,
 			},
 			NodeValue: map[uint16]parser.AwooParseNodeValue{
 				token.TokenTypePrimitive:      statement_parse.CreateNodePrimitiveSafe,
@@ -121,16 +124,20 @@ func main() {
 				statement.ParserStatementTypeFor:    statement_compile.CompileStatementFor,
 			},
 			NodeExpression: map[uint16]compiler.AwooCompileNodeExpression{
-				token.TokenOperatorAddition:       statement_compile.CompileNodeExpressionAdd,
-				token.TokenOperatorSubstraction:   statement_compile.CompileNodeExpressionSubstract,
-				token.TokenOperatorMultiplication: statement_compile.CompileNodeExpressionMultiply,
-				token.TokenOperatorDivision:       statement_compile.CompileNodeExpressionDivide,
+				token.TokenOperatorAddition:       statement_compile.HandleNodeExpressionLeftRight(instruction.AwooInstructionADD),
+				token.TokenOperatorSubstraction:   statement_compile.HandleNodeExpressionLeftRight(instruction.AwooInstructionSUB),
+				token.TokenOperatorMultiplication: statement_compile.HandleNodeExpressionLeftRight(instruction.AwooInstructionMUL),
+				token.TokenOperatorDivision:       statement_compile.HandleNodeExpressionLeftRight(instruction.AwooInstructionDIV),
 				token.TokenOperatorEqEq:           statement_compile.CompileNodeExpressionEqEq,
 				token.TokenOperatorNotEq:          statement_compile.CompileNodeExpressionNotEq,
-				token.TokenOperatorLT:             statement_compile.CompileNodeExpressionLT,
+				token.TokenOperatorLT:             statement_compile.HandleNodeExpressionLeftRight(instruction.AwooInstructionSLT),
 				token.TokenOperatorLTEQ:           statement_compile.CompileNodeExpressionLTEQ,
-				token.TokenOperatorGT:             statement_compile.CompileNodeExpressionGT,
+				token.TokenOperatorGT:             statement_compile.HandleNodeExpressionRightLeft(instruction.AwooInstructionSLT),
 				token.TokenOperatorGTEQ:           statement_compile.CompileNodeExpressionGTEQ,
+				token.TokenOperatorLS:             statement_compile.HandleNodeExpressionLeftRight(instruction.AwooInstructionSLL),
+				token.TokenOperatorRS:             statement_compile.HandleNodeExpressionLeftRight(instruction.AwooInstructionSRL),
+				token.TokenOperatorAnd:            statement_compile.HandleNodeExpressionLeftRight(instruction.AwooInstructionAND),
+				token.TokenOperatorOr:             statement_compile.HandleNodeExpressionLeftRight(instruction.AwooInstructionOR),
 			},
 			NodeValue: map[uint16]compiler.AwooCompileNodeValue{
 				node.ParserNodeTypeIdentifier:  statement_compile.CompileNodeIdentifier,

@@ -16,7 +16,7 @@ func ConstructExpressionReference(cparser *parser.AwooParser, t lexer_token.Awoo
 			return node.AwooParserNodeResult{}, err
 		}
 		return node.CreateNodeDereference(t, n.Node), nil
-	case token.TokenTypeReference:
+	case token.TokenOperatorReference:
 		n, err := CreateNodeIdentifierVariableSafeFast(cparser)
 		if err != nil {
 			return node.AwooParserNodeResult{}, err
@@ -27,7 +27,7 @@ func ConstructExpressionReference(cparser *parser.AwooParser, t lexer_token.Awoo
 }
 
 func ConstructExpressionReferenceFast(cparser *parser.AwooParser, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
-	t, err := parser.ExpectTokens(cparser, []uint16{token.TokenTypePrimitive, node.ParserNodeTypeIdentifier, token.TokenOperatorEq, token.TokenOperatorLT, token.TokenOperatorGT, token.TokenTypeBracketLeft, token.TokenOperatorSubstraction, token.TokenOperatorMultiplication, token.TokenTypeReference})
+	t, err := parser.ExpectTokens(cparser, []uint16{token.TokenTypePrimitive, node.ParserNodeTypeIdentifier, token.TokenOperatorEq, token.TokenOperatorLT, token.TokenOperatorGT, token.TokenTypeBracketLeft, token.TokenOperatorSubstraction, token.TokenOperatorMultiplication, token.TokenOperatorReference})
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}

@@ -10,8 +10,7 @@ const TokenTypeBracketRight = 0x005
 const TokenTypeBracketCurlyLeft = 0x006
 const TokenTypeBracketCurlyRight = 0x007
 const TokenTypeNot = 0x008
-const TokenTypeReference = 0x009
-const TokenTypeComma = 0x010
+const TokenTypeComma = 0x009
 
 func IsTokenTypeGeneral(t uint16) bool {
 	return t < 0x100
@@ -30,6 +29,11 @@ const TokenOperatorLT = 0x107
 const TokenOperatorLTEQ = 0x108
 const TokenOperatorGT = 0x109
 const TokenOperatorGTEQ = 0x110
+const TokenOperatorLS = 0x111
+const TokenOperatorRS = 0x112
+const TokenOperatorAnd = 0x113
+const TokenOperatorReference = 0x113
+const TokenOperatorOr = 0x114
 
 func IsTokenTypeOperator(t uint16) bool {
 	return t >= 0x100 && t < 0x200
