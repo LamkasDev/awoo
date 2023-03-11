@@ -73,6 +73,7 @@ func main() {
 				token.TokenTypeFunc:            statement_parse.ConstructStatementFunc,
 				token.TokenTypeReturn:          statement_parse.ConstructStatementReturn,
 				token.TokenOperatorDereference: statement_parse.ConstructStatementIdentifier,
+				token.TokenTypeFor:             statement_parse.ConstructStatementFor,
 			},
 			NodeExpression: map[uint16]parser.AwooParseNodeExpression{
 				token.TokenTypeBracketRight:       statement_parse.ConstructExpressionEndBracket,
@@ -117,6 +118,7 @@ func main() {
 				statement.ParserStatementTypeFunc:   statement_compile.CompileStatementFunc,
 				statement.ParserStatementTypeReturn: statement_compile.CompileStatementReturn,
 				statement.ParserStatementTypeCall:   statement_compile.CompileStatementCall,
+				statement.ParserStatementTypeFor:    statement_compile.CompileStatementFor,
 			},
 			NodeExpression: map[uint16]compiler.AwooCompileNodeExpression{
 				token.TokenOperatorAddition:       statement_compile.CompileNodeExpressionAdd,

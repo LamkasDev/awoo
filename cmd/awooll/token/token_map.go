@@ -75,6 +75,7 @@ func SetupTokenMap() AwooTokenMap {
 	AddToken(m, "else", "else", TokenTypeElse)
 	AddToken(m, "func", "func", TokenTypeFunc)
 	AddToken(m, "return", "return", TokenTypeReturn)
+	AddToken(m, "for", "for", TokenTypeFor)
 
 	return m
 }
