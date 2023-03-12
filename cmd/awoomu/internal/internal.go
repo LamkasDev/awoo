@@ -2,6 +2,7 @@ package internal
 
 import (
 	"encoding/binary"
+	"fmt"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/rom"
@@ -24,6 +25,7 @@ func TickInternal(internal *AwooEmulatorInternal) {
 	}
 	PrintInternalInstruction(internal, raw, ins)
 	ins.Process(&internal.CPU, ins)
+	fmt.Printf("\n")
 
 	if internal.CPU.Advance {
 		internal.CPU.Counter += 4
