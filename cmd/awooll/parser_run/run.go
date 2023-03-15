@@ -1,8 +1,6 @@
 package parser_run
 
 import (
-	"fmt"
-
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/lexer"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_details"
@@ -15,7 +13,6 @@ import (
 func RunParser(cparser *parser.AwooParser) parser.AwooParserResult {
 	result := parser.AwooParserResult{}
 	logger.Log(gchalk.Yellow("\n> Parser\n"))
-	logger.Log("Input: %s\n", gchalk.Magenta(fmt.Sprintf("%v", cparser.Contents.Tokens)))
 	var err error
 	for ; err == nil; err = parser.AdvanceParser(cparser) {
 		logger.Log("┏━ %s\n", lexer.PrintToken(&cparser.Settings.Lexer, &cparser.Current))

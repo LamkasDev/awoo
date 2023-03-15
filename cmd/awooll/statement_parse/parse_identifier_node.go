@@ -10,14 +10,26 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/types"
 	"github.com/jwalton/gchalk"
 )
 
 func CreateNodeIdentifierVariableSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, error) {
 	identifier := lexer_token.GetTokenIdentifierValue(&t)
-	_, err := parser_context.GetParserScopeCurrentFunctionMemory(&cparser.Context, identifier)
-	if err != nil {
+	if _, err := parser_context.GetParserScopeCurrentFunctionMemory(&cparser.Context, identifier); err != nil {
 		return node.AwooParserNodeResult{}, err
+	}
+	if arrToken, _ := parser.ExpectTokenOptional(cparser, token.TokenTypeBracketSquareLeft); arrToken != nil {
+		arrIndexNode := node.CreateNodeArrayIndex(*arrToken, identifier)
+		indexNode, err := ConstructExpressionStart(cparser, &parser_details.ConstructExpressionDetails{
+			Type:     cparser.Context.Lexer.Types.All[types.AwooTypeUInt16],
+			EndToken: token.TokenTypeBracketSquareRight,
+		})
+		if err != nil {
+			return arrIndexNode, err
+		}
+		node.SetNodeArrayIndexIndex(&arrIndexNode.Node, indexNode.Node)
+		return arrIndexNode, nil
 	}
 
 	return node.CreateNodeIdentifier(t), nil
@@ -34,8 +46,7 @@ func CreateNodeIdentifierVariableSafeFast(cparser *parser.AwooParser) (node.Awoo
 
 func CreateNodeIdentifierCallSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, error) {
 	callFunctionName := lexer_token.GetTokenIdentifierValue(&t)
-	_, err := parser.ExpectTokens(cparser, []uint16{token.TokenTypeBracketLeft})
-	if err != nil {
+	if _, err := parser.ExpectTokens(cparser, []uint16{token.TokenTypeBracketLeft}); err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
 	callFunction, ok := parser_context.GetParserFunction(&cparser.Context, callFunctionName)

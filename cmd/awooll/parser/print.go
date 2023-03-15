@@ -14,10 +14,18 @@ func PrintStatementDefinitionVariable(settings *AwooParserSettings, context *par
 	t := statement.GetStatementDefinitionVariableType(s)
 	id := statement.GetStatementDefinitionVariableIdentifier(s)
 	prim := statement.GetStatementDefinitionVariableValue(s)
-	return fmt.Sprintf("statement %s %s = %s (%s)",
+	if prim != nil {
+		return fmt.Sprintf("statement %s %s = %s (%s)",
+			lexer.PrintNode(&settings.Lexer, &context.Lexer, &t),
+			lexer.PrintNode(&settings.Lexer, &context.Lexer, &id),
+			lexer.PrintNode(&settings.Lexer, &context.Lexer, prim),
+			gchalk.Green(fmt.Sprintf("%#x", s.Type)),
+		)
+	}
+
+	return fmt.Sprintf("statement %s %s (%s)",
 		lexer.PrintNode(&settings.Lexer, &context.Lexer, &t),
 		lexer.PrintNode(&settings.Lexer, &context.Lexer, &id),
-		lexer.PrintNode(&settings.Lexer, &context.Lexer, &prim),
 		gchalk.Green(fmt.Sprintf("%#x", s.Type)),
 	)
 }

@@ -17,13 +17,6 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 	variableNameNode := statement.GetStatementDefinitionVariableIdentifier(&s)
 	variableName := node.GetNodeIdentifierValue(&variableNameNode)
 	switch variableTypeNode.Type {
-	case node.ParserNodeTypeType:
-		variableType := node.GetNodeTypeType(&variableTypeNode)
-		return compiler_context.AwooCompilerMemoryEntry{
-			Name: variableName,
-			Type: variableType,
-			Size: ccompiler.Context.Parser.Lexer.Types.All[variableType].Size,
-		}
 	case node.ParserNodeTypePointer:
 		// TODO: chaining pointers
 		pointedTypeNode := node.GetNodeSingleValue(&variableTypeNode)
@@ -34,22 +27,37 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 			Data: pointedType,
 			Size: ccompiler.Context.Parser.Lexer.Types.All[types.AwooTypePointer].Size,
 		}
+	case node.ParserNodeTypeArray:
+		arraySize := node.GetNodeArraySize(&variableTypeNode)
+		arrayTypeNode := node.GetNodeArrayType(&variableTypeNode)
+		arrayType := node.GetNodeTypeType(&arrayTypeNode)
+		return compiler_context.AwooCompilerMemoryEntry{
+			Name: variableName,
+			Type: arrayType,
+			Size: arraySize * ccompiler.Context.Parser.Lexer.Types.All[arrayType].Size,
+		}
 	}
 
-	return compiler_context.AwooCompilerMemoryEntry{}
+	variableType := node.GetNodeTypeType(&variableTypeNode)
+	return compiler_context.AwooCompilerMemoryEntry{
+		Name: variableName,
+		Type: variableType,
+		Size: ccompiler.Context.Parser.Lexer.Types.All[variableType].Size,
+	}
 }
 
 func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
 	details := compiler_details.CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero}
-
 	variableMemory, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, GetCompilerMemoryEntry(ccompiler, s))
 	if err != nil {
 		return d, err
 	}
 
 	variableValueNode := statement.GetStatementDefinitionVariableValue(&s)
-	d, err = CompileNodeValue(ccompiler, variableValueNode, d, &details)
-	if err != nil {
+	if variableValueNode == nil {
+		return d, nil
+	}
+	if d, err = CompileNodeValue(ccompiler, *variableValueNode, d, &details); err != nil {
 		return d, err
 	}
 

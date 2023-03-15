@@ -66,6 +66,17 @@ func PrintNodeCall(settings *AwooLexerSettings, context *lexer_context.AwooLexer
 	return fmt.Sprintf("%s()", v)
 }
 
+func PrintNodeArray(settings *AwooLexerSettings, context *lexer_context.AwooLexerContext, n *node.AwooParserNode) string {
+	arrayType := node.GetNodeArrayType(n)
+	arraySize := node.GetNodeArraySize(n)
+	return fmt.Sprintf("%s[%d]", PrintNode(settings, context, &arrayType), arraySize)
+}
+
+func PrintNodeArrayIndex(settings *AwooLexerSettings, context *lexer_context.AwooLexerContext, n *node.AwooParserNode) string {
+	arrayIndex := node.GetNodeArrayIndexIndex(n)
+	return fmt.Sprintf("%s[%s]", node.GetNodeArrayIndexIdentifier(n), PrintNode(settings, context, &arrayIndex))
+}
+
 func PrintNode(settings *AwooLexerSettings, context *lexer_context.AwooLexerContext, n *node.AwooParserNode) string {
 	entry, ok := settings.Mappings.PrintNode[n.Type]
 	if ok {

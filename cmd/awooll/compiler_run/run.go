@@ -2,7 +2,6 @@ package compiler_run
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -15,7 +14,6 @@ import (
 
 func RunCompiler(ccompiler *compiler.AwooCompiler) {
 	logger.Log(gchalk.Yellow("\n> Compiler\n"))
-	logger.Log("Input: %s\n", gchalk.Magenta(fmt.Sprintf("%v", ccompiler.Contents.Statements)))
 
 	err := os.MkdirAll(filepath.Dir(ccompiler.Settings.Path), 0644)
 	if err != nil {

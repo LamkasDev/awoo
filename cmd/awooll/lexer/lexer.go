@@ -74,7 +74,6 @@ func RunLexer(lexer *AwooLexer) AwooLexerResult {
 		Context: lexer.Context,
 	}
 	logger.Log(gchalk.Yellow("> Lexer\n"))
-	logger.Log("Input: %s\n", gchalk.Magenta(string(lexer.Contents)))
 	var err error
 	for ; err == nil; _, err = AdvanceLexer(lexer) {
 		if unicode.IsSpace(lexer.Current) {

@@ -53,7 +53,10 @@ func ConstructStatementFunc(cparser *parser.AwooParser, _ lexer_token.AwooLexerT
 
 	var functionReturnType *uint16
 	if returnTypeToken, _ := parser.ExpectTokenOptional(cparser, token.TokenTypeType); returnTypeToken != nil {
-		returnTypeNode := ConstructNodeType(cparser, *returnTypeToken)
+		returnTypeNode, err := ConstructNodeType(cparser, *returnTypeToken)
+		if err != nil {
+			return functionStatement, err
+		}
 		statement.SetStatementFuncReturnType(&functionStatement, &returnTypeNode.Node)
 	}
 

@@ -56,6 +56,8 @@ func main() {
 				node.ParserNodeTypeReference:   lexer.PrintNodeReference,
 				node.ParserNodeTypeDereference: lexer.PrintNodeDereference,
 				node.ParserNodeTypeCall:        lexer.PrintNodeCall,
+				node.ParserNodeTypeArray:       lexer.PrintNodeArray,
+				node.ParserNodeTypeArrayIndex:  lexer.PrintNodeArrayIndex,
 			},
 		},
 	}
@@ -147,6 +149,7 @@ func main() {
 				node.ParserNodeTypeReference:   statement_compile.CompileNodeReference,
 				node.ParserNodeTypeDereference: statement_compile.CompileNodeDereference,
 				node.ParserNodeTypeCall:        statement_compile.CompileNodeCall,
+				node.ParserNodeTypeArrayIndex:  statement_compile.CompileNodeArrayIndex,
 			},
 		},
 	}

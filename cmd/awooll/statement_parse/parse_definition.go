@@ -8,15 +8,17 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/types"
 )
 
 func ConstructStatementDefinitionVariable(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
-	variableTypeNode := ConstructNodeType(cparser, t)
+	variableTypeNode, err := ConstructNodeType(cparser, t)
+	if err != nil {
+		return statement.AwooParserStatement{}, err
+	}
 	variableType := cparser.Context.Lexer.Types.All[lexer_token.GetTokenTypeId(&t)]
 	definitionStatement := statement.CreateStatementDefinitionVariable(variableTypeNode.Node)
 
-	t, err := parser.ExpectToken(cparser, token.TokenTypeIdentifier)
+	t, err = parser.ExpectToken(cparser, token.TokenTypeIdentifier)
 	if err != nil {
 		return statement.AwooParserStatement{}, err
 	}
@@ -43,11 +45,7 @@ func ConstructStatementDefinitionVariable(cparser *parser.AwooParser, t lexer_to
 		if err != nil {
 			return statement.AwooParserStatement{}, err
 		}
-		statement.SetStatementDefinitionVariableValue(&definitionStatement, variableValueNode.Node)
-	} else {
-		// TODO: create set for uninitialized nodes
-		variableValueNode := node.CreateNodePrimitive(lexer_token.CreateTokenPrimitive(0, types.AwooTypeInt32, int32(0), nil))
-		statement.SetStatementDefinitionVariableValue(&definitionStatement, variableValueNode.Node)
+		statement.SetStatementDefinitionVariableValue(&definitionStatement, &variableValueNode.Node)
 	}
 
 	return definitionStatement, nil

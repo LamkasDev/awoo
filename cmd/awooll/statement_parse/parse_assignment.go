@@ -9,12 +9,24 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
 )
 
-func ConstructStatementAssignment(cparser *parser.AwooParser, variableNameNode node.AwooParserNode, variableName string, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
-	variableMemory, err := parser_context.GetParserScopeCurrentFunctionMemory(&cparser.Context, variableName)
+func GetVariableMemoryForAssignment(cparser *parser.AwooParser, identifierNode node.AwooParserNode) (parser_context.AwooParserMemoryEntry, error) {
+	switch identifierNode.Type {
+	case node.ParserNodeTypePointer:
+		identifierNode = node.GetNodeSingleValue(&identifierNode)
+		return parser_context.GetParserScopeCurrentFunctionMemory(&cparser.Context, node.GetNodeIdentifierValue(&identifierNode))
+	case node.ParserNodeTypeArrayIndex:
+		return parser_context.GetParserScopeCurrentFunctionMemory(&cparser.Context, node.GetNodeArrayIndexIdentifier(&identifierNode))
+	}
+
+	return parser_context.GetParserScopeCurrentFunctionMemory(&cparser.Context, node.GetNodeIdentifierValue(&identifierNode))
+}
+
+func ConstructStatementAssignment(cparser *parser.AwooParser, identifierNode node.AwooParserNode, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
+	variableMemory, err := GetVariableMemoryForAssignment(cparser, identifierNode)
 	if err != nil {
 		return statement.AwooParserStatement{}, err
 	}
-	assignmentStatement := statement.CreateStatementAssignment(variableNameNode)
+	assignmentStatement := statement.CreateStatementAssignment(identifierNode)
 	assignmentOperator, _ := parser.ExpectTokensOptional(cparser, []uint16{token.TokenOperatorAddition, token.TokenOperatorSubstraction, token.TokenOperatorMultiplication, token.TokenOperatorDivision})
 	if _, err := parser.ExpectToken(cparser, token.TokenOperatorEq); err != nil {
 		return statement.AwooParserStatement{}, err
@@ -28,7 +40,7 @@ func ConstructStatementAssignment(cparser *parser.AwooParser, variableNameNode n
 	}
 	if assignmentOperator != nil {
 		variableValueNode = node.AwooParserNodeResult{
-			Node: node.CreateNodeExpression(*assignmentOperator, variableNameNode, variableValueNode.Node),
+			Node: node.CreateNodeExpression(*assignmentOperator, identifierNode, variableValueNode.Node),
 		}
 	}
 	statement.SetStatementAssignmentValue(&assignmentStatement, variableValueNode.Node)

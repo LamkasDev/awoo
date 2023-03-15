@@ -12,17 +12,17 @@ import (
 
 func CompileNodeIdentifier(ccompiler *compiler.AwooCompiler, n node.AwooParserNode, d []byte, details *compiler_details.CompileNodeValueDetails) ([]byte, error) {
 	identifier := node.GetNodeIdentifierValue(&n)
-	identifierMemory, err := compiler_context.GetCompilerScopeCurrentFunctionMemory(&ccompiler.Context, identifier)
+	variableMemory, err := compiler_context.GetCompilerScopeCurrentFunctionMemory(&ccompiler.Context, identifier)
 	if err != nil {
 		return d, err
 	}
 
 	loadInstruction := encoder.AwooEncodedInstruction{
-		Instruction: *instruction.AwooInstructionsLoad[ccompiler.Context.Parser.Lexer.Types.All[identifierMemory.Type].Size],
+		Instruction: *instruction.AwooInstructionsLoad[ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type].Size],
 		Destination: details.Register,
-		Immediate:   uint32(identifierMemory.Start),
+		Immediate:   uint32(variableMemory.Start),
 	}
-	if !identifierMemory.Global {
+	if !variableMemory.Global {
 		loadInstruction.SourceOne = cpu.AwooRegisterSavedZero
 	}
 	return encoder.Encode(loadInstruction, d)

@@ -13,6 +13,8 @@ const ParserNodeTypeNegative = 0x005
 const ParserNodeTypeReference = 0x006
 const ParserNodeTypeDereference = 0x007
 const ParserNodeTypeCall = 0x008
+const ParserNodeTypeArray = 0x009
+const ParserNodeTypeArrayIndex = 0x00A
 
 type AwooParserNode struct {
 	Type  uint16

@@ -7,7 +7,7 @@ import (
 type AwooParserStatementDataDefinitionVariable struct {
 	Type       node.AwooParserNode
 	Identifier node.AwooParserNode
-	Value      node.AwooParserNode
+	Value      *node.AwooParserNode
 }
 
 func GetStatementDefinitionVariableType(s *AwooParserStatement) node.AwooParserNode {
@@ -30,11 +30,11 @@ func SetStatementDefinitionVariableIdentifier(s *AwooParserStatement, n node.Awo
 	s.Data = d
 }
 
-func GetStatementDefinitionVariableValue(s *AwooParserStatement) node.AwooParserNode {
+func GetStatementDefinitionVariableValue(s *AwooParserStatement) *node.AwooParserNode {
 	return s.Data.(AwooParserStatementDataDefinitionVariable).Value
 }
 
-func SetStatementDefinitionVariableValue(s *AwooParserStatement, n node.AwooParserNode) {
+func SetStatementDefinitionVariableValue(s *AwooParserStatement, n *node.AwooParserNode) {
 	d := s.Data.(AwooParserStatementDataDefinitionVariable)
 	d.Value = n
 	s.Data = d

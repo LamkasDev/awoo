@@ -30,7 +30,10 @@ func ConstructStatementDefinitionType(cparser *parser.AwooParser, _ lexer_token.
 	}
 	originalIdentifier := lexer_token.GetTokenTypeId(&t)
 	originalType, _ := lexer_context.GetContextTypeId(&cparser.Context.Lexer, originalIdentifier)
-	originalIdentifierNode := ConstructNodeType(cparser, t)
+	originalIdentifierNode, err := ConstructNodeType(cparser, t)
+	if err != nil {
+		return statement.AwooParserStatement{}, err
+	}
 	statement.SetStatementDefinitionTypeValue(&defStatement, originalIdentifierNode.Node)
 	lexer_context.AddContextTypeAlias(&cparser.Context.Lexer, originalType, newType)
 	// end
