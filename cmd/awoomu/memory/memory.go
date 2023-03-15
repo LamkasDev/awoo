@@ -11,8 +11,10 @@ type WriteMemoryFunc[K constraints.Integer] func(mem *AwooMemory, n arch.AwooReg
 type ReadMemoryFunc[K constraints.Integer] func(mem *AwooMemory, n arch.AwooRegister) K
 
 type AwooMemory struct {
-	Data     []byte
-	Lockable []AwooMemoryLockable
+	Data       []byte
+	Lockable   []AwooMemoryLockable
+	TotalRead  uint64
+	TotalWrite uint64
 }
 
 type AwooMemoryLockable struct {
@@ -47,6 +49,7 @@ func WriteMemory64(mem *AwooMemory, n arch.AwooRegister, data int64) {
 	mem.Data[n+5] = byte(data >> 16)
 	mem.Data[n+6] = byte(data >> 8)
 	mem.Data[n+7] = byte(data)
+	mem.TotalWrite += 8
 }
 
 func WriteMemory32(mem *AwooMemory, n arch.AwooRegister, data int32) {
@@ -54,15 +57,18 @@ func WriteMemory32(mem *AwooMemory, n arch.AwooRegister, data int32) {
 	mem.Data[n+1] = byte(data >> 16)
 	mem.Data[n+2] = byte(data >> 8)
 	mem.Data[n+3] = byte(data)
+	mem.TotalWrite += 4
 }
 
 func WriteMemory16(mem *AwooMemory, n arch.AwooRegister, data int16) {
 	mem.Data[n] = byte(data >> 8)
 	mem.Data[n+1] = byte(data)
+	mem.TotalWrite += 2
 }
 
 func WriteMemory8(mem *AwooMemory, n arch.AwooRegister, data int8) {
 	mem.Data[n] = byte(data)
+	mem.TotalWrite++
 }
 
 func ReadMemorySafe[K constraints.Integer](mem *AwooMemory, n arch.AwooRegister, read ReadMemoryFunc[K]) K {
@@ -85,6 +91,7 @@ func ReadMemory64(mem *AwooMemory, n arch.AwooRegister) int64 {
 	data |= int64(mem.Data[n+5]) << 16
 	data |= int64(mem.Data[n+6]) << 8
 	data |= int64(mem.Data[n+7])
+	mem.TotalRead += 8
 
 	return data
 }
@@ -94,6 +101,7 @@ func ReadMemory32(mem *AwooMemory, n arch.AwooRegister) int32 {
 	data |= int32(mem.Data[n+1]) << 16
 	data |= int32(mem.Data[n+2]) << 8
 	data |= int32(mem.Data[n+3])
+	mem.TotalRead += 4
 
 	return data
 }
@@ -101,10 +109,12 @@ func ReadMemory32(mem *AwooMemory, n arch.AwooRegister) int32 {
 func ReadMemory16(mem *AwooMemory, n arch.AwooRegister) int16 {
 	data := int16(mem.Data[n]) << 8
 	data |= int16(mem.Data[n+1])
+	mem.TotalRead += 2
 
 	return data
 }
 
 func ReadMemory8(mem *AwooMemory, n arch.AwooRegister) int8 {
+	mem.TotalRead++
 	return int8(mem.Data[n])
 }

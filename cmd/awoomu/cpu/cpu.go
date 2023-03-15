@@ -8,11 +8,12 @@ import (
 
 // TODO: move memory into internals
 type AwooCPU struct {
-	Registers [31]arch.AwooRegister
-	Counter   arch.AwooRegister
-	Advance   bool
-	Memory    memory.AwooMemory
-	Table     instruction.AwooInstructionTable
+	Registers   [31]arch.AwooRegister
+	Counter     arch.AwooRegister
+	Advance     bool
+	TotalCycles uint64
+	Memory      memory.AwooMemory
+	Table       instruction.AwooInstructionTable
 }
 
 var AwooRegisterNames = map[arch.AwooRegister]string{
