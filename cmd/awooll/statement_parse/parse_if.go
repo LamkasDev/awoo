@@ -10,7 +10,7 @@ import (
 
 func ConstructStatementIfOuter(cparser *parser.AwooParser, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
 	n, err := ConstructExpressionStart(cparser, &parser_details.ConstructExpressionDetails{
-		EndToken: token.TokenTypeBracketCurlyRight,
+		EndTokens: []uint16{token.TokenTypeBracketCurlyRight},
 	})
 	if err != nil {
 		return statement.AwooParserStatement{}, err

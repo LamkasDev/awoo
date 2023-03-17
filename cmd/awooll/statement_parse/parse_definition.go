@@ -12,10 +12,10 @@ import (
 
 func ConstructStatementDefinitionVariable(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
 	variableTypeNode, err := ConstructNodeType(cparser, t)
+	variableType := cparser.Context.Lexer.Types.All[lexer_token.GetTokenTypeId(&t)]
 	if err != nil {
 		return statement.AwooParserStatement{}, err
 	}
-	variableType := cparser.Context.Lexer.Types.All[lexer_token.GetTokenTypeId(&t)]
 	definitionStatement := statement.CreateStatementDefinitionVariable(variableTypeNode.Node)
 
 	t, err = parser.ExpectToken(cparser, token.TokenTypeIdentifier)
@@ -38,14 +38,15 @@ func ConstructStatementDefinitionVariable(cparser *parser.AwooParser, t lexer_to
 		return statement.AwooParserStatement{}, err
 	}
 	if t.Type == token.TokenOperatorEq {
-		variableValueNode, err := ConstructExpressionStart(cparser, &parser_details.ConstructExpressionDetails{
-			Type:     variableType,
-			EndToken: details.EndToken,
-		})
+		valueDetails := parser_details.ConstructExpressionDetails{
+			Type:      variableType,
+			EndTokens: []uint16{details.EndToken},
+		}
+		valueNode, err := ConstructExpressionStart(cparser, &valueDetails)
 		if err != nil {
 			return statement.AwooParserStatement{}, err
 		}
-		statement.SetStatementDefinitionVariableValue(&definitionStatement, &variableValueNode.Node)
+		statement.SetStatementDefinitionVariableValue(&definitionStatement, &valueNode.Node)
 	}
 
 	return definitionStatement, nil

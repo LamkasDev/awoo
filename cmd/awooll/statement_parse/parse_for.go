@@ -20,7 +20,7 @@ func ConstructStatementFor(cparser *parser.AwooParser, _ lexer_token.AwooLexerTo
 	}
 	forStatement := statement.CreateStatementFor(forInitializationStatement)
 	forConditionExpression, err := ConstructExpressionStart(cparser, &parser_details.ConstructExpressionDetails{
-		EndToken: token.TokenTypeEndStatement,
+		EndTokens: []uint16{token.TokenTypeEndStatement},
 	})
 	if err != nil {
 		return forStatement, err

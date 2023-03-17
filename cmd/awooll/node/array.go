@@ -5,37 +5,26 @@ import (
 )
 
 type AwooParserNodeDataArray struct {
-	Type AwooParserNode
-	Size uint16
+	Elements []AwooParserNode
 }
 
-func GetNodeArrayType(n *AwooParserNode) AwooParserNode {
-	return n.Data.(AwooParserNodeDataArray).Type
+func GetNodeArrayElements(n *AwooParserNode) []AwooParserNode {
+	return n.Data.(AwooParserNodeDataArray).Elements
 }
 
-func SetNodeArrayType(n *AwooParserNode, arrType AwooParserNode) {
+func SetNodeArrayElements(n *AwooParserNode, elements []AwooParserNode) {
 	d := n.Data.(AwooParserNodeDataArray)
-	d.Type = arrType
+	d.Elements = elements
 	n.Data = d
 }
 
-func GetNodeArraySize(n *AwooParserNode) uint16 {
-	return n.Data.(AwooParserNodeDataArray).Size
-}
-
-func SetNodeArraySize(n *AwooParserNode, size uint16) {
-	d := n.Data.(AwooParserNodeDataArray)
-	d.Size = size
-	n.Data = d
-}
-
-func CreateNodeArray(t lexer_token.AwooLexerToken, arrType AwooParserNode) AwooParserNodeResult {
+func CreateNodeArray(t lexer_token.AwooLexerToken, elements []AwooParserNode) AwooParserNodeResult {
 	return AwooParserNodeResult{
 		Node: AwooParserNode{
 			Type:  ParserNodeTypeArray,
 			Token: t,
 			Data: AwooParserNodeDataArray{
-				Type: arrType,
+				Elements: elements,
 			},
 		},
 	}

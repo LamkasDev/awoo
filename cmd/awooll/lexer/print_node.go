@@ -66,9 +66,9 @@ func PrintNodeCall(settings *AwooLexerSettings, context *lexer_context.AwooLexer
 	return fmt.Sprintf("%s()", v)
 }
 
-func PrintNodeArray(settings *AwooLexerSettings, context *lexer_context.AwooLexerContext, n *node.AwooParserNode) string {
-	arrayType := node.GetNodeArrayType(n)
-	arraySize := node.GetNodeArraySize(n)
+func PrintNodeTypeArray(settings *AwooLexerSettings, context *lexer_context.AwooLexerContext, n *node.AwooParserNode) string {
+	arrayType := node.GetNodeTypeArrayType(n)
+	arraySize := node.GetNodeTypeArraySize(n)
 	return fmt.Sprintf("%s[%d]", PrintNode(settings, context, &arrayType), arraySize)
 }
 

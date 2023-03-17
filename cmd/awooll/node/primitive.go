@@ -28,27 +28,23 @@ func GetNodePrimitiveValueFormat[K constraints.Integer](context lexer_context.Aw
 	case 1:
 		if primType.Flags&types.AwooTypeFlagsSign == 1 {
 			return K(GetNodePrimitiveValue(n).(int8))
-		} else {
-			return K(GetNodePrimitiveValue(n).(uint8))
 		}
+		return K(GetNodePrimitiveValue(n).(uint8))
 	case 2:
 		if primType.Flags&types.AwooTypeFlagsSign == 1 {
 			return K(GetNodePrimitiveValue(n).(int16))
-		} else {
-			return K(GetNodePrimitiveValue(n).(uint16))
 		}
+		return K(GetNodePrimitiveValue(n).(uint16))
 	case 4:
 		if primType.Flags&types.AwooTypeFlagsSign == 1 {
 			return K(GetNodePrimitiveValue(n).(int32))
-		} else {
-			return K(GetNodePrimitiveValue(n).(uint32))
 		}
+		return K(GetNodePrimitiveValue(n).(uint32))
 	case 8:
 		if primType.Flags&types.AwooTypeFlagsSign == 1 {
 			return K(GetNodePrimitiveValue(n).(int64))
-		} else {
-			return K(GetNodePrimitiveValue(n).(uint64))
 		}
+		return K(GetNodePrimitiveValue(n).(uint64))
 	}
 
 	return K(0)

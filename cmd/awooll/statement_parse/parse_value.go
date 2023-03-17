@@ -14,7 +14,7 @@ import (
 func ConstructNodeValue(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
 	entry, ok := cparser.Settings.Mappings.NodeValue[t.Type]
 	if !ok {
-		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red("primitive or identifier"))
+		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorCantParseNode, gchalk.Red(fmt.Sprintf("%#x", t.Type)))
 	}
 
 	return entry(cparser, t, details)

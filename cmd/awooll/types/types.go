@@ -5,6 +5,6 @@ type AwooType struct {
 	Id     uint16
 	Type   uint16
 	Length uint8
-	Size   uint16
+	Size   uint32
 	Flags  uint64
 }

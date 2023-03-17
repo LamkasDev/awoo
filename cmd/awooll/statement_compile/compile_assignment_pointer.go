@@ -12,15 +12,19 @@ import (
 )
 
 func CompileStatementAssignmentPointer(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
-	details := compiler_details.CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero}
 	identifierNode := statement.GetStatementAssignmentIdentifier(&s)
 	identifierNode = node.GetNodeSingleValue(&identifierNode)
 	variableMemory, err := compiler_context.GetCompilerScopeCurrentFunctionMemory(&ccompiler.Context, node.GetNodeIdentifierValue(&identifierNode))
-	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Data.(uint16)]
 	if err != nil {
 		return d, err
 	}
+	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Data.(uint16)]
+
 	valueNode := statement.GetStatementAssignmentValue(&s)
+	details := compiler_details.CompileNodeValueDetails{
+		Type:     variableMemory.Type,
+		Register: cpu.AwooRegisterTemporaryZero,
+	}
 	if d, err = CompileNodeValue(ccompiler, valueNode, d, &details); err != nil {
 		return d, err
 	}

@@ -10,5 +10,5 @@ type ConstructStatementDetails struct {
 type ConstructExpressionDetails struct {
 	Type            types.AwooType
 	PendingBrackets uint8
-	EndToken        uint16
+	EndTokens       []uint16
 }

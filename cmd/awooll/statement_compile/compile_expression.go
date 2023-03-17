@@ -92,16 +92,22 @@ func CompileNodeExpression(ccompiler *compiler.AwooCompiler, n node.AwooParserNo
 	if !ok {
 		return d, fmt.Errorf("%w: %s", awerrors.ErrorCantCompileOperator, gchalk.Red(ccompiler.Settings.Parser.Lexer.Tokens.All[n.Token.Type].Name))
 	}
+
+	var err error
 	left := node.GetNodeExpressionLeft(&n)
-	leftDetails := compiler_details.CompileNodeValueDetails{Register: details.Register}
-	rightDetails := compiler_details.CompileNodeValueDetails{Register: cpu.GetNextTemporaryRegister(details.Register)}
-	d, err := CompileNodeValue(ccompiler, left, d, &leftDetails)
-	if err != nil {
+	leftDetails := compiler_details.CompileNodeValueDetails{
+		Type:     details.Type,
+		Register: details.Register,
+	}
+	if d, err = CompileNodeValue(ccompiler, left, d, &leftDetails); err != nil {
 		return d, err
 	}
 	right := node.GetNodeExpressionRight(&n)
-	d, err = CompileNodeValue(ccompiler, right, d, &rightDetails)
-	if err != nil {
+	rightDetails := compiler_details.CompileNodeValueDetails{
+		Type:     details.Type,
+		Register: cpu.GetNextTemporaryRegister(details.Register),
+	}
+	if d, err = CompileNodeValue(ccompiler, right, d, &rightDetails); err != nil {
 		return d, err
 	}
 

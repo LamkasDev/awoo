@@ -27,9 +27,9 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 			Data: pointedType,
 			Size: ccompiler.Context.Parser.Lexer.Types.All[types.AwooTypePointer].Size,
 		}
-	case node.ParserNodeTypeArray:
-		arraySize := node.GetNodeArraySize(&variableTypeNode)
-		arrayTypeNode := node.GetNodeArrayType(&variableTypeNode)
+	case node.ParserNodeTypeTypeArray:
+		arraySize := node.GetNodeTypeArraySize(&variableTypeNode)
+		arrayTypeNode := node.GetNodeTypeArrayType(&variableTypeNode)
 		arrayType := node.GetNodeTypeType(&arrayTypeNode)
 		return compiler_context.AwooCompilerMemoryEntry{
 			Name: variableName,
@@ -47,28 +47,38 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 }
 
 func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
-	details := compiler_details.CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero}
 	variableMemory, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, GetCompilerMemoryEntry(ccompiler, s))
 	if err != nil {
 		return d, err
 	}
+	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type]
 
-	variableValueNode := statement.GetStatementDefinitionVariableValue(&s)
-	if variableValueNode == nil {
+	valueNode := statement.GetStatementDefinitionVariableValue(&s)
+	if valueNode == nil {
 		return d, nil
 	}
-	if d, err = CompileNodeValue(ccompiler, *variableValueNode, d, &details); err != nil {
+	valueDetails := compiler_details.CompileNodeValueDetails{
+		Type:     variableMemory.Type,
+		Register: cpu.AwooRegisterTemporaryZero,
+		Address: compiler_details.CompileNodeValueDetailsAddress{
+			Immediate: variableMemory.Start,
+		},
+	}
+	if !variableMemory.Global {
+		valueDetails.Address.Register = cpu.AwooRegisterSavedZero
+	}
+	if d, err = CompileNodeValue(ccompiler, *valueNode, d, &valueDetails); err != nil {
 		return d, err
+	}
+	if valueDetails.Address.Used {
+		return d, nil
 	}
 
 	saveInstruction := encoder.AwooEncodedInstruction{
-		Instruction: *instruction.AwooInstructionsSave[ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type].Size],
-		SourceTwo:   details.Register,
-		Immediate:   uint32(variableMemory.Start),
+		Instruction: *instruction.AwooInstructionsSave[variableType.Size],
+		SourceOne:   valueDetails.Address.Register,
+		SourceTwo:   valueDetails.Register,
+		Immediate:   valueDetails.Address.Immediate,
 	}
-	if !variableMemory.Global {
-		saveInstruction.SourceOne = cpu.AwooRegisterSavedZero
-	}
-
 	return encoder.Encode(saveInstruction, d)
 }

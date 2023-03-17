@@ -10,6 +10,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/parser_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/token"
+	"github.com/LamkasDev/awoo-emu/cmd/common/util"
 	"github.com/jwalton/gchalk"
 )
 
@@ -18,12 +19,12 @@ func ConstructExpressionAccumulate(cparser *parser.AwooParser, leftNode node.Awo
 	if err != nil {
 		return leftNode, err
 	}
-	if op.Type == details.EndToken {
+	if util.Contains(details.EndTokens, op.Type) {
 		return ConstructExpressionEndStatement(cparser, leftNode, op, details)
 	}
 	entry, ok := cparser.Settings.Mappings.NodeExpression[op.Type]
 	if !ok {
-		expectedTypes := []uint16{token.TokenOperatorLT, token.TokenOperatorGT, details.EndToken}
+		expectedTypes := append([]uint16{token.TokenOperatorLT, token.TokenOperatorGT}, details.EndTokens...)
 		if details.PendingBrackets > 0 {
 			expectedTypes = append(expectedTypes, token.TokenTypeBracketRight)
 		}
@@ -35,7 +36,7 @@ func ConstructExpressionAccumulate(cparser *parser.AwooParser, leftNode node.Awo
 
 func ConstructExpressionBracket(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
 	leftNode, err := ConstructExpressionReference(cparser, t, details)
-	for err == nil && !leftNode.End && !leftNode.EndBracket {
+	for err == nil && leftNode.End == nil {
 		leftNode, err = ConstructExpressionAccumulate(cparser, leftNode, details)
 	}
 	if err != nil {
@@ -44,7 +45,7 @@ func ConstructExpressionBracket(cparser *parser.AwooParser, t lexer_token.AwooLe
 	if leftNode.Node.Type == node.ParserNodeTypeExpression {
 		node.SetNodeExpressionIsBracket(&leftNode.Node, true)
 	}
-	leftNode.EndBracket = false
+	leftNode.End = nil
 
 	return leftNode, err
 }
@@ -60,7 +61,7 @@ func ConstructExpressionBracketFast(cparser *parser.AwooParser, details *parser_
 
 func ConstructExpressionStart(cparser *parser.AwooParser, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
 	leftNode, err := ConstructExpressionReferenceFast(cparser, details)
-	for err == nil && !leftNode.End {
+	for err == nil && leftNode.End == nil {
 		leftNode, err = ConstructExpressionAccumulate(cparser, leftNode, details)
 	}
 	if err != nil {

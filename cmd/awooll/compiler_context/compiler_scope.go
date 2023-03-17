@@ -30,7 +30,7 @@ func PushCompilerScopeFunction(context *AwooCompilerContext, scopeFunction AwooC
 
 func PushCompilerScopeBlock(context *AwooCompilerContext, funcId uint16, functionBlock AwooCompilerScopeBlock) AwooCompilerScopeBlock {
 	scopeFunction := context.Scopes.Functions[funcId]
-	functionBlockPosition := uint16(0)
+	functionBlockPosition := uint32(0)
 	if len(scopeFunction.Blocks) > 0 {
 		functionBlockPosition = scopeFunction.Blocks[uint16(len(scopeFunction.Blocks)-1)].Memory.Position
 	}
@@ -64,7 +64,7 @@ func GetCompilerScopeCurrentFunction(context *AwooCompilerContext) AwooCompilerS
 	return context.Scopes.Functions[uint16(len(context.Scopes.Functions)-1)]
 }
 
-func GetCompilerScopeCurrentFunctionSize(context *AwooCompilerContext) uint16 {
+func GetCompilerScopeCurrentFunctionSize(context *AwooCompilerContext) uint32 {
 	scopeFunction := context.Scopes.Functions[uint16(len(context.Scopes.Functions)-1)]
 	return scopeFunction.Blocks[uint16(len(scopeFunction.Blocks)-1)].Memory.Position
 }

@@ -14,8 +14,8 @@ func ConstructStatementReturn(cparser *parser.AwooParser, _ lexer_token.AwooLexe
 	currentFunction := cparser.Context.Functions.Entries[currentScopeFunction.Name]
 	if currentFunction.ReturnType != nil {
 		returnValue, err := ConstructExpressionStart(cparser, &parser_details.ConstructExpressionDetails{
-			Type:     cparser.Context.Lexer.Types.All[types.AwooTypeInt32],
-			EndToken: details.EndToken,
+			Type:      cparser.Context.Lexer.Types.All[types.AwooTypeInt32],
+			EndTokens: []uint16{details.EndToken},
 		})
 		if err != nil {
 			return returnStatement, err

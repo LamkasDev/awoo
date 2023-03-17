@@ -6,12 +6,12 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/compiler_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awooll/statement"
+	"github.com/LamkasDev/awoo-emu/cmd/awooll/types"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 )
 
 func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, bodies [][]byte, jump uint32) ([][]byte, uint32, error) {
-	details := compiler_details.CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero}
 	nodeBody := []byte{}
 	var err error
 
@@ -29,18 +29,25 @@ func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 
 		// TODO: this could be optimized using top level comparison from value node (because the below instruction can compare).
 		valueNode := statement.GetStatementIfValue(&s)
-		ifHeader, err := CompileNodeValue(ccompiler, valueNode, []byte{}, &details)
+		valueDetails := compiler_details.CompileNodeValueDetails{
+			Type:     types.AwooTypeBoolean,
+			Register: cpu.AwooRegisterTemporaryZero,
+		}
+		ifHeader, err := CompileNodeValue(ccompiler, valueNode, []byte{}, &valueDetails)
 		if err != nil {
 			return bodies, jump, err
 		}
-		ifHeader, err = encoder.Encode(encoder.AwooEncodedInstruction{
+
+		jumpBeyondEndInstruction := encoder.AwooEncodedInstruction{
 			Instruction: instruction.AwooInstructionBEQ,
-			SourceOne:   details.Register,
+			SourceOne:   valueDetails.Register,
 			Immediate:   uint32(len(nodeBody) + 8),
-		}, ifHeader)
+		}
+		ifHeader, err = encoder.Encode(jumpBeyondEndInstruction, ifHeader)
 		if err != nil {
 			return bodies, jump, err
 		}
+
 		nodeBody = append(ifHeader, nodeBody...)
 	case statement.ParserStatementTypeGroup:
 		compiler_context.PushCompilerScopeCurrentBlock(&ccompiler.Context, compiler_context.AwooCompilerScopeBlock{
@@ -52,9 +59,9 @@ func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 		}
 		compiler_context.PopCompilerScopeCurrentBlock(&ccompiler.Context)
 	}
+
 	bodies = append(bodies, nodeBody)
 	jump += uint32(len(nodeBody) + 4)
-
 	return bodies, jump, nil
 }
 
@@ -78,17 +85,17 @@ func CompileStatementIf(_ *compiler.AwooCompiler, s statement.AwooParserStatemen
 		if jump <= 4 {
 			continue
 		}
-		bodies[i], err = encoder.Encode(encoder.AwooEncodedInstruction{
+		jumpToNextBlockInstruction := encoder.AwooEncodedInstruction{
 			Instruction: instruction.AwooInstructionJAL,
 			Immediate:   jump,
-		}, bodies[i])
-		if err != nil {
+		}
+		if bodies[i], err = encoder.Encode(jumpToNextBlockInstruction, bodies[i]); err != nil {
 			return d, err
 		}
 	}
+
 	for _, b := range bodies {
 		d = append(d, b...)
 	}
-
 	return d, nil
 }

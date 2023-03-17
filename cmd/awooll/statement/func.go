@@ -13,7 +13,7 @@ type AwooParserStatementDataFunc struct {
 
 type AwooParserStatementFuncArgument struct {
 	Name string
-	Size uint16
+	Size uint32
 	Type uint16
 	Data interface{}
 }

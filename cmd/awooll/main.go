@@ -56,7 +56,7 @@ func main() {
 				node.ParserNodeTypeReference:   lexer.PrintNodeReference,
 				node.ParserNodeTypeDereference: lexer.PrintNodeDereference,
 				node.ParserNodeTypeCall:        lexer.PrintNodeCall,
-				node.ParserNodeTypeArray:       lexer.PrintNodeArray,
+				node.ParserNodeTypeTypeArray:   lexer.PrintNodeTypeArray,
 				node.ParserNodeTypeArrayIndex:  lexer.PrintNodeArrayIndex,
 			},
 		},
@@ -92,8 +92,9 @@ func main() {
 				token.TokenOperatorOr:             statement_parse.ConstructExpressionOr,
 			},
 			NodeValue: map[uint16]parser.AwooParseNodeValue{
-				token.TokenTypePrimitive:      statement_parse.CreateNodePrimitiveSafe,
-				node.ParserNodeTypeIdentifier: statement_parse.CreateNodeIdentifierSafe,
+				token.TokenTypePrimitive:        statement_parse.CreateNodePrimitiveSafe,
+				token.TokenTypeIdentifier:       statement_parse.CreateNodeIdentifierSafe,
+				token.TokenTypeBracketCurlyLeft: statement_parse.CreateNodeArray,
 			},
 			PrintStatement: map[uint16]parser.AwooPrintStatement{
 				statement.ParserStatementTypeDefinitionVariable: parser.PrintStatementDefinitionVariable,
@@ -150,6 +151,7 @@ func main() {
 				node.ParserNodeTypeDereference: statement_compile.CompileNodeDereference,
 				node.ParserNodeTypeCall:        statement_compile.CompileNodeCall,
 				node.ParserNodeTypeArrayIndex:  statement_compile.CompileNodeArrayIndex,
+				node.ParserNodeTypeArray:       statement_compile.CompileNodeArray,
 			},
 		},
 	}

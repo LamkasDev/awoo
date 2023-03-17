@@ -12,26 +12,36 @@ import (
 )
 
 func CompileStatementAssignmentIdentifier(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
-	details := compiler_details.CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero}
 	identifierNode := statement.GetStatementAssignmentIdentifier(&s)
 	variableMemory, err := compiler_context.GetCompilerScopeCurrentFunctionMemory(&ccompiler.Context, node.GetNodeIdentifierValue(&identifierNode))
-	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type]
 	if err != nil {
 		return d, err
 	}
+	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type]
+
 	valueNode := statement.GetStatementAssignmentValue(&s)
-	if d, err = CompileNodeValue(ccompiler, valueNode, d, &details); err != nil {
+	valueDetails := compiler_details.CompileNodeValueDetails{
+		Type:     variableMemory.Type,
+		Register: cpu.AwooRegisterTemporaryZero,
+		Address: compiler_details.CompileNodeValueDetailsAddress{
+			Immediate: variableMemory.Start,
+		},
+	}
+	if !variableMemory.Global {
+		valueDetails.Address.Register = cpu.AwooRegisterSavedZero
+	}
+	if d, err = CompileNodeValue(ccompiler, valueNode, d, &valueDetails); err != nil {
 		return d, err
+	}
+	if valueDetails.Address.Used {
+		return d, nil
 	}
 
 	saveInstruction := encoder.AwooEncodedInstruction{
 		Instruction: *instruction.AwooInstructionsSave[variableType.Size],
-		SourceTwo:   details.Register,
-		Immediate:   uint32(variableMemory.Start),
+		SourceOne:   valueDetails.Address.Register,
+		SourceTwo:   valueDetails.Register,
+		Immediate:   valueDetails.Address.Immediate,
 	}
-	if !variableMemory.Global {
-		saveInstruction.SourceOne = cpu.AwooRegisterSavedZero
-	}
-
 	return encoder.Encode(saveInstruction, d)
 }

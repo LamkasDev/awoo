@@ -22,8 +22,8 @@ func CreateNodeIdentifierVariableSafe(cparser *parser.AwooParser, t lexer_token.
 	if arrToken, _ := parser.ExpectTokenOptional(cparser, token.TokenTypeBracketSquareLeft); arrToken != nil {
 		arrIndexNode := node.CreateNodeArrayIndex(*arrToken, identifier)
 		indexNode, err := ConstructExpressionStart(cparser, &parser_details.ConstructExpressionDetails{
-			Type:     cparser.Context.Lexer.Types.All[types.AwooTypeUInt16],
-			EndToken: token.TokenTypeBracketSquareRight,
+			Type:      cparser.Context.Lexer.Types.All[types.AwooTypeUInt16],
+			EndTokens: []uint16{token.TokenTypeBracketSquareRight},
 		})
 		if err != nil {
 			return arrIndexNode, err
@@ -55,13 +55,10 @@ func CreateNodeIdentifierCallSafe(cparser *parser.AwooParser, t lexer_token.Awoo
 	}
 
 	callNode := node.CreateNodeCall(t)
-	for i, arg := range callFunction.Arguments {
+	for _, arg := range callFunction.Arguments {
 		details := parser_details.ConstructExpressionDetails{
-			Type:     cparser.Contents.Context.Types.All[arg.Type],
-			EndToken: token.TokenTypeBracketRight,
-		}
-		if i < len(callFunction.Arguments)-1 {
-			details.EndToken = token.TokenTypeComma
+			Type:      cparser.Contents.Context.Types.All[arg.Type],
+			EndTokens: []uint16{token.TokenTypeBracketRight, token.TokenTypeComma},
 		}
 		argNode, err := ConstructExpressionStart(cparser, &details)
 		if err != nil {

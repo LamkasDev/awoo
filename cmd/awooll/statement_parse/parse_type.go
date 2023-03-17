@@ -13,12 +13,12 @@ func ConstructNodeType(cparser *parser.AwooParser, t lexer_token.AwooLexerToken)
 		n = node.CreateNodePointer(t, n.Node)
 	}
 	if arrToken, _ := parser.ExpectTokenOptional(cparser, token.TokenTypeBracketSquareLeft); arrToken != nil {
-		n = node.CreateNodeArray(t, n.Node)
+		n = node.CreateNodeTypeArray(t, n.Node)
 		sizeToken, err := parser.ExpectToken(cparser, token.TokenTypePrimitive)
 		if err != nil {
 			return node.AwooParserNodeResult{}, err
 		}
-		node.SetNodeArraySize(&n.Node, GetPrimitiveValue[uint16](cparser.Context.Lexer, sizeToken))
+		node.SetNodeTypeArraySize(&n.Node, GetPrimitiveValue[uint32](cparser.Context.Lexer, sizeToken))
 		if _, err := parser.ExpectToken(cparser, token.TokenTypeBracketSquareRight); err != nil {
 			return node.AwooParserNodeResult{}, err
 		}

@@ -29,47 +29,50 @@ func CompileNodeCall(ccompiler *compiler.AwooCompiler, n node.AwooParserNode, d 
 	functionArgumentsOffset := stackOffset
 	var err error
 	for i := 0; i < len(function.Arguments); i++ {
-		argDetails := compiler_details.CompileNodeValueDetails{Register: cpu.AwooRegisterTemporaryZero}
-		d, err = CompileNodeValue(ccompiler, functionArguments[i], d, &argDetails)
-		if err != nil {
+		argumentDetails := compiler_details.CompileNodeValueDetails{
+			Type:     function.Arguments[i].Type,
+			Register: cpu.AwooRegisterTemporaryZero,
+		}
+		if d, err = CompileNodeValue(ccompiler, functionArguments[i], d, &argumentDetails); err != nil {
 			return d, err
 		}
-		d, err = encoder.Encode(encoder.AwooEncodedInstruction{
+		saveInstruction := encoder.AwooEncodedInstruction{
 			Instruction: *instruction.AwooInstructionsSave[function.Arguments[i].Size],
 			SourceOne:   cpu.AwooRegisterSavedZero,
-			SourceTwo:   details.Register,
+			SourceTwo:   argumentDetails.Register,
 			Immediate:   functionArgumentsOffset,
-		}, d)
-		if err != nil {
+		}
+		if d, err = encoder.Encode(saveInstruction, d); err != nil {
 			return d, err
 		}
 		functionArgumentsOffset += uint32(function.Arguments[i].Size)
 	}
 
-	d, err = encoder.Encode(encoder.AwooEncodedInstruction{
+	stackAdjustmentInstruction := encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionADDI,
 		SourceOne:   cpu.AwooRegisterSavedZero,
 		Destination: cpu.AwooRegisterSavedZero,
 		Immediate:   stackOffset,
-	}, d)
-	if err != nil {
+	}
+	if d, err = encoder.Encode(stackAdjustmentInstruction, d); err != nil {
 		return d, err
 	}
 
 	details.Register = cpu.AwooRegisterFunctionZero
-	d, err = encoder.Encode(encoder.AwooEncodedInstruction{
+	jumpInstruction := encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionJALR,
 		Destination: cpu.AwooRegisterReturnAddress,
 		Immediate:   uint32(function.Start),
-	}, d)
-	if err != nil {
+	}
+	if d, err = encoder.Encode(jumpInstruction, d); err != nil {
 		return d, err
 	}
 
-	return encoder.Encode(encoder.AwooEncodedInstruction{
+	stackAdjustmentInstruction = encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionADDI,
 		SourceOne:   cpu.AwooRegisterSavedZero,
 		Destination: cpu.AwooRegisterSavedZero,
 		Immediate:   -stackOffset,
-	}, d)
+	}
+	return encoder.Encode(stackAdjustmentInstruction, d)
 }

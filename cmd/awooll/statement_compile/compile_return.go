@@ -13,23 +13,25 @@ import (
 func CompileStatementReturn(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
 	currentScopeFunction := ccompiler.Context.Scopes.Functions[uint16(len(ccompiler.Context.Scopes.Functions)-1)]
 	currentFunction, _ := compiler_context.GetCompilerFunction(&ccompiler.Context, currentScopeFunction.Name)
+	var err error
 	if currentFunction.ReturnType != nil {
-		returnValue := statement.GetStatementReturnValue(&s)
-		d, err := CompileNodeValue(ccompiler, *returnValue, d, &compiler_details.CompileNodeValueDetails{
+		returnValueNode := statement.GetStatementReturnValue(&s)
+		returnDetails := compiler_details.CompileNodeValueDetails{
+			Type:     *currentFunction.ReturnType,
 			Register: cpu.AwooRegisterFunctionZero,
-		})
-		if err != nil {
+		}
+		if d, err = CompileNodeValue(ccompiler, *returnValueNode, d, &returnDetails); err != nil {
 			return d, err
 		}
 	}
 
-	d, err := encoder.Encode(encoder.AwooEncodedInstruction{
+	loadReturnAddressInstruction := encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionLW,
 		SourceOne:   cpu.AwooRegisterSavedZero,
 		Immediate:   uint32(compiler_context.GetCompilerFunctionArgumentsSize(currentFunction)),
 		Destination: cpu.AwooRegisterReturnAddress,
-	}, d)
-	if err != nil {
+	}
+	if d, err = encoder.Encode(loadReturnAddressInstruction, d); err != nil {
 		return d, err
 	}
 

@@ -31,19 +31,20 @@ func ConstructStatementAssignment(cparser *parser.AwooParser, identifierNode nod
 	if _, err := parser.ExpectToken(cparser, token.TokenOperatorEq); err != nil {
 		return statement.AwooParserStatement{}, err
 	}
-	variableValueNode, err := ConstructExpressionStart(cparser, &parser_details.ConstructExpressionDetails{
-		Type:     cparser.Context.Lexer.Types.All[variableMemory.Type],
-		EndToken: details.EndToken,
+	valueNode, err := ConstructExpressionStart(cparser, &parser_details.ConstructExpressionDetails{
+		Type:      cparser.Context.Lexer.Types.All[variableMemory.Type],
+		EndTokens: []uint16{details.EndToken},
 	})
 	if err != nil {
 		return statement.AwooParserStatement{}, err
 	}
+
 	if assignmentOperator != nil {
-		variableValueNode = node.AwooParserNodeResult{
-			Node: node.CreateNodeExpression(*assignmentOperator, identifierNode, variableValueNode.Node),
+		valueNode = node.AwooParserNodeResult{
+			Node: node.CreateNodeExpression(*assignmentOperator, identifierNode, valueNode.Node),
 		}
 	}
-	statement.SetStatementAssignmentValue(&assignmentStatement, variableValueNode.Node)
+	statement.SetStatementAssignmentValue(&assignmentStatement, valueNode.Node)
 
 	return assignmentStatement, nil
 }

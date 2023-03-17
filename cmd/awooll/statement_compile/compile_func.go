@@ -49,13 +49,13 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, s statement.AwooPars
 		functionReturnType = &returnType
 	}
 
-	d, err = encoder.Encode(encoder.AwooEncodedInstruction{
+	stackAdjustmentInstruction := encoder.AwooEncodedInstruction{
 		Instruction: instruction.AwooInstructionSW,
 		SourceOne:   cpu.AwooRegisterSavedZero,
 		SourceTwo:   cpu.AwooRegisterReturnAddress,
 		Immediate:   functionArgumentsOffset,
-	}, d)
-	if err != nil {
+	}
+	if d, err = encoder.Encode(stackAdjustmentInstruction, d); err != nil {
 		return d, err
 	}
 
@@ -66,12 +66,11 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, s statement.AwooPars
 		Start:      compiler_context.GetProgramHeaderSize() + ccompiler.Context.CurrentAddress,
 		Size:       uint16(len(d)),
 	})
-	d, err = CompileStatementGroup(ccompiler, statement.GetStatementFuncBody(&s), d)
-	if err != nil {
+	if d, err = CompileStatementGroup(ccompiler, statement.GetStatementFuncBody(&s), d); err != nil {
 		return d, err
 	}
-
 	compiler_context.PopCompilerScopeCurrentFunction(&ccompiler.Context)
+
 	if ccompiler.Context.Functions.Start == "" {
 		ccompiler.Context.Functions.Start = functionName
 		d = append(make([]byte, compiler_context.GetProgramHeaderSize()), d...)

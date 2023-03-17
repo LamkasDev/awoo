@@ -9,7 +9,7 @@ import (
 
 type AwooCompilerMemory struct {
 	Entries  map[string]AwooCompilerMemoryEntry
-	Position uint16
+	Position uint32
 }
 
 type AwooCompilerMemoryEntry struct {
@@ -17,8 +17,8 @@ type AwooCompilerMemoryEntry struct {
 	Global bool
 	Type   uint16
 	Data   interface{}
-	Start  uint16
-	Size   uint16
+	Start  uint32
+	Size   uint32
 }
 
 func PushCompilerScopeBlockMemory(context *AwooCompilerContext, funcId uint16, blockId uint16, blockEntry AwooCompilerMemoryEntry) (AwooCompilerMemoryEntry, error) {

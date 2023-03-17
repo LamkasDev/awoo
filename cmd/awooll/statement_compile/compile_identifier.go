@@ -16,9 +16,10 @@ func CompileNodeIdentifier(ccompiler *compiler.AwooCompiler, n node.AwooParserNo
 	if err != nil {
 		return d, err
 	}
+	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type]
 
 	loadInstruction := encoder.AwooEncodedInstruction{
-		Instruction: *instruction.AwooInstructionsLoad[ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type].Size],
+		Instruction: *instruction.AwooInstructionsLoad[variableType.Size],
 		Destination: details.Register,
 		Immediate:   uint32(variableMemory.Start),
 	}

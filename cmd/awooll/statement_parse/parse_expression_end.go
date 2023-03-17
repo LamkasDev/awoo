@@ -11,22 +11,22 @@ import (
 	"github.com/jwalton/gchalk"
 )
 
-func ConstructExpressionEndStatement(_ *parser.AwooParser, n node.AwooParserNodeResult, _ lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
+func ConstructExpressionEndStatement(_ *parser.AwooParser, n node.AwooParserNodeResult, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
 	if details.PendingBrackets > 0 {
 		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red(")"))
 	}
 	return node.AwooParserNodeResult{
 		Node: n.Node,
-		End:  true,
+		End:  &t.Type,
 	}, nil
 }
 
-func ConstructExpressionEndBracket(_ *parser.AwooParser, n node.AwooParserNodeResult, _ lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
+func ConstructExpressionEndBracket(_ *parser.AwooParser, n node.AwooParserNodeResult, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
 	if details.PendingBrackets > 0 {
 		details.PendingBrackets--
 		return node.AwooParserNodeResult{
-			Node:       n.Node,
-			EndBracket: true,
+			Node: n.Node,
+			End:  &t.Type,
 		}, nil
 	}
 	return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorUnexpectedToken, gchalk.Red(")"))
