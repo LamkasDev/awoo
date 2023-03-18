@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/LamkasDev/awoo-emu/cmd/awooll/awerrors"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/awerrors"
 	"github.com/manifoldco/promptui"
 )
 

@@ -7,10 +7,11 @@ import (
 	"syscall"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/config"
-	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/driver"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/driver/vga"
+	"github.com/LamkasDev/awoo-emu/cmd/awoomu/instructions"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/internal"
+	commonInstructions "github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
 var (
@@ -21,6 +22,7 @@ var (
 type AwooEmulator struct {
 	Config          config.AwooConfig
 	Internal        internal.AwooEmulatorInternal
+	Table           commonInstructions.AwooInstructionTable
 	Drivers         map[uint16]driver.AwooDriver
 	TickDrivers     []uint16
 	TickLongDrivers []uint16
@@ -29,12 +31,9 @@ type AwooEmulator struct {
 func SetupEmulator() AwooEmulator {
 	procTimeBeginPeriod.Call(uintptr(1))
 	emulator := AwooEmulator{
-		Config: config.NewAwooConfig(),
-		Internal: internal.AwooEmulatorInternal{
-			Running:   true,
-			Executing: true,
-			CPU:       cpu.SetupCPU(),
-		},
+		Config:          config.NewAwooConfig(),
+		Internal:        internal.SetupInternal(),
+		Table:           instructions.SetupDecoderInstructionTable(),
 		Drivers:         map[uint16]driver.AwooDriver{},
 		TickDrivers:     []uint16{},
 		TickLongDrivers: []uint16{},

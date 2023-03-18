@@ -1,11 +1,11 @@
 package instruction
 
-const AwooInstructionFormatR = 0x00
-const AwooInstructionFormatI = 0x01
-const AwooInstructionFormatS = 0x02
-const AwooInstructionFormatU = 0x03
-const AwooInstructionFormatB = 0x04
-const AwooInstructionFormatJ = 0x05
+const AwooInstructionFormatR = uint8(0x00)
+const AwooInstructionFormatI = uint8(0x01)
+const AwooInstructionFormatS = uint8(0x02)
+const AwooInstructionFormatU = uint8(0x03)
+const AwooInstructionFormatB = uint8(0x04)
+const AwooInstructionFormatJ = uint8(0x05)
 
 type AwooInstructionFormat struct {
 	Code        AwooInstructionRange

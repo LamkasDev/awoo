@@ -4,6 +4,7 @@ package arch
 
 const AwooPlatform = "awoo64"
 
+type AwooRegisterIndex uint8
 type AwooRegister int64
 type AwooRegisterU uint64
 
