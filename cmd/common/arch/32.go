@@ -4,7 +4,6 @@ package arch
 
 const AwooPlatform = "awoo32"
 
-type AwooRegisterIndex uint8
 type AwooRegister int32
 type AwooRegisterU uint32
 

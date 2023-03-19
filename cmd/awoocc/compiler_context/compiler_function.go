@@ -1,6 +1,9 @@
 package compiler_context
 
-import "github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
+import (
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
+	"github.com/LamkasDev/awoo-emu/cmd/common/types"
+)
 
 type AwooCompilerFunctionContainer struct {
 	Entries map[string]AwooCompilerFunction
@@ -9,7 +12,7 @@ type AwooCompilerFunctionContainer struct {
 
 type AwooCompilerFunction struct {
 	Name       string
-	ReturnType *uint16
+	ReturnType *types.AwooTypeId
 	Arguments  []statement.AwooParserStatementFuncArgument
 	Start      uint16
 	Size       uint16

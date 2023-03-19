@@ -4,15 +4,16 @@ import (
 	"encoding/binary"
 
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
+	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/util"
 )
 
 type AwooEncodedInstruction struct {
 	Instruction instruction.AwooInstructionDefinition
-	SourceOne   arch.AwooRegisterIndex
-	SourceTwo   arch.AwooRegisterIndex
-	Destination arch.AwooRegisterIndex
+	SourceOne   cpu.AwooRegisterId
+	SourceTwo   cpu.AwooRegisterId
+	Destination cpu.AwooRegisterId
 	Immediate   uint32
 }
 

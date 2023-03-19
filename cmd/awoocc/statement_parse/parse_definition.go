@@ -39,7 +39,7 @@ func ConstructStatementDefinitionVariable(cparser *parser.AwooParser, t lexer_to
 	}
 	if t.Type == token.TokenOperatorEq {
 		valueDetails := parser_details.ConstructExpressionDetails{
-			Type:      variableType,
+			Type:      variableType.Id,
 			EndTokens: []uint16{details.EndToken},
 		}
 		valueNode, err := ConstructExpressionStart(cparser, &valueDetails)

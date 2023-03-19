@@ -11,13 +11,14 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
+	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 	"github.com/jwalton/gchalk"
 	"golang.org/x/exp/constraints"
 )
 
 // TODO: make this generic (to be used in primitive nodes also?).
 func GetPrimitiveValue[K constraints.Integer](context lexer_context.AwooLexerContext, t lexer_token.AwooLexerToken) K {
-	primType := context.Types.All[lexer_token.GetTokenPrimitiveType(&t)]
+	primType := context.Types.All[commonTypes.AwooTypeId(lexer_token.GetTokenPrimitiveType(&t))]
 	switch primType.Size {
 	case 1:
 		if primType.Flags&types.AwooTypeFlagsSign == 1 {
@@ -49,7 +50,7 @@ func GetPrimitiveValue[K constraints.Integer](context lexer_context.AwooLexerCon
 }
 
 func GetPrimitiveLimits(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (int64, int64) {
-	primType := cparser.Context.Lexer.Types.All[lexer_token.GetTokenPrimitiveType(&t)]
+	primType := cparser.Context.Lexer.Types.All[commonTypes.AwooTypeId(lexer_token.GetTokenPrimitiveType(&t))]
 	primBytes := float64(8 * primType.Size)
 	if primType.Flags&types.AwooTypeFlagsSign == 1 {
 		return int64(math.Pow(2, primBytes-1)) - 1, -int64(math.Pow(2, primBytes-1))

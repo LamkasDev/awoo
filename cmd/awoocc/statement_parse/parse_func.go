@@ -8,6 +8,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
+	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
 func ConstructStatementFunc(cparser *parser.AwooParser, _ lexer_token.AwooLexerToken, _ *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
@@ -51,7 +52,7 @@ func ConstructStatementFunc(cparser *parser.AwooParser, _ lexer_token.AwooLexerT
 		return functionStatement, err
 	}
 
-	var functionReturnType *uint16
+	var functionReturnType *commonTypes.AwooTypeId
 	if returnTypeToken, _ := parser.ExpectTokenOptional(cparser, token.TokenTypeType); returnTypeToken != nil {
 		returnTypeNode, err := ConstructNodeType(cparser, *returnTypeToken)
 		if err != nil {

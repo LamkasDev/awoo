@@ -86,7 +86,7 @@ func ExpectToken(cparser *AwooParser, tokenType uint16) (lexer_token.AwooLexerTo
 		return t, err
 	}
 	if t.Type != tokenType {
-		return t, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red(cparser.Context.Lexer.Types.All[tokenType].Key))
+		return t, fmt.Errorf("%w: %s", awerrors.ErrorExpectedToken, gchalk.Red(cparser.Settings.Lexer.Tokens.All[tokenType].Key))
 	}
 
 	return t, nil

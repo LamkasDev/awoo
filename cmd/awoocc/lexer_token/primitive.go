@@ -1,18 +1,21 @@
 package lexer_token
 
-import "github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
+import (
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
+	"github.com/LamkasDev/awoo-emu/cmd/common/types"
+)
 
 type AwooLexerTokenDataPrimitive struct {
-	Type  uint16
+	Type  types.AwooTypePrimitiveId
 	Value interface{}
 	Extra interface{}
 }
 
-func GetTokenPrimitiveType(t *AwooLexerToken) uint16 {
+func GetTokenPrimitiveType(t *AwooLexerToken) types.AwooTypePrimitiveId {
 	return t.Data.(AwooLexerTokenDataPrimitive).Type
 }
 
-func SetTokenPrimitiveType(t *AwooLexerToken, primitiveType uint16) {
+func SetTokenPrimitiveType(t *AwooLexerToken, primitiveType types.AwooTypePrimitiveId) {
 	t.Data.(*AwooLexerTokenDataPrimitive).Type = primitiveType
 }
 
@@ -32,7 +35,7 @@ func SetTokenPrimitiveExtra(t *AwooLexerToken, value interface{}) {
 	t.Data.(*AwooLexerTokenDataPrimitive).Extra = value
 }
 
-func CreateTokenPrimitive(start uint16, primitiveType uint16, value interface{}, extra interface{}) AwooLexerToken {
+func CreateTokenPrimitive(start uint16, primitiveType types.AwooTypePrimitiveId, value interface{}, extra interface{}) AwooLexerToken {
 	return AwooLexerToken{
 		Type:  token.TokenTypePrimitive,
 		Start: start,

@@ -10,6 +10,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
+	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
 func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement) compiler_context.AwooCompilerMemoryEntry {
@@ -22,10 +23,10 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 		pointedTypeNode := node.GetNodeSingleValue(&variableTypeNode)
 		pointedType := node.GetNodeTypeType(&pointedTypeNode)
 		return compiler_context.AwooCompilerMemoryEntry{
-			Name: variableName,
-			Type: types.AwooTypePointer,
-			Data: pointedType,
-			Size: ccompiler.Context.Parser.Lexer.Types.All[types.AwooTypePointer].Size,
+			Name:        variableName,
+			Type:        commonTypes.AwooTypeId(types.AwooTypePointer),
+			TypeDetails: &pointedType,
+			Size:        ccompiler.Context.Parser.Lexer.Types.All[commonTypes.AwooTypeId(types.AwooTypePointer)].Size,
 		}
 	case node.ParserNodeTypeTypeArray:
 		arraySize := node.GetNodeTypeArraySize(&variableTypeNode)

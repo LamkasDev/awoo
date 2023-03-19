@@ -32,7 +32,7 @@ func ConstructStatementAssignment(cparser *parser.AwooParser, identifierNode nod
 		return statement.AwooParserStatement{}, err
 	}
 	valueNode, err := ConstructExpressionStart(cparser, &parser_details.ConstructExpressionDetails{
-		Type:      cparser.Context.Lexer.Types.All[variableMemory.Type],
+		Type:      variableMemory.Type,
 		EndTokens: []uint16{details.EndToken},
 	})
 	if err != nil {

@@ -1,6 +1,6 @@
 package parser_details
 
-import "github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
+import "github.com/LamkasDev/awoo-emu/cmd/common/types"
 
 type ConstructStatementDetails struct {
 	CanReturn bool
@@ -8,7 +8,7 @@ type ConstructStatementDetails struct {
 }
 
 type ConstructExpressionDetails struct {
-	Type            types.AwooType
+	Type            types.AwooTypeId
 	PendingBrackets uint8
 	EndTokens       []uint16
 }

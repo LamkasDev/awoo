@@ -14,7 +14,7 @@ func ProcessAND(internal *internal.AwooEmulatorInternal, ins instruction.AwooIns
 	internal.CPU.Registers[ins.Destination] = internal.CPU.Registers[ins.SourceOne] & internal.CPU.Registers[ins.SourceTwo]
 	if arch.AwooDebug {
 		fmt.Printf("%s = %s (%s & %s)",
-			gchalk.Yellow(cpu.AwooRegisterNames[arch.AwooRegisterIndex(ins.Destination)]),
+			gchalk.Yellow(cpu.AwooRegisterNames[cpu.AwooRegisterId(ins.Destination)]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
@@ -26,7 +26,7 @@ func ProcessOR(internal *internal.AwooEmulatorInternal, ins instruction.AwooInst
 	internal.CPU.Registers[ins.Destination] = internal.CPU.Registers[ins.SourceOne] | internal.CPU.Registers[ins.SourceTwo]
 	if arch.AwooDebug {
 		fmt.Printf("%s = %s (%s | %s)",
-			gchalk.Yellow(cpu.AwooRegisterNames[arch.AwooRegisterIndex(ins.Destination)]),
+			gchalk.Yellow(cpu.AwooRegisterNames[cpu.AwooRegisterId(ins.Destination)]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
@@ -38,7 +38,7 @@ func ProcessXOR(internal *internal.AwooEmulatorInternal, ins instruction.AwooIns
 	internal.CPU.Registers[ins.Destination] = internal.CPU.Registers[ins.SourceOne] ^ internal.CPU.Registers[ins.SourceTwo]
 	if arch.AwooDebug {
 		fmt.Printf("%s = %s (%s ^ %s)",
-			gchalk.Yellow(cpu.AwooRegisterNames[arch.AwooRegisterIndex(ins.Destination)]),
+			gchalk.Yellow(cpu.AwooRegisterNames[cpu.AwooRegisterId(ins.Destination)]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
@@ -50,7 +50,7 @@ func ProcessANDI(internal *internal.AwooEmulatorInternal, ins instruction.AwooIn
 	internal.CPU.Registers[ins.Destination] = internal.CPU.Registers[ins.SourceOne] & ins.Immediate
 	if arch.AwooDebug {
 		fmt.Printf("%s = %s (%s & %s)",
-			gchalk.Yellow(cpu.AwooRegisterNames[arch.AwooRegisterIndex(ins.Destination)]),
+			gchalk.Yellow(cpu.AwooRegisterNames[cpu.AwooRegisterId(ins.Destination)]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(ins.Immediate)),
@@ -62,7 +62,7 @@ func ProcessORI(internal *internal.AwooEmulatorInternal, ins instruction.AwooIns
 	internal.CPU.Registers[ins.Destination] = internal.CPU.Registers[ins.SourceOne] | ins.Immediate
 	if arch.AwooDebug {
 		fmt.Printf("%s = %s (%s | %s)",
-			gchalk.Yellow(cpu.AwooRegisterNames[arch.AwooRegisterIndex(ins.Destination)]),
+			gchalk.Yellow(cpu.AwooRegisterNames[cpu.AwooRegisterId(ins.Destination)]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(ins.Immediate)),
@@ -74,7 +74,7 @@ func ProcessXORI(internal *internal.AwooEmulatorInternal, ins instruction.AwooIn
 	internal.CPU.Registers[ins.Destination] = internal.CPU.Registers[ins.SourceOne] ^ ins.Immediate
 	if arch.AwooDebug {
 		fmt.Printf("%s = %s (%s ^ %s)",
-			gchalk.Yellow(cpu.AwooRegisterNames[arch.AwooRegisterIndex(ins.Destination)]),
+			gchalk.Yellow(cpu.AwooRegisterNames[cpu.AwooRegisterId(ins.Destination)]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(ins.Immediate)),
@@ -86,7 +86,7 @@ func ProcessSLL(internal *internal.AwooEmulatorInternal, ins instruction.AwooIns
 	internal.CPU.Registers[ins.Destination] = (arch.AwooRegister)((arch.AwooRegisterU)(internal.CPU.Registers[ins.SourceOne]) << internal.CPU.Registers[ins.SourceTwo])
 	if arch.AwooDebug {
 		fmt.Printf("%s = %s (%s << %s)",
-			gchalk.Yellow(cpu.AwooRegisterNames[arch.AwooRegisterIndex(ins.Destination)]),
+			gchalk.Yellow(cpu.AwooRegisterNames[cpu.AwooRegisterId(ins.Destination)]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
@@ -98,7 +98,7 @@ func ProcessSRL(internal *internal.AwooEmulatorInternal, ins instruction.AwooIns
 	internal.CPU.Registers[ins.Destination] = (arch.AwooRegister)((arch.AwooRegisterU)(internal.CPU.Registers[ins.SourceOne]) >> internal.CPU.Registers[ins.SourceTwo])
 	if arch.AwooDebug {
 		fmt.Printf("%s = %s (%s >> %s)",
-			gchalk.Yellow(cpu.AwooRegisterNames[arch.AwooRegisterIndex(ins.Destination)]),
+			gchalk.Yellow(cpu.AwooRegisterNames[cpu.AwooRegisterId(ins.Destination)]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
@@ -110,7 +110,7 @@ func ProcessSRA(internal *internal.AwooEmulatorInternal, ins instruction.AwooIns
 	internal.CPU.Registers[ins.Destination] = internal.CPU.Registers[ins.SourceOne] >> internal.CPU.Registers[ins.SourceTwo]
 	if arch.AwooDebug {
 		fmt.Printf("%s = %s (%s >> %s)",
-			gchalk.Yellow(cpu.AwooRegisterNames[arch.AwooRegisterIndex(ins.Destination)]),
+			gchalk.Yellow(cpu.AwooRegisterNames[cpu.AwooRegisterId(ins.Destination)]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
@@ -122,7 +122,7 @@ func ProcessSLLI(internal *internal.AwooEmulatorInternal, ins instruction.AwooIn
 	internal.CPU.Registers[ins.Destination] = (arch.AwooRegister)((arch.AwooRegisterU)(internal.CPU.Registers[ins.SourceOne]) << ins.Immediate)
 	if arch.AwooDebug {
 		fmt.Printf("%s = %s (%s << %s)",
-			gchalk.Yellow(cpu.AwooRegisterNames[arch.AwooRegisterIndex(ins.Destination)]),
+			gchalk.Yellow(cpu.AwooRegisterNames[cpu.AwooRegisterId(ins.Destination)]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(ins.Immediate)),
@@ -134,7 +134,7 @@ func ProcessSRLI(internal *internal.AwooEmulatorInternal, ins instruction.AwooIn
 	internal.CPU.Registers[ins.Destination] = (arch.AwooRegister)((arch.AwooRegisterU)(internal.CPU.Registers[ins.SourceOne]) >> ins.Immediate)
 	if arch.AwooDebug {
 		fmt.Printf("%s = %s (%s >> %s)",
-			gchalk.Yellow(cpu.AwooRegisterNames[arch.AwooRegisterIndex(ins.Destination)]),
+			gchalk.Yellow(cpu.AwooRegisterNames[cpu.AwooRegisterId(ins.Destination)]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(ins.Immediate)),
@@ -146,7 +146,7 @@ func ProcessSRAI(internal *internal.AwooEmulatorInternal, ins instruction.AwooIn
 	internal.CPU.Registers[ins.Destination] = internal.CPU.Registers[ins.SourceOne] >> ins.Immediate
 	if arch.AwooDebug {
 		fmt.Printf("%s = %s (%s >> %s)",
-			gchalk.Yellow(cpu.AwooRegisterNames[arch.AwooRegisterIndex(ins.Destination)]),
+			gchalk.Yellow(cpu.AwooRegisterNames[cpu.AwooRegisterId(ins.Destination)]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(ins.Immediate)),

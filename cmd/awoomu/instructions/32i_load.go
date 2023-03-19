@@ -13,7 +13,7 @@ import (
 
 func PrintLoad(internal *internal.AwooEmulatorInternal, ins instruction.AwooInstruction) {
 	fmt.Printf("%s = %s",
-		gchalk.Yellow(cpu.AwooRegisterNames[arch.AwooRegisterIndex(ins.Destination)]),
+		gchalk.Yellow(cpu.AwooRegisterNames[cpu.AwooRegisterId(ins.Destination)]),
 		gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
 	)
 }

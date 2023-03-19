@@ -1,20 +1,23 @@
 package lexer_token
 
-import "github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
+import (
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
+	"github.com/LamkasDev/awoo-emu/cmd/common/types"
+)
 
 type AwooLexerTokenDataType struct {
-	Id uint16
+	Id types.AwooTypeId
 }
 
-func GetTokenTypeId(t *AwooLexerToken) uint16 {
+func GetTokenTypeId(t *AwooLexerToken) types.AwooTypeId {
 	return t.Data.(AwooLexerTokenDataType).Id
 }
 
-func SetTokenTypeId(t *AwooLexerToken, id uint16) {
+func SetTokenTypeId(t *AwooLexerToken, id types.AwooTypeId) {
 	t.Data.(*AwooLexerTokenDataType).Id = id
 }
 
-func CreateTokenType(start uint16, value uint16) AwooLexerToken {
+func CreateTokenType(start uint16, value types.AwooTypeId) AwooLexerToken {
 	return AwooLexerToken{
 		Type:  token.TokenTypeType,
 		Start: start,

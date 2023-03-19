@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/awerrors"
+	"github.com/LamkasDev/awoo-emu/cmd/common/types"
 	"github.com/jwalton/gchalk"
 )
 
@@ -12,10 +13,10 @@ type AwooParserMemory struct {
 }
 
 type AwooParserMemoryEntry struct {
-	Name   string
-	Global bool
-	Type   uint16
-	Data   interface{}
+	Name        string
+	Global      bool
+	Type        types.AwooTypeId
+	TypeDetails *types.AwooTypeId
 }
 
 func PushParserScopeBlockMemory(context *AwooParserContext, funcId uint16, blockId uint16, blockEntry AwooParserMemoryEntry) (AwooParserMemoryEntry, error) {

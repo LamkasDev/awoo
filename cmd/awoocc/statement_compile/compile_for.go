@@ -8,6 +8,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
+	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
 func CompileStatementFor(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
@@ -18,7 +19,7 @@ func CompileStatementFor(ccompiler *compiler.AwooCompiler, s statement.AwooParse
 	initSize := len(d)
 
 	conditionDetails := compiler_details.CompileNodeValueDetails{
-		Type:     types.AwooTypeBoolean,
+		Type:     commonTypes.AwooTypeId(types.AwooTypeBoolean),
 		Register: cpu.AwooRegisterTemporaryZero,
 	}
 	if d, err = CompileNodeValue(ccompiler, statement.GetStatementForCondition(&s), d, &conditionDetails); err != nil {

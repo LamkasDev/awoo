@@ -9,6 +9,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
+	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
 func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, bodies [][]byte, jump uint32) ([][]byte, uint32, error) {
@@ -30,7 +31,7 @@ func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 		// TODO: this could be optimized using top level comparison from value node (because the below instruction can compare).
 		valueNode := statement.GetStatementIfValue(&s)
 		valueDetails := compiler_details.CompileNodeValueDetails{
-			Type:     types.AwooTypeBoolean,
+			Type:     commonTypes.AwooTypeId(types.AwooTypeBoolean),
 			Register: cpu.AwooRegisterTemporaryZero,
 		}
 		ifHeader, err := CompileNodeValue(ccompiler, valueNode, []byte{}, &valueDetails)

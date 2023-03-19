@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/awerrors"
+	"github.com/LamkasDev/awoo-emu/cmd/common/types"
 	"github.com/jwalton/gchalk"
 )
 
@@ -13,12 +14,12 @@ type AwooCompilerMemory struct {
 }
 
 type AwooCompilerMemoryEntry struct {
-	Name   string
-	Global bool
-	Type   uint16
-	Data   interface{}
-	Start  uint32
-	Size   uint32
+	Name        string
+	Global      bool
+	Type        types.AwooTypeId
+	TypeDetails *types.AwooTypeId
+	Start       uint32
+	Size        uint32
 }
 
 func PushCompilerScopeBlockMemory(context *AwooCompilerContext, funcId uint16, blockId uint16, blockEntry AwooCompilerMemoryEntry) (AwooCompilerMemoryEntry, error) {

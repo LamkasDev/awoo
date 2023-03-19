@@ -18,7 +18,7 @@ func CompileStatementAssignmentPointer(ccompiler *compiler.AwooCompiler, s state
 	if err != nil {
 		return d, err
 	}
-	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Data.(uint16)]
+	variableType := ccompiler.Context.Parser.Lexer.Types.All[*variableMemory.TypeDetails]
 
 	valueNode := statement.GetStatementAssignmentValue(&s)
 	details := compiler_details.CompileNodeValueDetails{

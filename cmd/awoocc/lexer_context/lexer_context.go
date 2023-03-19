@@ -2,6 +2,7 @@ package lexer_context
 
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
+	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
 type AwooLexerContext struct {
@@ -13,18 +14,18 @@ func GetContextType(context *AwooLexerContext, key string) (*types.AwooType, boo
 	return t, ok
 }
 
-func GetContextTypeId(context *AwooLexerContext, id uint16) (types.AwooType, bool) {
+func GetContextTypeId(context *AwooLexerContext, id commonTypes.AwooTypeId) (types.AwooType, bool) {
 	t, ok := context.Types.All[id]
 	return t, ok
 }
 
-func AddContextType(context *AwooLexerContext, t types.AwooType) uint16 {
+func AddContextType(context *AwooLexerContext, t types.AwooType) commonTypes.AwooTypeId {
 	return types.AddTypeUserDefined(&context.Types, t)
 }
 
-func AddContextTypeAlias(context *AwooLexerContext, original types.AwooType, t types.AwooType) uint16 {
+func AddContextTypeAlias(context *AwooLexerContext, original types.AwooType, t types.AwooType) commonTypes.AwooTypeId {
 	return AddContextType(context, types.AwooType{
-		Key: t.Key, Type: original.Type,
+		Key: t.Key, PrimitiveType: original.PrimitiveType,
 		Length: original.Length, Size: original.Size,
 		Flags: original.Flags,
 	})

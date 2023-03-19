@@ -2,6 +2,7 @@ package statement
 
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
+	"github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
 type AwooParserStatementDataFunc struct {
@@ -12,10 +13,10 @@ type AwooParserStatementDataFunc struct {
 }
 
 type AwooParserStatementFuncArgument struct {
-	Name string
-	Size uint32
-	Type uint16
-	Data interface{}
+	Name        string
+	Size        uint32
+	Type        types.AwooTypeId
+	TypeDetails *types.AwooTypeId
 }
 
 func GetStatementFuncIdentifier(s *AwooParserStatement) node.AwooParserNode {

@@ -1,16 +1,19 @@
 package node
 
-import "github.com/LamkasDev/awoo-emu/cmd/awoocc/lexer_token"
+import (
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/lexer_token"
+	"github.com/LamkasDev/awoo-emu/cmd/common/types"
+)
 
 type AwooParserNodeDataType struct {
-	Value uint16
+	Value types.AwooTypeId
 }
 
-func GetNodeTypeType(n *AwooParserNode) uint16 {
+func GetNodeTypeType(n *AwooParserNode) types.AwooTypeId {
 	return n.Data.(AwooParserNodeDataType).Value
 }
 
-func SetNodeTypeType(n *AwooParserNode, value uint16) {
+func SetNodeTypeType(n *AwooParserNode, value types.AwooTypeId) {
 	d := n.Data.(AwooParserNodeDataType)
 	d.Value = value
 	n.Data = d

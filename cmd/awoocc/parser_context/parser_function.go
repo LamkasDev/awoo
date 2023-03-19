@@ -1,6 +1,9 @@
 package parser_context
 
-import "github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
+import (
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
+	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
+)
 
 type AwooParserFunctionContainer struct {
 	Entries map[string]AwooParserFunction
@@ -9,7 +12,7 @@ type AwooParserFunctionContainer struct {
 
 type AwooParserFunction struct {
 	Name       string
-	ReturnType *uint16
+	ReturnType *commonTypes.AwooTypeId
 	Arguments  []statement.AwooParserStatementFuncArgument
 }
 

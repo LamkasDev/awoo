@@ -9,6 +9,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
+	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
 func CompileStatementFunc(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
@@ -22,10 +23,10 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, s statement.AwooPars
 	functionArgumentsOffset := uint32(0)
 	for _, argument := range functionArguments {
 		_, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, compiler_context.AwooCompilerMemoryEntry{
-			Name: argument.Name,
-			Size: argument.Size,
-			Type: argument.Type,
-			Data: argument.Data,
+			Name:        argument.Name,
+			Size:        argument.Size,
+			Type:        argument.Type,
+			TypeDetails: argument.TypeDetails,
 		})
 		if err != nil {
 			return d, err
@@ -36,14 +37,14 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, s statement.AwooPars
 	_, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, compiler_context.AwooCompilerMemoryEntry{
 		Name: "_returnAddress",
 		Size: 4,
-		Type: types.AwooTypePointer,
+		Type: commonTypes.AwooTypeId(types.AwooTypePointer),
 	})
 	if err != nil {
 		return d, err
 	}
 
 	functionReturnTypeNode := statement.GetStatementFuncReturnType(&s)
-	var functionReturnType *uint16
+	var functionReturnType *commonTypes.AwooTypeId
 	if functionReturnTypeNode != nil {
 		returnType := node.GetNodeTypeType(functionReturnTypeNode)
 		functionReturnType = &returnType

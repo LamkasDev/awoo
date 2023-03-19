@@ -11,6 +11,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
+	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 	"github.com/jwalton/gchalk"
 )
 
@@ -22,7 +23,7 @@ func CreateNodeIdentifierVariableSafe(cparser *parser.AwooParser, t lexer_token.
 	if arrToken, _ := parser.ExpectTokenOptional(cparser, token.TokenTypeBracketSquareLeft); arrToken != nil {
 		arrIndexNode := node.CreateNodeArrayIndex(*arrToken, identifier)
 		indexNode, err := ConstructExpressionStart(cparser, &parser_details.ConstructExpressionDetails{
-			Type:      cparser.Context.Lexer.Types.All[types.AwooTypeUInt16],
+			Type:      commonTypes.AwooTypeId(types.AwooTypeUInt16),
 			EndTokens: []uint16{token.TokenTypeBracketSquareRight},
 		})
 		if err != nil {
@@ -57,7 +58,7 @@ func CreateNodeIdentifierCallSafe(cparser *parser.AwooParser, t lexer_token.Awoo
 	callNode := node.CreateNodeCall(t)
 	for _, arg := range callFunction.Arguments {
 		details := parser_details.ConstructExpressionDetails{
-			Type:      cparser.Contents.Context.Types.All[arg.Type],
+			Type:      arg.Type,
 			EndTokens: []uint16{token.TokenTypeBracketRight, token.TokenTypeComma},
 		}
 		argNode, err := ConstructExpressionStart(cparser, &details)

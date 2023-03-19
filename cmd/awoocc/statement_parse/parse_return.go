@@ -5,7 +5,6 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
 )
 
 func ConstructStatementReturn(cparser *parser.AwooParser, _ lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
@@ -14,7 +13,7 @@ func ConstructStatementReturn(cparser *parser.AwooParser, _ lexer_token.AwooLexe
 	currentFunction := cparser.Context.Functions.Entries[currentScopeFunction.Name]
 	if currentFunction.ReturnType != nil {
 		returnValue, err := ConstructExpressionStart(cparser, &parser_details.ConstructExpressionDetails{
-			Type:      cparser.Context.Lexer.Types.All[types.AwooTypeInt32],
+			Type:      *currentFunction.ReturnType,
 			EndTokens: []uint16{details.EndToken},
 		})
 		if err != nil {
