@@ -8,14 +8,15 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
-func CompileStatementAssignmentIdentifier(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
+func CompileStatementAssignmentIdentifier(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s statement.AwooParserStatement) error {
 	identifierNode := statement.GetStatementAssignmentIdentifier(&s)
 	variableMemory, err := compiler_context.GetCompilerScopeCurrentFunctionMemory(&ccompiler.Context, node.GetNodeIdentifierValue(&identifierNode))
 	if err != nil {
-		return d, err
+		return err
 	}
 	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type]
 
@@ -30,11 +31,11 @@ func CompileStatementAssignmentIdentifier(ccompiler *compiler.AwooCompiler, s st
 	if !variableMemory.Global {
 		valueDetails.Address.Register = cpu.AwooRegisterSavedZero
 	}
-	if d, err = CompileNodeValue(ccompiler, valueNode, d, &valueDetails); err != nil {
-		return d, err
+	if err = CompileNodeValue(ccompiler, elf, valueNode, &valueDetails); err != nil {
+		return err
 	}
 	if valueDetails.Address.Used {
-		return d, nil
+		return nil
 	}
 
 	saveInstruction := encoder.AwooEncodedInstruction{
@@ -43,5 +44,5 @@ func CompileStatementAssignmentIdentifier(ccompiler *compiler.AwooCompiler, s st
 		SourceTwo:   valueDetails.Register,
 		Immediate:   valueDetails.Address.Immediate,
 	}
-	return encoder.Encode(saveInstruction, d)
+	return encoder.Encode(elf, saveInstruction)
 }

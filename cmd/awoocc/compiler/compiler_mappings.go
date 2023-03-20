@@ -4,13 +4,14 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 )
 
-type AwooCompileStatement func(ccompiler *AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error)
+type AwooCompileStatement func(ccompiler *AwooCompiler, elf *elf.AwooElf, s statement.AwooParserStatement) error
 
-type AwooCompileNodeExpression func(ccompiler *AwooCompiler, d []byte, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) ([]byte, error)
+type AwooCompileNodeExpression func(ccompiler *AwooCompiler, elf *elf.AwooElf, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) error
 
-type AwooCompileNodeValue func(ccompiler *AwooCompiler, n node.AwooParserNode, d []byte, details *compiler_details.CompileNodeValueDetails) ([]byte, error)
+type AwooCompileNodeValue func(ccompiler *AwooCompiler, elf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error
 
 type AwooCompilerMappings struct {
 	Statement      map[uint16]AwooCompileStatement

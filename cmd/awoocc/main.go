@@ -16,6 +16,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement_compile"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement_parse"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/flags"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
@@ -116,8 +117,8 @@ func main() {
 			Statement: map[uint16]compiler.AwooCompileStatement{
 				statement.ParserStatementTypeDefinitionVariable: statement_compile.CompileStatementDefinition,
 				statement.ParserStatementTypeAssignment:         statement_compile.CompileStatementAssignment,
-				statement.ParserStatementTypeDefinitionType: func(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
-					return []byte{}, nil
+				statement.ParserStatementTypeDefinitionType: func(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s statement.AwooParserStatement) error {
+					return nil
 				},
 				statement.ParserStatementTypeIf:     statement_compile.CompileStatementIf,
 				statement.ParserStatementTypeGroup:  statement_compile.CompileStatementGroup,

@@ -8,95 +8,114 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
-func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, bodies [][]byte, jump uint32) ([][]byte, uint32, error) {
-	nodeBody := []byte{}
-	var err error
+type AwooCompilerIfBodiesDescriptor struct {
+	Jump   uint32
+	Bodies []AwooCompilerIfBodyDescriptor
+}
 
+type AwooCompilerIfBodyDescriptor struct {
+	Start  uint32
+	Length uint32
+}
+
+func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, descriptor *AwooCompilerIfBodiesDescriptor, s statement.AwooParserStatement) error {
+	start := uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
 	switch s.Type {
 	case statement.ParserStatementTypeIf:
-		// We need to compile the body first to determine comparison jump address.
-		compiler_context.PushCompilerScopeCurrentBlock(&ccompiler.Context, compiler_context.AwooCompilerScopeBlock{
-			Name: "if",
-		})
-		nodeBody, err = CompileStatementGroup(ccompiler, statement.GetStatementIfBody(&s), nodeBody)
-		if err != nil {
-			return bodies, jump, err
-		}
-		compiler_context.PopCompilerScopeCurrentBlock(&ccompiler.Context)
-
 		// TODO: this could be optimized using top level comparison from value node (because the below instruction can compare).
 		valueNode := statement.GetStatementIfValue(&s)
 		valueDetails := compiler_details.CompileNodeValueDetails{
 			Type:     commonTypes.AwooTypeId(types.AwooTypeBoolean),
 			Register: cpu.AwooRegisterTemporaryZero,
 		}
-		ifHeader, err := CompileNodeValue(ccompiler, valueNode, []byte{}, &valueDetails)
-		if err != nil {
-			return bodies, jump, err
+		if err := CompileNodeValue(ccompiler, elf, valueNode, &valueDetails); err != nil {
+			return err
 		}
 
-		jumpBeyondEndInstruction := encoder.AwooEncodedInstruction{
+		// Reserve instruction for jump to next block.
+		jumpToNextBlockStart := uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
+		if err := encoder.Encode(elf, encoder.AwooEncodedInstruction{}); err != nil {
+			return err
+		}
+
+		// Compile the body to determine comparison jump address.
+		compiler_context.PushCompilerScopeCurrentBlock(&ccompiler.Context, compiler_context.AwooCompilerScopeBlock{
+			Name: "if",
+		})
+		if err := CompileStatementGroup(ccompiler, elf, statement.GetStatementIfBody(&s)); err != nil {
+			return err
+		}
+		compiler_context.PopCompilerScopeCurrentBlock(&ccompiler.Context)
+		bodyEnd := uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
+		bodyLength := bodyEnd - jumpToNextBlockStart
+
+		// Populate reserved instruction with jump.
+		jumpToNextBlockInstruction := encoder.AwooEncodedInstruction{
 			Instruction: instructions.AwooInstructionBEQ,
 			SourceOne:   valueDetails.Register,
-			Immediate:   uint32(len(nodeBody) + 8),
+			Immediate:   bodyLength + 8,
 		}
-		ifHeader, err = encoder.Encode(jumpBeyondEndInstruction, ifHeader)
-		if err != nil {
-			return bodies, jump, err
+		if err := encoder.EncodeAt(elf, jumpToNextBlockStart, jumpToNextBlockInstruction); err != nil {
+			return err
 		}
-
-		nodeBody = append(ifHeader, nodeBody...)
 	case statement.ParserStatementTypeGroup:
 		compiler_context.PushCompilerScopeCurrentBlock(&ccompiler.Context, compiler_context.AwooCompilerScopeBlock{
 			Name: "else",
 		})
-		nodeBody, err = CompileStatementGroup(ccompiler, s, []byte{})
-		if err != nil {
-			return bodies, jump, err
+		if err := CompileStatementGroup(ccompiler, elf, s); err != nil {
+			return err
 		}
 		compiler_context.PopCompilerScopeCurrentBlock(&ccompiler.Context)
 	}
 
-	bodies = append(bodies, nodeBody)
-	jump += uint32(len(nodeBody) + 4)
-	return bodies, jump, nil
+	// Reserve instruction for jump beyond subsequent blocks.
+	if err := encoder.Encode(elf, encoder.AwooEncodedInstruction{}); err != nil {
+		return err
+	}
+	end := uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
+	length := end - start
+	descriptor.Bodies = append(descriptor.Bodies, AwooCompilerIfBodyDescriptor{
+		Start:  start,
+		Length: length,
+	})
+	descriptor.Jump += length
+
+	return nil
 }
 
-func CompileStatementIf(_ *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
-	bodies, jump, err := CompileStatementIfNode(&compiler.AwooCompiler{}, s, [][]byte{}, uint32(4))
-	if err != nil {
-		return d, err
+func CompileStatementIf(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, ifNode statement.AwooParserStatement) error {
+	descriptor := AwooCompilerIfBodiesDescriptor{
+		Jump:   uint32(4),
+		Bodies: []AwooCompilerIfBodyDescriptor{},
 	}
-	elseGroups := statement.GetStatementIfElse(&s)
-	for _, nextGroup := range elseGroups {
-		bodies, jump, err = CompileStatementIfNode(&compiler.AwooCompiler{}, nextGroup, bodies, jump)
-		if err != nil {
-			return d, err
+	if err := CompileStatementIfNode(ccompiler, elf, &descriptor, ifNode); err != nil {
+		return err
+	}
+	elseGroups := statement.GetStatementIfElse(&ifNode)
+	for _, elseGroup := range elseGroups {
+		if err := CompileStatementIfNode(ccompiler, elf, &descriptor, elseGroup); err != nil {
+			return err
 		}
 	}
 
 	// This is used for jumping over subsequent if statements.
 	// An extra instruction is added on end of each block, except for the last.
-	for i, body := range bodies {
-		jump -= uint32(len(body) + 4)
-		if jump <= 4 {
-			continue
-		}
-		jumpToNextBlockInstruction := encoder.AwooEncodedInstruction{
+	for _, body := range descriptor.Bodies {
+		// TODO: remove jump on last
+		descriptor.Jump -= uint32(body.Length + 4)
+		jumpBeyondSubsequentBlocksInstruction := encoder.AwooEncodedInstruction{
 			Instruction: instructions.AwooInstructionJAL,
-			Immediate:   jump,
+			Immediate:   descriptor.Jump,
 		}
-		if bodies[i], err = encoder.Encode(jumpToNextBlockInstruction, bodies[i]); err != nil {
-			return d, err
+		if err := encoder.EncodeAt(elf, (body.Start+body.Length)-4, jumpBeyondSubsequentBlocksInstruction); err != nil {
+			return err
 		}
 	}
 
-	for _, b := range bodies {
-		d = append(d, b...)
-	}
-	return d, nil
+	return nil
 }

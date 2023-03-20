@@ -7,14 +7,15 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
-func CompileNodeIdentifier(ccompiler *compiler.AwooCompiler, n node.AwooParserNode, d []byte, details *compiler_details.CompileNodeValueDetails) ([]byte, error) {
+func CompileNodeIdentifier(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
 	identifier := node.GetNodeIdentifierValue(&n)
 	variableMemory, err := compiler_context.GetCompilerScopeCurrentFunctionMemory(&ccompiler.Context, identifier)
 	if err != nil {
-		return d, err
+		return err
 	}
 	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type]
 
@@ -26,5 +27,5 @@ func CompileNodeIdentifier(ccompiler *compiler.AwooCompiler, n node.AwooParserNo
 	if !variableMemory.Global {
 		loadInstruction.SourceOne = cpu.AwooRegisterSavedZero
 	}
-	return encoder.Encode(loadInstruction, d)
+	return encoder.Encode(elf, loadInstruction)
 }

@@ -1,33 +1,22 @@
 package elf
 
-import "github.com/LamkasDev/awoo-emu/cmd/common/types"
-
 type AwooElf struct {
-	Sections          AwooElfSections
-	SymbolTable       AwooElfSymbolTable
-	RelocationDetails AwooElfRelocationTable
+	Type           AwooElfTypeId
+	Counter        uint32
+	SectionList    AwooElfSectionList
+	SymbolTable    AwooElfSymbolTable
+	RelocationList AwooElfRelocationList
 }
 
-type AwooElfSections struct {
-	Text AwooElfSection
-	Data AwooElfSection
-}
-
-type AwooElfSection []byte
-
-type AwooElfSymbolTable map[string]AwooElfSymbolTableEntry
-
-type AwooElfSymbolTableEntry struct {
-	Name        string
-	Type        types.AwooTypeId
-	TypeDetails *types.AwooTypeId
-	Start       uint32
-	Size        uint32
-}
-
-type AwooElfRelocationTable []AwooElfRelocationTableEntry
-
-type AwooElfRelocationTableEntry struct {
-	Offset uint32
-	Name   string
+func NewAwooElf(elfType AwooElfTypeId) AwooElf {
+	return AwooElf{
+		Type: elfType,
+		SectionList: AwooElfSectionList{
+			ProgramIndex: 0,
+			DataIndex:    1,
+			Sections:     []AwooElfSection{{Id: 0, Contents: []byte{}}, {Id: 1, Contents: []byte{}}},
+		},
+		SymbolTable:    AwooElfSymbolTable{},
+		RelocationList: AwooElfRelocationList{},
+	}
 }

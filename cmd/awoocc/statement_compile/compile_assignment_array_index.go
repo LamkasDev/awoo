@@ -8,14 +8,15 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
-func CompileStatementAssignmentArrayIndex(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
+func CompileStatementAssignmentArrayIndex(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s statement.AwooParserStatement) error {
 	identifierNode := statement.GetStatementAssignmentIdentifier(&s)
 	variableMemory, err := compiler_context.GetCompilerScopeCurrentFunctionMemory(&ccompiler.Context, node.GetNodeArrayIndexIdentifier(&identifierNode))
 	if err != nil {
-		return d, err
+		return err
 	}
 	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type]
 
@@ -24,15 +25,15 @@ func CompileStatementAssignmentArrayIndex(ccompiler *compiler.AwooCompiler, s st
 		Type:     variableMemory.Type,
 		Register: cpu.AwooRegisterTemporaryZero,
 	}
-	if d, err = CompileNodeValue(ccompiler, valueNode, d, &valueDetails); err != nil {
-		return d, err
+	if err = CompileNodeValue(ccompiler, elf, valueNode, &valueDetails); err != nil {
+		return err
 	}
 
 	addressDetails := compiler_details.CompileNodeValueDetails{
 		Register: cpu.GetNextTemporaryRegister(valueDetails.Register),
 	}
-	if d, err = CompileArrayIndexAddress(ccompiler, identifierNode, d, &addressDetails); err != nil {
-		return d, err
+	if err = CompileArrayIndexAddress(ccompiler, elf, identifierNode, &addressDetails); err != nil {
+		return err
 	}
 	if !variableMemory.Global {
 		addressAdjustmentInstruction := encoder.AwooEncodedInstruction{
@@ -41,8 +42,8 @@ func CompileStatementAssignmentArrayIndex(ccompiler *compiler.AwooCompiler, s st
 			SourceTwo:   cpu.AwooRegisterSavedZero,
 			Destination: addressDetails.Register,
 		}
-		if d, err = encoder.Encode(addressAdjustmentInstruction, d); err != nil {
-			return d, err
+		if err = encoder.Encode(elf, addressAdjustmentInstruction); err != nil {
+			return err
 		}
 	}
 
@@ -52,5 +53,5 @@ func CompileStatementAssignmentArrayIndex(ccompiler *compiler.AwooCompiler, s st
 		SourceTwo:   valueDetails.Register,
 		Immediate:   uint32(variableMemory.Start),
 	}
-	return encoder.Encode(saveInstruction, d)
+	return encoder.Encode(elf, saveInstruction)
 }

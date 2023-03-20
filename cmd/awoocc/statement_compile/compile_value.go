@@ -7,14 +7,15 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/jwalton/gchalk"
 )
 
-func CompileNodeValue(ccompiler *compiler.AwooCompiler, n node.AwooParserNode, d []byte, details *compiler_details.CompileNodeValueDetails) ([]byte, error) {
+func CompileNodeValue(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
 	entry, ok := ccompiler.Settings.Mappings.NodeValue[n.Type]
 	if !ok {
-		return d, fmt.Errorf("%w: %s", awerrors.ErrorCantCompileNode, gchalk.Red(fmt.Sprintf("%#x", n.Type)))
+		return fmt.Errorf("%w: %s", awerrors.ErrorCantCompileNode, gchalk.Red(fmt.Sprintf("%#x", n.Type)))
 	}
 
-	return entry(ccompiler, n, d, details)
+	return entry(ccompiler, elf, n, details)
 }

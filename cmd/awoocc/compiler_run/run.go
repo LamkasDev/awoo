@@ -2,12 +2,15 @@ package compiler_run
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/gob"
 	"os"
 	"path/filepath"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement_compile"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/jwalton/gchalk"
 )
@@ -25,23 +28,20 @@ func RunCompiler(ccompiler *compiler.AwooCompiler) {
 	}
 
 	writer := bufio.NewWriter(file)
+	elf := elf.AwooElf{}
 	for ok := true; ok; ok = compiler.AdvanceCompiler(ccompiler) {
 		parser.PrintStatement(&ccompiler.Settings.Parser, &ccompiler.Context.Parser, &ccompiler.Current)
-		data, err := statement_compile.CompileStatement(ccompiler, ccompiler.Current, []byte{})
+		err := statement_compile.CompileStatement(ccompiler, &elf, ccompiler.Current)
 		if err != nil {
 			panic(err)
 		}
-		compiler.PrintNewCompile(ccompiler, &ccompiler.Current, data)
-		_, err = writer.Write(data)
-		if err != nil {
-			panic(err)
-		}
-		ccompiler.Context.CurrentAddress += uint16(len(data))
+		// compiler.PrintNewCompile(ccompiler, &ccompiler.Current, data)
 	}
-	writer.Flush()
-	err = CompileProgramHeader(ccompiler, file, writer)
-	if err != nil {
+	var data bytes.Buffer
+	if err := gob.NewEncoder(&data).Encode(elf); err != nil {
 		panic(err)
 	}
+	writer.Write(data.Bytes())
+	writer.Flush()
 	file.Close()
 }

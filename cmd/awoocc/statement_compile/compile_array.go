@@ -6,19 +6,19 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
-func CompileNodeArray(ccompiler *compiler.AwooCompiler, n node.AwooParserNode, d []byte, details *compiler_details.CompileNodeValueDetails) ([]byte, error) {
+func CompileNodeArray(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
 	addressAdjustmentInstruction := encoder.AwooEncodedInstruction{
 		Instruction: instructions.AwooInstructionADDI,
 		SourceOne:   details.Address.Register,
 		Immediate:   details.Address.Immediate,
 		Destination: details.Register,
 	}
-	var err error
-	if d, err = encoder.Encode(addressAdjustmentInstruction, d); err != nil {
-		return d, err
+	if err := encoder.Encode(elf, addressAdjustmentInstruction); err != nil {
+		return err
 	}
 
 	for i, elementNode := range node.GetNodeArrayElements(&n) {
@@ -29,8 +29,8 @@ func CompileNodeArray(ccompiler *compiler.AwooCompiler, n node.AwooParserNode, d
 				Immediate:   uint32(ccompiler.Context.Parser.Lexer.Types.All[details.Type].Size),
 				Destination: details.Register,
 			}
-			if d, err = encoder.Encode(addressAdjustmentInstruction, d); err != nil {
-				return d, err
+			if err := encoder.Encode(elf, addressAdjustmentInstruction); err != nil {
+				return err
 			}
 		}
 
@@ -39,8 +39,8 @@ func CompileNodeArray(ccompiler *compiler.AwooCompiler, n node.AwooParserNode, d
 			Type:     details.Type,
 			Register: cpu.GetNextTemporaryRegister(details.Register),
 		}
-		if d, err = CompileNodeValue(ccompiler, elementNode, d, &elementDetails); err != nil {
-			return d, err
+		if err := CompileNodeValue(ccompiler, elf, elementNode, &elementDetails); err != nil {
+			return err
 		}
 
 		saveInstruction := encoder.AwooEncodedInstruction{
@@ -48,11 +48,11 @@ func CompileNodeArray(ccompiler *compiler.AwooCompiler, n node.AwooParserNode, d
 			SourceOne:   details.Register,
 			SourceTwo:   elementDetails.Register,
 		}
-		if d, err = encoder.Encode(saveInstruction, d); err != nil {
-			return d, err
+		if err := encoder.Encode(elf, saveInstruction); err != nil {
+			return err
 		}
 	}
 
 	details.Address.Used = true
-	return d, nil
+	return nil
 }

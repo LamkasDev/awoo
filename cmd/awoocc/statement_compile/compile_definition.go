@@ -9,6 +9,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
@@ -47,16 +48,16 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 	}
 }
 
-func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
+func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s statement.AwooParserStatement) error {
 	variableMemory, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, GetCompilerMemoryEntry(ccompiler, s))
 	if err != nil {
-		return d, err
+		return err
 	}
 	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type]
 
 	valueNode := statement.GetStatementDefinitionVariableValue(&s)
 	if valueNode == nil {
-		return d, nil
+		return nil
 	}
 	valueDetails := compiler_details.CompileNodeValueDetails{
 		Type:     variableMemory.Type,
@@ -68,11 +69,11 @@ func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, s statement.Aw
 	if !variableMemory.Global {
 		valueDetails.Address.Register = cpu.AwooRegisterSavedZero
 	}
-	if d, err = CompileNodeValue(ccompiler, *valueNode, d, &valueDetails); err != nil {
-		return d, err
+	if err = CompileNodeValue(ccompiler, elf, *valueNode, &valueDetails); err != nil {
+		return err
 	}
 	if valueDetails.Address.Used {
-		return d, nil
+		return nil
 	}
 
 	saveInstruction := encoder.AwooEncodedInstruction{
@@ -81,5 +82,5 @@ func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, s statement.Aw
 		SourceTwo:   valueDetails.Register,
 		Immediate:   valueDetails.Address.Immediate,
 	}
-	return encoder.Encode(saveInstruction, d)
+	return encoder.Encode(elf, saveInstruction)
 }

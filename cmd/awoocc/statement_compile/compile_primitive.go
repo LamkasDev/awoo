@@ -6,10 +6,11 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
-func CompileNodePrimitive(ccompiler *compiler.AwooCompiler, n node.AwooParserNode, d []byte, details *compiler_details.CompileNodeValueDetails) ([]byte, error) {
+func CompileNodePrimitive(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
 	// TODO: handle unsigned.
 	primitiveValue := node.GetNodePrimitiveValueFormat[int64](ccompiler.Context.Parser.Lexer, &n)
 	if primitiveValue > arch.AwooImmediateSmallMax {
@@ -20,31 +21,31 @@ func CompileNodePrimitive(ccompiler *compiler.AwooCompiler, n node.AwooParserNod
 		}
 
 		// Load upper 20-bits, if primitive value is over 12-bits
-		d, err := encoder.Encode(encoder.AwooEncodedInstruction{
+		err := encoder.Encode(elf, encoder.AwooEncodedInstruction{
 			Instruction: instructions.AwooInstructionLUI,
 			Immediate:   uint32(luiValue),
 			Destination: details.Register,
-		}, d)
+		})
 		if err != nil {
-			return d, err
+			return err
 		}
 
 		if addiValue != 0 {
 			// Load lower 12-bits
-			return encoder.Encode(encoder.AwooEncodedInstruction{
+			return encoder.Encode(elf, encoder.AwooEncodedInstruction{
 				Instruction: instructions.AwooInstructionADDI,
 				Immediate:   uint32(addiValue),
 				SourceOne:   details.Register,
 				Destination: details.Register,
-			}, d)
+			})
 		}
 
-		return d, nil
+		return nil
 	}
 
-	return encoder.Encode(encoder.AwooEncodedInstruction{
+	return encoder.Encode(elf, encoder.AwooEncodedInstruction{
 		Instruction: instructions.AwooInstructionADDI,
 		Immediate:   uint32(primitiveValue),
 		Destination: details.Register,
-	}, d)
+	})
 }

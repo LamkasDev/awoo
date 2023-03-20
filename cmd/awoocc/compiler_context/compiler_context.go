@@ -5,12 +5,7 @@ import (
 )
 
 type AwooCompilerContext struct {
-	CurrentAddress uint16
-	Parser         parser_context.AwooParserContext
-	Scopes         AwooCompilerScopeContainer
-	Functions      AwooCompilerFunctionContainer
-}
-
-func GetProgramHeaderSize() uint16 {
-	return 8
+	Parser    parser_context.AwooParserContext
+	Scopes    AwooCompilerScopeContainer
+	Functions AwooCompilerFunctionContainer
 }

@@ -8,11 +8,12 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
-func CompileStatementFunc(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
+func CompileStatementFunc(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s statement.AwooParserStatement) error {
 	functionNameNode := statement.GetStatementFuncIdentifier(&s)
 	functionName := node.GetNodeIdentifierValue(&functionNameNode)
 	compiler_context.PushCompilerScopeFunction(&ccompiler.Context, compiler_context.AwooCompilerScopeFunction{
@@ -29,7 +30,7 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, s statement.AwooPars
 			TypeDetails: argument.TypeDetails,
 		})
 		if err != nil {
-			return d, err
+			return err
 		}
 		functionArgumentsOffset += uint32(argument.Size)
 	}
@@ -40,7 +41,7 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, s statement.AwooPars
 		Type: commonTypes.AwooTypeId(types.AwooTypePointer),
 	})
 	if err != nil {
-		return d, err
+		return err
 	}
 
 	functionReturnTypeNode := statement.GetStatementFuncReturnType(&s)
@@ -56,26 +57,20 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, s statement.AwooPars
 		SourceTwo:   cpu.AwooRegisterReturnAddress,
 		Immediate:   functionArgumentsOffset,
 	}
-	if d, err = encoder.Encode(stackAdjustmentInstruction, d); err != nil {
-		return d, err
+	if err = encoder.Encode(elf, stackAdjustmentInstruction); err != nil {
+		return err
 	}
 
 	compiler_context.PushCompilerFunction(&ccompiler.Context, compiler_context.AwooCompilerFunction{
 		Name:       functionName,
 		ReturnType: functionReturnType,
 		Arguments:  statement.GetStatementFuncArguments(&s),
-		Start:      compiler_context.GetProgramHeaderSize() + ccompiler.Context.CurrentAddress,
-		Size:       uint16(len(d)),
+		Start:      uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents)),
 	})
-	if d, err = CompileStatementGroup(ccompiler, statement.GetStatementFuncBody(&s), d); err != nil {
-		return d, err
+	if err = CompileStatementGroup(ccompiler, elf, statement.GetStatementFuncBody(&s)); err != nil {
+		return err
 	}
 	compiler_context.PopCompilerScopeCurrentFunction(&ccompiler.Context)
 
-	if ccompiler.Context.Functions.Start == "" {
-		ccompiler.Context.Functions.Start = functionName
-		d = append(make([]byte, compiler_context.GetProgramHeaderSize()), d...)
-	}
-
-	return d, nil
+	return nil
 }

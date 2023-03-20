@@ -7,14 +7,14 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
-func CompileStatementFor(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
-	var err error
-	if d, err = CompileStatement(ccompiler, statement.GetStatementForInitialization(&s), d); err != nil {
-		return d, err
+func CompileStatementFor(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s statement.AwooParserStatement) error {
+	if err := CompileStatement(ccompiler, elf, statement.GetStatementForInitialization(&s)); err != nil {
+		return err
 	}
 	initSize := len(d)
 
@@ -22,18 +22,18 @@ func CompileStatementFor(ccompiler *compiler.AwooCompiler, s statement.AwooParse
 		Type:     commonTypes.AwooTypeId(types.AwooTypeBoolean),
 		Register: cpu.AwooRegisterTemporaryZero,
 	}
-	if d, err = CompileNodeValue(ccompiler, statement.GetStatementForCondition(&s), d, &conditionDetails); err != nil {
-		return d, err
+	if err := CompileNodeValue(ccompiler, elf, statement.GetStatementForCondition(&s), &conditionDetails); err != nil {
+		return err
 	}
 
 	body, err := CompileStatementGroup(ccompiler, statement.GetStatementForBody(&s), []byte{})
 	if err != nil {
-		return d, err
+		return err
 	}
 
-	body, err = CompileStatement(ccompiler, statement.GetStatementForAdvancement(&s), body)
+	body, err = CompileStatement(ccompiler, elf, statement.GetStatementForAdvancement(&s))
 	if err != nil {
-		return d, err
+		return err
 	}
 
 	jumpToConditionInstruction := encoder.AwooEncodedInstruction{
@@ -50,10 +50,9 @@ func CompileStatementFor(ccompiler *compiler.AwooCompiler, s statement.AwooParse
 		SourceOne:   cpu.AwooRegisterTemporaryZero,
 		Immediate:   uint32((len(d) - initSize) + len(body)),
 	}
-	if d, err = encoder.Encode(jumpBeyondEndInstruction, d); err != nil {
-		return d, err
+	if err = encoder.Encode(elf, jumpBeyondEndInstruction); err != nil {
+		return err
 	}
 
-	d = append(d, body...)
-	return d, nil
+	return nil
 }

@@ -7,21 +7,21 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
-func CompileStatementReturn(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement, d []byte) ([]byte, error) {
+func CompileStatementReturn(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s statement.AwooParserStatement) error {
 	currentScopeFunction := ccompiler.Context.Scopes.Functions[uint16(len(ccompiler.Context.Scopes.Functions)-1)]
 	currentFunction, _ := compiler_context.GetCompilerFunction(&ccompiler.Context, currentScopeFunction.Name)
-	var err error
 	if currentFunction.ReturnType != nil {
 		returnValueNode := statement.GetStatementReturnValue(&s)
 		returnDetails := compiler_details.CompileNodeValueDetails{
 			Type:     *currentFunction.ReturnType,
 			Register: cpu.AwooRegisterFunctionZero,
 		}
-		if d, err = CompileNodeValue(ccompiler, *returnValueNode, d, &returnDetails); err != nil {
-			return d, err
+		if err := CompileNodeValue(ccompiler, elf, *returnValueNode, &returnDetails); err != nil {
+			return err
 		}
 	}
 
@@ -31,12 +31,12 @@ func CompileStatementReturn(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 		Immediate:   uint32(compiler_context.GetCompilerFunctionArgumentsSize(currentFunction)),
 		Destination: cpu.AwooRegisterReturnAddress,
 	}
-	if d, err = encoder.Encode(loadReturnAddressInstruction, d); err != nil {
-		return d, err
+	if err := encoder.Encode(elf, loadReturnAddressInstruction); err != nil {
+		return err
 	}
 
-	return encoder.Encode(encoder.AwooEncodedInstruction{
+	return encoder.Encode(elf, encoder.AwooEncodedInstruction{
 		Instruction: instructions.AwooInstructionJALR,
 		SourceOne:   cpu.AwooRegisterReturnAddress,
-	}, d)
+	})
 }

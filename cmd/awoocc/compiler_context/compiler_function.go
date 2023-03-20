@@ -7,15 +7,13 @@ import (
 
 type AwooCompilerFunctionContainer struct {
 	Entries map[string]AwooCompilerFunction
-	Start   string
 }
 
 type AwooCompilerFunction struct {
 	Name       string
 	ReturnType *types.AwooTypeId
 	Arguments  []statement.AwooParserStatementFuncArgument
-	Start      uint16
-	Size       uint16
+	Start      uint32
 }
 
 func PushCompilerFunction(context *AwooCompilerContext, entry AwooCompilerFunction) {
