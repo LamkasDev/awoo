@@ -21,8 +21,8 @@ install: build
 
 runcc: build
 	@if not exist "$(AWOODIR)\bin\dev" mkdir "$(AWOODIR)\bin\dev"
-	@copy "build\$(AWOOPLATFORM)\awooll.exe" "$(AWOODIR)\bin\dev\awooll.exe" >nul
-	@cd "build\$(AWOOPLATFORM)" && .\awooll.exe -i "$(AWOODIR)\data\input.awoo" -o "$(AWOODIR)\data\obj\input.awoobj"
+	@copy "build\$(AWOOPLATFORM)\awoocc.exe" "$(AWOODIR)\bin\dev\awoocc.exe" >nul
+	@cd "build\$(AWOOPLATFORM)" && .\awoocc.exe -i "$(AWOODIR)\data\input.awoo" -o "$(AWOODIR)\data\obj\input.awoobj"
 	
 runld: build
 	@if not exist "$(AWOODIR)\bin\dev" mkdir "$(AWOODIR)\bin\dev"
