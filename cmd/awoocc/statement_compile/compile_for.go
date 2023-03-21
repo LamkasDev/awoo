@@ -16,7 +16,12 @@ func CompileStatementFor(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s s
 	if err := CompileStatement(ccompiler, elf, statement.GetStatementForInitialization(&s)); err != nil {
 		return err
 	}
-	initSize := len(d)
+
+	// Reserve instruction for condition.
+	conditionStart := uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
+	if err := encoder.Encode(elf, encoder.AwooEncodedInstruction{}); err != nil {
+		return err
+	}
 
 	conditionDetails := compiler_details.CompileNodeValueDetails{
 		Type:     commonTypes.AwooTypeId(types.AwooTypeBoolean),
@@ -26,31 +31,30 @@ func CompileStatementFor(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s s
 		return err
 	}
 
-	body, err := CompileStatementGroup(ccompiler, statement.GetStatementForBody(&s), []byte{})
-	if err != nil {
+	if err := CompileStatementGroup(ccompiler, elf, statement.GetStatementForBody(&s)); err != nil {
 		return err
 	}
 
-	body, err = CompileStatement(ccompiler, elf, statement.GetStatementForAdvancement(&s))
-	if err != nil {
+	if err := CompileStatement(ccompiler, elf, statement.GetStatementForAdvancement(&s)); err != nil {
 		return err
 	}
 
+	end := uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
 	jumpToConditionInstruction := encoder.AwooEncodedInstruction{
 		Instruction: instructions.AwooInstructionJAL,
-		Immediate:   uint32((-len(d) + initSize) - len(body)),
+		Immediate:   uint32(conditionStart - end),
 	}
-	body, err = encoder.Encode(jumpToConditionInstruction, body)
-	if err != nil {
-		return d, err
+	if err := encoder.Encode(elf, jumpToConditionInstruction); err != nil {
+		return err
 	}
 
+	end = uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
 	jumpBeyondEndInstruction := encoder.AwooEncodedInstruction{
 		Instruction: instructions.AwooInstructionBEQ,
 		SourceOne:   cpu.AwooRegisterTemporaryZero,
-		Immediate:   uint32((len(d) - initSize) + len(body)),
+		Immediate:   uint32(end - conditionStart),
 	}
-	if err = encoder.Encode(elf, jumpBeyondEndInstruction); err != nil {
+	if err := encoder.EncodeAt(elf, conditionStart, jumpBeyondEndInstruction); err != nil {
 		return err
 	}
 

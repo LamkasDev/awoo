@@ -28,7 +28,7 @@ func RunCompiler(ccompiler *compiler.AwooCompiler) {
 	}
 
 	writer := bufio.NewWriter(file)
-	elf := elf.AwooElf{}
+	elf := elf.NewAwooElf(elf.AwooElfTypeObject)
 	for ok := true; ok; ok = compiler.AdvanceCompiler(ccompiler) {
 		parser.PrintStatement(&ccompiler.Settings.Parser, &ccompiler.Context.Parser, &ccompiler.Current)
 		err := statement_compile.CompileStatement(ccompiler, &elf, ccompiler.Current)

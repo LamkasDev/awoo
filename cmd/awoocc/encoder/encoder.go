@@ -63,6 +63,6 @@ func EncodeAt(elf *elf.AwooElf, offset uint32, ins AwooEncodedInstruction) error
 
 func Encode(elf *elf.AwooElf, ins AwooEncodedInstruction) error {
 	offset := uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
-	binary.BigEndian.AppendUint32(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents, uint32(0))
+	elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents = binary.BigEndian.AppendUint32(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents, uint32(0))
 	return EncodeAt(elf, offset, ins)
 }

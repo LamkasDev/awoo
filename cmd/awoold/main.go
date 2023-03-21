@@ -2,12 +2,16 @@ package main
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/gob"
 	"flag"
+	"fmt"
 	"os"
 	"os/user"
 	"path"
 	"path/filepath"
 
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/flags"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/LamkasDev/awoo-emu/cmd/common/paths"
@@ -34,6 +38,12 @@ func main() {
 		panic(err)
 	}
 
+	var elf elf.AwooElf
+	if err := gob.NewDecoder(bytes.NewBuffer(inputFile)).Decode(&elf); err != nil {
+		panic(err)
+	}
+	fmt.Printf("%+v\n", elf)
+
 	err = os.MkdirAll(filepath.Dir(output), 0644)
 	if err != nil {
 		panic(err)
@@ -44,7 +54,11 @@ func main() {
 	}
 
 	writer := bufio.NewWriter(outputFile)
-	writer.Write(inputFile)
+	var data bytes.Buffer
+	if err := gob.NewEncoder(&data).Encode(elf); err != nil {
+		panic(err)
+	}
+	writer.Write(data.Bytes())
 	writer.Flush()
 	outputFile.Close()
 }
