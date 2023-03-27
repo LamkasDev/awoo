@@ -20,11 +20,10 @@ func PrintDecodedInstruction(ins instruction.AwooInstruction) string {
 	)
 }
 
-func PrintInternalInstruction(internal *internal.AwooEmulatorInternal, raw []byte, ins instruction.AwooInstruction) {
+func PrintInternalInstruction(internal *internal.AwooEmulatorInternal, ins instruction.AwooInstruction) {
 	logger.Log(
-		"c: %s; r: %s; %s",
+		"c: %s; %s",
 		gchalk.Red(fmt.Sprintf("%#6x", internal.CPU.Counter)),
-		gchalk.Cyan(fmt.Sprintf("%#x %#x %#x %#x", raw[0:1], raw[1:2], raw[2:3], raw[3:4])),
 		PrintDecodedInstruction(ins),
 	)
 }

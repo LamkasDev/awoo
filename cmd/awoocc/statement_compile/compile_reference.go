@@ -22,7 +22,7 @@ func CompileNodeReference(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n 
 	// TODO: merge this logic with primitives
 	return encoder.Encode(elf, encoder.AwooEncodedInstruction{
 		Instruction: instructions.AwooInstructionADDI,
-		Immediate:   uint32(variableMemory.Start),
+		Immediate:   uint32(variableMemory.Symbol.Start),
 		Destination: details.Register,
 	})
 }

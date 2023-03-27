@@ -2,7 +2,7 @@ package compiler_context
 
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
-	"github.com/LamkasDev/awoo-emu/cmd/common/types"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 )
 
 type AwooCompilerFunctionContainer struct {
@@ -10,14 +10,18 @@ type AwooCompilerFunctionContainer struct {
 }
 
 type AwooCompilerFunction struct {
-	Name       string
-	ReturnType *types.AwooTypeId
-	Arguments  []statement.AwooParserStatementFuncArgument
-	Start      uint32
+	Symbol    elf.AwooElfSymbolTableEntry
+	Arguments []statement.AwooParserStatementFuncArgument
 }
 
 func PushCompilerFunction(context *AwooCompilerContext, entry AwooCompilerFunction) {
-	context.Functions.Entries[entry.Name] = entry
+	context.Functions.Entries[entry.Symbol.Name] = entry
+}
+
+func SetSizeOfCompilerFunction(context *AwooCompilerContext, name string, size uint32) {
+	entry := context.Functions.Entries[name]
+	entry.Symbol.Size = size
+	context.Functions.Entries[name] = entry
 }
 
 func GetCompilerFunction(context *AwooCompilerContext, name string) (AwooCompilerFunction, bool) {

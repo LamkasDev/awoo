@@ -1,8 +1,10 @@
 package elf
 
+import "github.com/LamkasDev/awoo-emu/cmd/common/arch"
+
 type AwooElf struct {
 	Type           AwooElfTypeId
-	Counter        uint32
+	Counter        arch.AwooRegister
 	SectionList    AwooElfSectionList
 	SymbolTable    AwooElfSymbolTable
 	RelocationList AwooElfRelocationList

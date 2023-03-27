@@ -19,11 +19,11 @@ func CompileStatementAssignmentPointer(ccompiler *compiler.AwooCompiler, elf *el
 	if err != nil {
 		return err
 	}
-	variableType := ccompiler.Context.Parser.Lexer.Types.All[*variableMemory.TypeDetails]
+	variableType := ccompiler.Context.Parser.Lexer.Types.All[*variableMemory.Symbol.TypeDetails]
 
 	valueNode := statement.GetStatementAssignmentValue(&s)
 	details := compiler_details.CompileNodeValueDetails{
-		Type:     variableMemory.Type,
+		Type:     variableMemory.Symbol.Type,
 		Register: cpu.AwooRegisterTemporaryZero,
 	}
 	if err = CompileNodeValue(ccompiler, elf, valueNode, &details); err != nil {
@@ -32,9 +32,9 @@ func CompileStatementAssignmentPointer(ccompiler *compiler.AwooCompiler, elf *el
 
 	addressRegister := cpu.GetNextTemporaryRegister(details.Register)
 	loadInstruction := encoder.AwooEncodedInstruction{
-		Instruction: *instructions.AwooInstructionsLoad[ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type].Size],
+		Instruction: *instructions.AwooInstructionsLoad[ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Symbol.Type].Size],
 		Destination: addressRegister,
-		Immediate:   uint32(variableMemory.Start),
+		Immediate:   uint32(variableMemory.Symbol.Start),
 	}
 	if !variableMemory.Global {
 		loadInstruction.SourceOne = cpu.AwooRegisterSavedZero

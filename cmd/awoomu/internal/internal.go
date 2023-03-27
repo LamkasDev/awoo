@@ -3,7 +3,6 @@ package internal
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/memory"
-	"github.com/LamkasDev/awoo-emu/cmd/awoomu/rom"
 )
 
 type AwooEmulatorInternal struct {
@@ -11,7 +10,6 @@ type AwooEmulatorInternal struct {
 	Executing bool
 	CPU       cpu.AwooCPU
 	Memory    memory.AwooMemory
-	ROM       rom.AwooRom
 }
 
 func SetupInternal() AwooEmulatorInternal {

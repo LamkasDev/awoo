@@ -14,10 +14,10 @@ import (
 func CompileStatementReturn(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s statement.AwooParserStatement) error {
 	currentScopeFunction := ccompiler.Context.Scopes.Functions[uint16(len(ccompiler.Context.Scopes.Functions)-1)]
 	currentFunction, _ := compiler_context.GetCompilerFunction(&ccompiler.Context, currentScopeFunction.Name)
-	if currentFunction.ReturnType != nil {
+	if currentFunction.Symbol.TypeDetails != nil {
 		returnValueNode := statement.GetStatementReturnValue(&s)
 		returnDetails := compiler_details.CompileNodeValueDetails{
-			Type:     *currentFunction.ReturnType,
+			Type:     *currentFunction.Symbol.TypeDetails,
 			Register: cpu.AwooRegisterFunctionZero,
 		}
 		if err := CompileNodeValue(ccompiler, elf, *returnValueNode, &returnDetails); err != nil {

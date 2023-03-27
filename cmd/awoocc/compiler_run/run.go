@@ -8,9 +8,10 @@ import (
 	"path/filepath"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
+	awooElf "github.com/LamkasDev/awoo-emu/cmd/awoocc/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement_compile"
-	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
+	commonElf "github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/jwalton/gchalk"
 )
@@ -28,15 +29,17 @@ func RunCompiler(ccompiler *compiler.AwooCompiler) {
 	}
 
 	writer := bufio.NewWriter(file)
-	elf := elf.NewAwooElf(elf.AwooElfTypeObject)
+	elf := commonElf.NewAwooElf(commonElf.AwooElfTypeObject)
 	for ok := true; ok; ok = compiler.AdvanceCompiler(ccompiler) {
+		start := len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents)
 		parser.PrintStatement(&ccompiler.Settings.Parser, &ccompiler.Context.Parser, &ccompiler.Current)
-		err := statement_compile.CompileStatement(ccompiler, &elf, ccompiler.Current)
-		if err != nil {
+		if err := statement_compile.CompileStatement(ccompiler, &elf, ccompiler.Current); err != nil {
 			panic(err)
 		}
-		// compiler.PrintNewCompile(ccompiler, &ccompiler.Current, data)
+		end := len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents)
+		compiler.PrintNewCompile(ccompiler, &ccompiler.Current, elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents[start:end])
 	}
+	awooElf.PopulateSymbolTable(ccompiler, &elf)
 	var data bytes.Buffer
 	if err := gob.NewEncoder(&data).Encode(elf); err != nil {
 		panic(err)

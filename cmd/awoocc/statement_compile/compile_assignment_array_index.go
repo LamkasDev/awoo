@@ -18,11 +18,11 @@ func CompileStatementAssignmentArrayIndex(ccompiler *compiler.AwooCompiler, elf 
 	if err != nil {
 		return err
 	}
-	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type]
+	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Symbol.Type]
 
 	valueNode := statement.GetStatementAssignmentValue(&s)
 	valueDetails := compiler_details.CompileNodeValueDetails{
-		Type:     variableMemory.Type,
+		Type:     variableMemory.Symbol.Type,
 		Register: cpu.AwooRegisterTemporaryZero,
 	}
 	if err = CompileNodeValue(ccompiler, elf, valueNode, &valueDetails); err != nil {
@@ -51,7 +51,7 @@ func CompileStatementAssignmentArrayIndex(ccompiler *compiler.AwooCompiler, elf 
 		Instruction: *instructions.AwooInstructionsSave[variableType.Size],
 		SourceOne:   addressDetails.Register,
 		SourceTwo:   valueDetails.Register,
-		Immediate:   uint32(variableMemory.Start),
+		Immediate:   uint32(variableMemory.Symbol.Start),
 	}
 	return encoder.Encode(elf, saveInstruction)
 }

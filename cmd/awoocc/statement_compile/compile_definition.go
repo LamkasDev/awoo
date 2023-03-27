@@ -24,27 +24,33 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 		pointedTypeNode := node.GetNodeSingleValue(&variableTypeNode)
 		pointedType := node.GetNodeTypeType(&pointedTypeNode)
 		return compiler_context.AwooCompilerMemoryEntry{
-			Name:        variableName,
-			Type:        commonTypes.AwooTypeId(types.AwooTypePointer),
-			TypeDetails: &pointedType,
-			Size:        ccompiler.Context.Parser.Lexer.Types.All[commonTypes.AwooTypeId(types.AwooTypePointer)].Size,
+			Symbol: elf.AwooElfSymbolTableEntry{
+				Name:        variableName,
+				Type:        commonTypes.AwooTypeId(types.AwooTypePointer),
+				TypeDetails: &pointedType,
+				Size:        ccompiler.Context.Parser.Lexer.Types.All[commonTypes.AwooTypeId(types.AwooTypePointer)].Size,
+			},
 		}
 	case node.ParserNodeTypeTypeArray:
 		arraySize := node.GetNodeTypeArraySize(&variableTypeNode)
 		arrayTypeNode := node.GetNodeTypeArrayType(&variableTypeNode)
 		arrayType := node.GetNodeTypeType(&arrayTypeNode)
 		return compiler_context.AwooCompilerMemoryEntry{
-			Name: variableName,
-			Type: arrayType,
-			Size: arraySize * ccompiler.Context.Parser.Lexer.Types.All[arrayType].Size,
+			Symbol: elf.AwooElfSymbolTableEntry{
+				Name: variableName,
+				Type: arrayType,
+				Size: arraySize * ccompiler.Context.Parser.Lexer.Types.All[arrayType].Size,
+			},
 		}
 	}
 
 	variableType := node.GetNodeTypeType(&variableTypeNode)
 	return compiler_context.AwooCompilerMemoryEntry{
-		Name: variableName,
-		Type: variableType,
-		Size: ccompiler.Context.Parser.Lexer.Types.All[variableType].Size,
+		Symbol: elf.AwooElfSymbolTableEntry{
+			Name: variableName,
+			Type: variableType,
+			Size: ccompiler.Context.Parser.Lexer.Types.All[variableType].Size,
+		},
 	}
 }
 
@@ -53,17 +59,17 @@ func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, elf *elf.AwooE
 	if err != nil {
 		return err
 	}
-	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type]
+	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Symbol.Type]
 
 	valueNode := statement.GetStatementDefinitionVariableValue(&s)
 	if valueNode == nil {
 		return nil
 	}
 	valueDetails := compiler_details.CompileNodeValueDetails{
-		Type:     variableMemory.Type,
+		Type:     variableMemory.Symbol.Type,
 		Register: cpu.AwooRegisterTemporaryZero,
 		Address: compiler_details.CompileNodeValueDetailsAddress{
-			Immediate: variableMemory.Start,
+			Immediate: variableMemory.Symbol.Start,
 		},
 	}
 	if !variableMemory.Global {

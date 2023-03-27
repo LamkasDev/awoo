@@ -13,6 +13,7 @@ type ReadMemoryFunc[K constraints.Integer] func(mem *AwooMemory, n arch.AwooRegi
 type AwooMemory struct {
 	Data       []byte
 	Lockable   []AwooMemoryLockable
+	ProgramEnd arch.AwooRegister
 	TotalRead  uint64
 	TotalWrite uint64
 }

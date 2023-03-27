@@ -18,14 +18,14 @@ func CompileStatementAssignmentIdentifier(ccompiler *compiler.AwooCompiler, elf 
 	if err != nil {
 		return err
 	}
-	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type]
+	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Symbol.Type]
 
 	valueNode := statement.GetStatementAssignmentValue(&s)
 	valueDetails := compiler_details.CompileNodeValueDetails{
-		Type:     variableMemory.Type,
+		Type:     variableMemory.Symbol.Type,
 		Register: cpu.AwooRegisterTemporaryZero,
 		Address: compiler_details.CompileNodeValueDetailsAddress{
-			Immediate: variableMemory.Start,
+			Immediate: variableMemory.Symbol.Start,
 		},
 	}
 	if !variableMemory.Global {

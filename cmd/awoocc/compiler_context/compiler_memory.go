@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/awerrors"
-	"github.com/LamkasDev/awoo-emu/cmd/common/types"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/jwalton/gchalk"
 )
 
@@ -14,19 +14,15 @@ type AwooCompilerMemory struct {
 }
 
 type AwooCompilerMemoryEntry struct {
-	Name        string
-	Global      bool
-	Type        types.AwooTypeId
-	TypeDetails *types.AwooTypeId
-	Start       uint32
-	Size        uint32
+	Symbol elf.AwooElfSymbolTableEntry
+	Global bool
 }
 
 func PushCompilerScopeBlockMemory(context *AwooCompilerContext, funcId uint16, blockId uint16, blockEntry AwooCompilerMemoryEntry) (AwooCompilerMemoryEntry, error) {
 	functionBlock := context.Scopes.Functions[funcId].Blocks[blockId]
-	blockEntry.Start = functionBlock.Memory.Position
-	functionBlock.Memory.Position += blockEntry.Size
-	functionBlock.Memory.Entries[blockEntry.Name] = blockEntry
+	blockEntry.Symbol.Start = functionBlock.Memory.Position
+	functionBlock.Memory.Position += blockEntry.Symbol.Size
+	functionBlock.Memory.Entries[blockEntry.Symbol.Name] = blockEntry
 	context.Scopes.Functions[funcId].Blocks[blockId] = functionBlock
 
 	return blockEntry, nil
@@ -36,9 +32,9 @@ func PushCompilerScopeCurrentBlockMemory(context *AwooCompilerContext, blockEntr
 	scopeFunction, ok := context.Scopes.Functions[uint16(len(context.Scopes.Functions)-1)]
 	if !ok {
 		blockEntry.Global = true
-		blockEntry.Start = context.Scopes.Global.Position
-		context.Scopes.Global.Entries[blockEntry.Name] = blockEntry
-		context.Scopes.Global.Position += blockEntry.Size
+		blockEntry.Symbol.Start = context.Scopes.Global.Position
+		context.Scopes.Global.Entries[blockEntry.Symbol.Name] = blockEntry
+		context.Scopes.Global.Position += blockEntry.Symbol.Size
 		return blockEntry, nil
 	}
 
@@ -52,7 +48,7 @@ func PopCompilerScopeBlockMemory(context *AwooCompilerContext, funcId uint16, bl
 	}
 
 	functionBlock := context.Scopes.Functions[funcId].Blocks[blockId]
-	functionBlock.Memory.Position -= blockEntry.Size
+	functionBlock.Memory.Position -= blockEntry.Symbol.Size
 	delete(functionBlock.Memory.Entries, name)
 	context.Scopes.Functions[funcId].Blocks[blockId] = functionBlock
 
@@ -62,7 +58,7 @@ func PopCompilerScopeBlockMemory(context *AwooCompilerContext, funcId uint16, bl
 func PopCompilerScopeFunctionMemory(context *AwooCompilerContext, funcId uint16, name string) error {
 	globalEntry, ok := context.Scopes.Global.Entries[name]
 	if ok {
-		context.Scopes.Global.Position -= globalEntry.Size
+		context.Scopes.Global.Position -= globalEntry.Symbol.Size
 		delete(context.Scopes.Global.Entries, name)
 		return nil
 	}

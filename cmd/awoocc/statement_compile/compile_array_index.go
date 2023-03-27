@@ -33,7 +33,7 @@ func CompileNodeArrayIndex(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n
 	}
 
 	addressDetails := compiler_details.CompileNodeValueDetails{
-		Type:     variableMemory.Type,
+		Type:     variableMemory.Symbol.Type,
 		Register: cpu.GetNextTemporaryRegister(details.Register),
 	}
 	if err = CompileArrayIndexAddress(ccompiler, elf, n, &addressDetails); err != nil {
@@ -52,10 +52,10 @@ func CompileNodeArrayIndex(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n
 	}
 
 	loadInstruction := encoder.AwooEncodedInstruction{
-		Instruction: *instructions.AwooInstructionsLoad[ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Type].Size],
+		Instruction: *instructions.AwooInstructionsLoad[ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Symbol.Type].Size],
 		SourceOne:   addressDetails.Register,
 		Destination: details.Register,
-		Immediate:   uint32(variableMemory.Start),
+		Immediate:   uint32(variableMemory.Symbol.Start),
 	}
 	return encoder.Encode(elf, loadInstruction)
 }

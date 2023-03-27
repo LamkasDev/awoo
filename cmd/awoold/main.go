@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"flag"
-	"fmt"
 	"os"
 	"os/user"
 	"path"
@@ -42,7 +41,6 @@ func main() {
 	if err := gob.NewDecoder(bytes.NewBuffer(inputFile)).Decode(&elf); err != nil {
 		panic(err)
 	}
-	fmt.Printf("%+v\n", elf)
 
 	err = os.MkdirAll(filepath.Dir(output), 0644)
 	if err != nil {

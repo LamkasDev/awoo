@@ -63,7 +63,7 @@ func CompileNodeCall(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node.
 	jumpInstruction := encoder.AwooEncodedInstruction{
 		Instruction: instructions.AwooInstructionJALR,
 		Destination: cpu.AwooRegisterReturnAddress,
-		Immediate:   uint32(function.Start),
+		Immediate:   uint32(function.Symbol.Start),
 	}
 	if err = encoder.Encode(elf, jumpInstruction); err != nil {
 		return err

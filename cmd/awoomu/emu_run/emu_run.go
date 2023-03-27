@@ -1,26 +1,41 @@
 package emu_run
 
 import (
-	"encoding/binary"
+	"bytes"
+	"encoding/gob"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/emu"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/internal"
-	"github.com/LamkasDev/awoo-emu/cmd/awoomu/rom"
+	"github.com/LamkasDev/awoo-emu/cmd/awoomu/memory"
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	commonInstruction "github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/jwalton/gchalk"
 )
 
-func Load(path string) {
-	/* program, _ := SelectProgram() */
-	emulator := emu.SetupEmulator()
-	rom.LoadROMFromPath(&emulator.Internal.ROM, path)
-	Run(&emulator)
+func Load(emulator *emu.AwooEmulator, path string) {
+	osFile, err := os.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+	var osElf elf.AwooElf
+	if err := gob.NewDecoder(bytes.NewBuffer(osFile)).Decode(&osElf); err != nil {
+		panic(err)
+	}
+
+	memoryLength := arch.AwooRegister(0)
+	copy(emulator.Internal.Memory.Data[memoryLength:], osElf.SectionList.Sections[osElf.SectionList.DataIndex].Contents)
+	memoryLength += arch.AwooRegister(len(osElf.SectionList.Sections[osElf.SectionList.DataIndex].Contents))
+	copy(emulator.Internal.Memory.Data[memoryLength:], osElf.SectionList.Sections[osElf.SectionList.ProgramIndex].Contents)
+	memoryLength += arch.AwooRegister(len(osElf.SectionList.Sections[osElf.SectionList.ProgramIndex].Contents))
+	emulator.Internal.CPU.Counter = osElf.Counter
+	emulator.Internal.Memory.ProgramEnd = memoryLength
 }
 
 func Run(emulator *emu.AwooEmulator) {
@@ -33,7 +48,7 @@ func Run(emulator *emu.AwooEmulator) {
 					emulator.Drivers[id] = emulator.Drivers[id].Tick(&emulator.Internal, emulator.Drivers[id])
 				}
 				emulator.Internal.CPU.TotalCycles++
-				emulator.Internal.Executing = emulator.Internal.CPU.Counter < emulator.Internal.ROM.Length
+				emulator.Internal.Executing = emulator.Internal.CPU.Counter < emulator.Internal.Memory.ProgramEnd
 			}
 			time.Sleep(time.Millisecond)
 		}
@@ -61,13 +76,12 @@ func Run(emulator *emu.AwooEmulator) {
 }
 
 func ProcessCycle(emulator *emu.AwooEmulator) {
-	raw := emulator.Internal.ROM.Data[emulator.Internal.CPU.Counter : emulator.Internal.CPU.Counter+4]
-	rawIns := arch.AwooInstruction(binary.BigEndian.Uint32(raw))
-	ins, err := instruction.Decode(emulator.Table, rawIns)
+	raw := arch.AwooInstruction(memory.ReadMemory32(&emulator.Internal.Memory, emulator.Internal.CPU.Counter))
+	ins, err := instruction.Decode(emulator.Table, raw)
 	if err != nil {
 		panic(err)
 	}
-	instruction.PrintInternalInstruction(&emulator.Internal, raw, ins)
+	instruction.PrintInternalInstruction(&emulator.Internal, ins)
 	ins.Process.(func(*internal.AwooEmulatorInternal, commonInstruction.AwooInstruction))(&emulator.Internal, ins)
 	fmt.Printf("\n")
 

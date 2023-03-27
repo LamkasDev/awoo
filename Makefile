@@ -5,13 +5,28 @@ GOOS=windows
 GOARCH=amd64
 GOTAGS=$(AWOOPLATFORM),awoodebug
 
-.PHONY: build install runll runemu run clean
-build:
+.PHONY: buildcc builddump buildld buildmu build install runcc rundump runld runmu run clean
+buildcc:
 	@set GOOS=$(GOOS)
 	@set GOARCH=$(GOARCH)
 	@go build -o build/$(AWOOPLATFORM)/awoocc.exe -tags $(GOTAGS) cmd/awoocc/main.go
+
+builddump:
+	@set GOOS=$(GOOS)
+	@set GOARCH=$(GOARCH)
+	@go build -o build/$(AWOOPLATFORM)/awoodump.exe -tags $(GOTAGS) cmd/awoodump/main.go
+
+buildld:
+	@set GOOS=$(GOOS)
+	@set GOARCH=$(GOARCH)
 	@go build -o build/$(AWOOPLATFORM)/awoold.exe -tags $(GOTAGS) cmd/awoold/main.go
+
+buildmu:
+	@set GOOS=$(GOOS)
+	@set GOARCH=$(GOARCH)
 	@go build -o build/$(AWOOPLATFORM)/awoomu.exe -tags $(GOTAGS) cmd/awoomu/main.go
+
+build: buildcc builddump buildld buildmu
 
 install: build
 	@if exist "$(AWOODIR)\bin\$(AWOOPLATFORM)" rmdir /S /Q "$(AWOODIR)\bin\$(AWOOPLATFORM)"
@@ -19,17 +34,22 @@ install: build
 	@if exist"$(AWOODIR)\resources" rmdir /S /Q "$(AWOODIR)\resources"
 	@xcopy "resources" "$(AWOODIR)\resources\" /E /C /I >nul
 
-runcc: build
+runcc: buildcc
 	@if not exist "$(AWOODIR)\bin\dev" mkdir "$(AWOODIR)\bin\dev"
 	@copy "build\$(AWOOPLATFORM)\awoocc.exe" "$(AWOODIR)\bin\dev\awoocc.exe" >nul
 	@cd "build\$(AWOOPLATFORM)" && .\awoocc.exe -i "$(AWOODIR)\data\input.awoo" -o "$(AWOODIR)\data\obj\input.awoobj"
-	
-runld: build
+
+rundump: builddump
+	@if not exist "$(AWOODIR)\bin\dev" mkdir "$(AWOODIR)\bin\dev"
+	@copy "build\$(AWOOPLATFORM)\awoodump.exe" "$(AWOODIR)\bin\dev\awoodump.exe" >nul
+	@cd "build\$(AWOOPLATFORM)" && .\awoodump.exe -i "$(AWOODIR)\data\obj\input.awoobj"
+
+runld: buildld
 	@if not exist "$(AWOODIR)\bin\dev" mkdir "$(AWOODIR)\bin\dev"
 	@copy "build\$(AWOOPLATFORM)\awoold.exe" "$(AWOODIR)\bin\dev\awoold.exe" >nul
 	@cd "build\$(AWOOPLATFORM)" && .\awoold.exe -i "$(AWOODIR)\data\obj\input.awoobj" -o "$(AWOODIR)\data\bin\input.awooxe"
 
-runemu: build
+runmu: buildmu
 	@if not exist "$(AWOODIR)\bin\dev" mkdir "$(AWOODIR)\bin\dev"
 	@copy "build\$(AWOOPLATFORM)\awoomu.exe" "$(AWOODIR)\bin\dev\awoomu.exe" >nul
 	@cd "build\$(AWOOPLATFORM)" && .\awoomu.exe -i "$(AWOODIR)\data\bin\input.awooxe"

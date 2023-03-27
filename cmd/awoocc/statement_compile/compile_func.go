@@ -9,6 +9,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
+	commonElf "github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
@@ -24,10 +25,12 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s 
 	functionArgumentsOffset := uint32(0)
 	for _, argument := range functionArguments {
 		_, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, compiler_context.AwooCompilerMemoryEntry{
-			Name:        argument.Name,
-			Size:        argument.Size,
-			Type:        argument.Type,
-			TypeDetails: argument.TypeDetails,
+			Symbol: commonElf.AwooElfSymbolTableEntry{
+				Name:        argument.Name,
+				Size:        argument.Size,
+				Type:        argument.Type,
+				TypeDetails: argument.TypeDetails,
+			},
 		})
 		if err != nil {
 			return err
@@ -36,9 +39,11 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s 
 	}
 
 	_, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, compiler_context.AwooCompilerMemoryEntry{
-		Name: "_returnAddress",
-		Size: 4,
-		Type: commonTypes.AwooTypeId(types.AwooTypePointer),
+		Symbol: commonElf.AwooElfSymbolTableEntry{
+			Name: "_returnAddress",
+			Size: 4,
+			Type: commonTypes.AwooTypeId(types.AwooTypePointer),
+		},
 	})
 	if err != nil {
 		return err
@@ -61,15 +66,20 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s 
 		return err
 	}
 
-	compiler_context.PushCompilerFunction(&ccompiler.Context, compiler_context.AwooCompilerFunction{
-		Name:       functionName,
-		ReturnType: functionReturnType,
-		Arguments:  statement.GetStatementFuncArguments(&s),
-		Start:      uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents)),
-	})
+	compilerFunction := compiler_context.AwooCompilerFunction{
+		Symbol: commonElf.AwooElfSymbolTableEntry{
+			Name:        functionName,
+			Type:        commonTypes.AwooTypeId(types.AwooTypeFunction),
+			TypeDetails: functionReturnType,
+			Start:       uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents)),
+		},
+		Arguments: statement.GetStatementFuncArguments(&s),
+	}
+	compiler_context.PushCompilerFunction(&ccompiler.Context, compilerFunction)
 	if err = CompileStatementGroup(ccompiler, elf, statement.GetStatementFuncBody(&s)); err != nil {
 		return err
 	}
+	compiler_context.SetSizeOfCompilerFunction(&ccompiler.Context, functionName, uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))-compilerFunction.Symbol.Start)
 	compiler_context.PopCompilerScopeCurrentFunction(&ccompiler.Context)
 
 	return nil
