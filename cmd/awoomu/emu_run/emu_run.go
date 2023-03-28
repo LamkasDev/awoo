@@ -13,6 +13,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoomu/memory"
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
+	"github.com/LamkasDev/awoo-emu/cmd/common/decoder"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	commonInstruction "github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
@@ -77,7 +78,7 @@ func Run(emulator *emu.AwooEmulator) {
 
 func ProcessCycle(emulator *emu.AwooEmulator) {
 	raw := arch.AwooInstruction(memory.ReadMemory32(&emulator.Internal.Memory, emulator.Internal.CPU.Counter))
-	ins, err := instruction.Decode(emulator.Table, raw)
+	ins, err := decoder.Decode(emulator.Table, raw)
 	if err != nil {
 		panic(err)
 	}

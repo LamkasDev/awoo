@@ -154,6 +154,7 @@ func main() {
 				node.ParserNodeTypeArrayIndex:  statement_compile.CompileNodeArrayIndex,
 				node.ParserNodeTypeArray:       statement_compile.CompileNodeArray,
 			},
+			InstructionTable: instructions.SetupInstructionTable(),
 		},
 	}
 	comp := compiler.SetupCompiler(compSettings, par.Context)

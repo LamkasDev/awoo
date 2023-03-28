@@ -4,15 +4,17 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
+	awooElf "github.com/LamkasDev/awoo-emu/cmd/awoocc/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
-	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
+	commonElf "github.com/LamkasDev/awoo-emu/cmd/common/elf"
+	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
-func CompileStatementAssignmentArrayIndex(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s statement.AwooParserStatement) error {
+func CompileStatementAssignmentArrayIndex(ccompiler *compiler.AwooCompiler, elf *commonElf.AwooElf, s statement.AwooParserStatement) error {
 	identifierNode := statement.GetStatementAssignmentIdentifier(&s)
 	variableMemory, err := compiler_context.GetCompilerScopeCurrentFunctionMemory(&ccompiler.Context, node.GetNodeArrayIndexIdentifier(&identifierNode))
 	if err != nil {
@@ -36,8 +38,8 @@ func CompileStatementAssignmentArrayIndex(ccompiler *compiler.AwooCompiler, elf 
 		return err
 	}
 	if !variableMemory.Global {
-		addressAdjustmentInstruction := encoder.AwooEncodedInstruction{
-			Instruction: instructions.AwooInstructionADD,
+		addressAdjustmentInstruction := instruction.AwooInstruction{
+			Definition:  instructions.AwooInstructionADD,
 			SourceOne:   addressDetails.Register,
 			SourceTwo:   cpu.AwooRegisterSavedZero,
 			Destination: addressDetails.Register,
@@ -47,11 +49,14 @@ func CompileStatementAssignmentArrayIndex(ccompiler *compiler.AwooCompiler, elf 
 		}
 	}
 
-	saveInstruction := encoder.AwooEncodedInstruction{
-		Instruction: *instructions.AwooInstructionsSave[variableType.Size],
-		SourceOne:   addressDetails.Register,
-		SourceTwo:   valueDetails.Register,
-		Immediate:   uint32(variableMemory.Symbol.Start),
+	saveInstruction := instruction.AwooInstruction{
+		Definition: *instructions.AwooInstructionsSave[variableType.Size],
+		SourceOne:  addressDetails.Register,
+		SourceTwo:  valueDetails.Register,
+		Immediate:  variableMemory.Symbol.Start,
+	}
+	if variableMemory.Global {
+		awooElf.PushRelocationEntry(elf, variableMemory.Symbol.Name)
 	}
 	return encoder.Encode(elf, saveInstruction)
 }

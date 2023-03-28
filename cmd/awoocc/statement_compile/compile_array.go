@@ -5,14 +5,16 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
+	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
+	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
 func CompileNodeArray(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
-	addressAdjustmentInstruction := encoder.AwooEncodedInstruction{
-		Instruction: instructions.AwooInstructionADDI,
+	addressAdjustmentInstruction := instruction.AwooInstruction{
+		Definition:  instructions.AwooInstructionADDI,
 		SourceOne:   details.Address.Register,
 		Immediate:   details.Address.Immediate,
 		Destination: details.Register,
@@ -23,10 +25,10 @@ func CompileNodeArray(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node
 
 	for i, elementNode := range node.GetNodeArrayElements(&n) {
 		if i != 0 {
-			addressAdjustmentInstruction = encoder.AwooEncodedInstruction{
-				Instruction: instructions.AwooInstructionADDI,
+			addressAdjustmentInstruction = instruction.AwooInstruction{
+				Definition:  instructions.AwooInstructionADDI,
 				SourceOne:   details.Register,
-				Immediate:   uint32(ccompiler.Context.Parser.Lexer.Types.All[details.Type].Size),
+				Immediate:   arch.AwooRegister(ccompiler.Context.Parser.Lexer.Types.All[details.Type].Size),
 				Destination: details.Register,
 			}
 			if err := encoder.Encode(elf, addressAdjustmentInstruction); err != nil {
@@ -43,10 +45,10 @@ func CompileNodeArray(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node
 			return err
 		}
 
-		saveInstruction := encoder.AwooEncodedInstruction{
-			Instruction: *instructions.AwooInstructionsSave[elementType.Size],
-			SourceOne:   details.Register,
-			SourceTwo:   elementDetails.Register,
+		saveInstruction := instruction.AwooInstruction{
+			Definition: *instructions.AwooInstructionsSave[elementType.Size],
+			SourceOne:  details.Register,
+			SourceTwo:  elementDetails.Register,
 		}
 		if err := encoder.Encode(elf, saveInstruction); err != nil {
 			return err

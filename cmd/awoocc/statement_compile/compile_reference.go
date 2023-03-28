@@ -4,9 +4,11 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
+	awooElf "github.com/LamkasDev/awoo-emu/cmd/awoocc/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
+	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
@@ -20,9 +22,12 @@ func CompileNodeReference(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n 
 	}
 
 	// TODO: merge this logic with primitives
-	return encoder.Encode(elf, encoder.AwooEncodedInstruction{
-		Instruction: instructions.AwooInstructionADDI,
-		Immediate:   uint32(variableMemory.Symbol.Start),
+	if variableMemory.Global {
+		awooElf.PushRelocationEntry(elf, variableMemory.Symbol.Name)
+	}
+	return encoder.Encode(elf, instruction.AwooInstruction{
+		Definition:  instructions.AwooInstructionADDI,
+		Immediate:   variableMemory.Symbol.Start,
 		Destination: details.Register,
 	})
 }
@@ -35,8 +40,8 @@ func CompileNodeDereference(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, 
 
 	// TODO: merge this logic with identifiers
 	// TODO: fix da 4
-	loadInstruction := encoder.AwooEncodedInstruction{
-		Instruction: *instructions.AwooInstructionsLoad[4],
+	loadInstruction := instruction.AwooInstruction{
+		Definition:  *instructions.AwooInstructionsLoad[4],
 		Destination: details.Register,
 		SourceOne:   details.Register,
 	}

@@ -4,13 +4,14 @@ import (
 	"fmt"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/awerrors"
+	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/jwalton/gchalk"
 )
 
 type AwooCompilerMemory struct {
 	Entries  map[string]AwooCompilerMemoryEntry
-	Position uint32
+	Position arch.AwooRegister
 }
 
 type AwooCompilerMemoryEntry struct {

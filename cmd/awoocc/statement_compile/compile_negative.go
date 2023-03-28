@@ -6,6 +6,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
+	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
@@ -15,8 +16,8 @@ func CompileNodeNegative(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n n
 		return err
 	}
 
-	return encoder.Encode(elf, encoder.AwooEncodedInstruction{
-		Instruction: instructions.AwooInstructionSUB,
+	return encoder.Encode(elf, instruction.AwooInstruction{
+		Definition:  instructions.AwooInstructionSUB,
 		Destination: details.Register,
 		SourceTwo:   details.Register,
 	})

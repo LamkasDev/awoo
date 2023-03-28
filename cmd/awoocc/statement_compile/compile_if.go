@@ -7,24 +7,26 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
+	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
+	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
 type AwooCompilerIfBodiesDescriptor struct {
-	Jump   uint32
+	Jump   arch.AwooRegister
 	Bodies []AwooCompilerIfBodyDescriptor
 }
 
 type AwooCompilerIfBodyDescriptor struct {
-	Start  uint32
-	Length uint32
+	Start  arch.AwooRegister
+	Length arch.AwooRegister
 }
 
 func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, descriptor *AwooCompilerIfBodiesDescriptor, s statement.AwooParserStatement) error {
-	start := uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
+	start := arch.AwooRegister(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
 	switch s.Type {
 	case statement.ParserStatementTypeIf:
 		// TODO: this could be optimized using top level comparison from value node (because the below instruction can compare).
@@ -38,8 +40,8 @@ func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, 
 		}
 
 		// Reserve instruction for jump to next block.
-		jumpToNextBlockStart := uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
-		if err := encoder.Encode(elf, encoder.AwooEncodedInstruction{}); err != nil {
+		jumpToNextBlockStart := arch.AwooRegister(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
+		if err := encoder.Encode(elf, instruction.AwooInstruction{}); err != nil {
 			return err
 		}
 
@@ -51,14 +53,14 @@ func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, 
 			return err
 		}
 		compiler_context.PopCompilerScopeCurrentBlock(&ccompiler.Context)
-		bodyEnd := uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
+		bodyEnd := arch.AwooRegister(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
 		bodyLength := bodyEnd - jumpToNextBlockStart
 
 		// Populate reserved instruction with jump.
-		jumpToNextBlockInstruction := encoder.AwooEncodedInstruction{
-			Instruction: instructions.AwooInstructionBEQ,
-			SourceOne:   valueDetails.Register,
-			Immediate:   bodyLength + 8,
+		jumpToNextBlockInstruction := instruction.AwooInstruction{
+			Definition: instructions.AwooInstructionBEQ,
+			SourceOne:  valueDetails.Register,
+			Immediate:  bodyLength + 8,
 		}
 		if err := encoder.EncodeAt(elf, jumpToNextBlockStart, jumpToNextBlockInstruction); err != nil {
 			return err
@@ -74,10 +76,10 @@ func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, 
 	}
 
 	// Reserve instruction for jump beyond subsequent blocks.
-	if err := encoder.Encode(elf, encoder.AwooEncodedInstruction{}); err != nil {
+	if err := encoder.Encode(elf, instruction.AwooInstruction{}); err != nil {
 		return err
 	}
-	end := uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
+	end := arch.AwooRegister(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
 	length := end - start
 	descriptor.Bodies = append(descriptor.Bodies, AwooCompilerIfBodyDescriptor{
 		Start:  start,
@@ -90,7 +92,7 @@ func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, 
 
 func CompileStatementIf(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, ifNode statement.AwooParserStatement) error {
 	descriptor := AwooCompilerIfBodiesDescriptor{
-		Jump:   uint32(4),
+		Jump:   arch.AwooRegister(4),
 		Bodies: []AwooCompilerIfBodyDescriptor{},
 	}
 	if err := CompileStatementIfNode(ccompiler, elf, &descriptor, ifNode); err != nil {
@@ -107,10 +109,10 @@ func CompileStatementIf(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, ifNo
 	// An extra instruction is added on end of each block, except for the last.
 	for _, body := range descriptor.Bodies {
 		// TODO: remove jump on last
-		descriptor.Jump -= uint32(body.Length + 4)
-		jumpBeyondSubsequentBlocksInstruction := encoder.AwooEncodedInstruction{
-			Instruction: instructions.AwooInstructionJAL,
-			Immediate:   descriptor.Jump,
+		descriptor.Jump -= body.Length + 4
+		jumpBeyondSubsequentBlocksInstruction := instruction.AwooInstruction{
+			Definition: instructions.AwooInstructionJAL,
+			Immediate:  descriptor.Jump,
 		}
 		if err := encoder.EncodeAt(elf, (body.Start+body.Length)-4, jumpBeyondSubsequentBlocksInstruction); err != nil {
 			return err

@@ -17,8 +17,8 @@ import (
 
 func HandleNodeExpressionLeftRight(ins instruction.AwooInstructionDefinition) compiler.AwooCompileNodeExpression {
 	return func(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) error {
-		return encoder.Encode(elf, encoder.AwooEncodedInstruction{
-			Instruction: ins,
+		return encoder.Encode(elf, instruction.AwooInstruction{
+			Definition:  ins,
 			SourceOne:   leftDetails.Register,
 			SourceTwo:   rightDetails.Register,
 			Destination: leftDetails.Register,
@@ -28,8 +28,8 @@ func HandleNodeExpressionLeftRight(ins instruction.AwooInstructionDefinition) co
 
 func HandleNodeExpressionRightLeft(ins instruction.AwooInstructionDefinition) compiler.AwooCompileNodeExpression {
 	return func(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) error {
-		return encoder.Encode(elf, encoder.AwooEncodedInstruction{
-			Instruction: ins,
+		return encoder.Encode(elf, instruction.AwooInstruction{
+			Definition:  ins,
 			SourceOne:   rightDetails.Register,
 			SourceTwo:   leftDetails.Register,
 			Destination: leftDetails.Register,
@@ -42,8 +42,8 @@ func CompileNodeExpressionEqEq(ccompiler *compiler.AwooCompiler, elf *elf.AwooEl
 	if err != nil {
 		return err
 	}
-	return encoder.Encode(elf, encoder.AwooEncodedInstruction{
-		Instruction: instructions.AwooInstructionSLTIU,
+	return encoder.Encode(elf, instruction.AwooInstruction{
+		Definition:  instructions.AwooInstructionSLTIU,
 		SourceOne:   leftDetails.Register,
 		Destination: leftDetails.Register,
 		Immediate:   1,
@@ -55,8 +55,8 @@ func CompileNodeExpressionNotEq(ccompiler *compiler.AwooCompiler, elf *elf.AwooE
 	if err != nil {
 		return err
 	}
-	return encoder.Encode(elf, encoder.AwooEncodedInstruction{
-		Instruction: instructions.AwooInstructionSLTU,
+	return encoder.Encode(elf, instruction.AwooInstruction{
+		Definition:  instructions.AwooInstructionSLTU,
 		SourceOne:   cpu.AwooRegisterZero,
 		SourceTwo:   leftDetails.Register,
 		Destination: leftDetails.Register,
@@ -68,8 +68,8 @@ func CompileNodeExpressionLTEQ(ccompiler *compiler.AwooCompiler, elf *elf.AwooEl
 	if err != nil {
 		return err
 	}
-	return encoder.Encode(elf, encoder.AwooEncodedInstruction{
-		Instruction: instructions.AwooInstructionXORI,
+	return encoder.Encode(elf, instruction.AwooInstruction{
+		Definition:  instructions.AwooInstructionXORI,
 		SourceOne:   leftDetails.Register,
 		Destination: leftDetails.Register,
 		Immediate:   1,
@@ -81,8 +81,8 @@ func CompileNodeExpressionGTEQ(ccompiler *compiler.AwooCompiler, elf *elf.AwooEl
 	if err != nil {
 		return err
 	}
-	return encoder.Encode(elf, encoder.AwooEncodedInstruction{
-		Instruction: instructions.AwooInstructionXORI,
+	return encoder.Encode(elf, instruction.AwooInstruction{
+		Definition:  instructions.AwooInstructionXORI,
 		SourceOne:   leftDetails.Register,
 		Destination: leftDetails.Register,
 		Immediate:   1,

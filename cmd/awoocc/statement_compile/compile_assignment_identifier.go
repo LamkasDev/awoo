@@ -4,11 +4,13 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
+	awooElf "github.com/LamkasDev/awoo-emu/cmd/awoocc/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
+	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
@@ -38,11 +40,14 @@ func CompileStatementAssignmentIdentifier(ccompiler *compiler.AwooCompiler, elf 
 		return nil
 	}
 
-	saveInstruction := encoder.AwooEncodedInstruction{
-		Instruction: *instructions.AwooInstructionsSave[variableType.Size],
-		SourceOne:   valueDetails.Address.Register,
-		SourceTwo:   valueDetails.Register,
-		Immediate:   valueDetails.Address.Immediate,
+	saveInstruction := instruction.AwooInstruction{
+		Definition: *instructions.AwooInstructionsSave[variableType.Size],
+		SourceOne:  valueDetails.Address.Register,
+		SourceTwo:  valueDetails.Register,
+		Immediate:  valueDetails.Address.Immediate,
+	}
+	if variableMemory.Global {
+		awooElf.PushRelocationEntry(elf, variableMemory.Symbol.Name)
 	}
 	return encoder.Encode(elf, saveInstruction)
 }

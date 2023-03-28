@@ -1,12 +1,15 @@
 package types
 
-import "github.com/LamkasDev/awoo-emu/cmd/common/types"
+import (
+	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
+	"github.com/LamkasDev/awoo-emu/cmd/common/types"
+)
 
 type AwooType struct {
 	Key           string
 	Id            types.AwooTypeId
 	PrimitiveType types.AwooTypePrimitiveId
 	Length        uint8
-	Size          uint32
+	Size          arch.AwooRegister
 	Flags         uint64
 }

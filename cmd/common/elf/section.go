@@ -1,5 +1,7 @@
 package elf
 
+import "github.com/LamkasDev/awoo-emu/cmd/common/arch"
+
 type AwooElfSectionList struct {
 	ProgramIndex AwooElfSectionId
 	DataIndex    AwooElfSectionId
@@ -10,6 +12,6 @@ type AwooElfSectionId uint16
 
 type AwooElfSection struct {
 	Id       AwooElfSectionId
-	Address  uint32
+	Address  arch.AwooRegister
 	Contents []byte
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
+	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
@@ -25,18 +26,18 @@ func CompileStatementReturn(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, 
 		}
 	}
 
-	loadReturnAddressInstruction := encoder.AwooEncodedInstruction{
-		Instruction: instructions.AwooInstructionLW,
+	loadReturnAddressInstruction := instruction.AwooInstruction{
+		Definition:  instructions.AwooInstructionLW,
 		SourceOne:   cpu.AwooRegisterSavedZero,
-		Immediate:   uint32(compiler_context.GetCompilerFunctionArgumentsSize(currentFunction)),
+		Immediate:   compiler_context.GetCompilerFunctionArgumentsSize(currentFunction),
 		Destination: cpu.AwooRegisterReturnAddress,
 	}
 	if err := encoder.Encode(elf, loadReturnAddressInstruction); err != nil {
 		return err
 	}
 
-	return encoder.Encode(elf, encoder.AwooEncodedInstruction{
-		Instruction: instructions.AwooInstructionJALR,
-		SourceOne:   cpu.AwooRegisterReturnAddress,
+	return encoder.Encode(elf, instruction.AwooInstruction{
+		Definition: instructions.AwooInstructionJALR,
+		SourceOne:  cpu.AwooRegisterReturnAddress,
 	})
 }

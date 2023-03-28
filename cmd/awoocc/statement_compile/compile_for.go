@@ -6,8 +6,10 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
+	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
+	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
@@ -18,8 +20,8 @@ func CompileStatementFor(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s s
 	}
 
 	// Reserve instruction for condition.
-	conditionStart := uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
-	if err := encoder.Encode(elf, encoder.AwooEncodedInstruction{}); err != nil {
+	conditionStart := arch.AwooRegister(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
+	if err := encoder.Encode(elf, instruction.AwooInstruction{}); err != nil {
 		return err
 	}
 
@@ -39,20 +41,20 @@ func CompileStatementFor(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s s
 		return err
 	}
 
-	end := uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
-	jumpToConditionInstruction := encoder.AwooEncodedInstruction{
-		Instruction: instructions.AwooInstructionJAL,
-		Immediate:   uint32(conditionStart - end),
+	end := arch.AwooRegister(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
+	jumpToConditionInstruction := instruction.AwooInstruction{
+		Definition: instructions.AwooInstructionJAL,
+		Immediate:  conditionStart - end,
 	}
 	if err := encoder.Encode(elf, jumpToConditionInstruction); err != nil {
 		return err
 	}
 
-	end = uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
-	jumpBeyondEndInstruction := encoder.AwooEncodedInstruction{
-		Instruction: instructions.AwooInstructionBEQ,
-		SourceOne:   cpu.AwooRegisterTemporaryZero,
-		Immediate:   uint32(end - conditionStart),
+	end = arch.AwooRegister(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
+	jumpBeyondEndInstruction := instruction.AwooInstruction{
+		Definition: instructions.AwooInstructionBEQ,
+		SourceOne:  cpu.AwooRegisterTemporaryZero,
+		Immediate:  end - conditionStart,
 	}
 	if err := encoder.EncodeAt(elf, conditionStart, jumpBeyondEndInstruction); err != nil {
 		return err

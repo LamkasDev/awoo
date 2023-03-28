@@ -5,11 +5,14 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
+	awooElf "github.com/LamkasDev/awoo-emu/cmd/awoocc/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
+	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
+	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
@@ -24,7 +27,7 @@ func CompileNodeCall(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node.
 	if !ok {
 		return awerrors.ErrorFailedToGetFunctionFromScope
 	}
-	stackOffset := uint32(compiler_context.GetCompilerScopeCurrentFunctionSize(&ccompiler.Context))
+	stackOffset := arch.AwooRegister(compiler_context.GetCompilerScopeCurrentFunctionSize(&ccompiler.Context))
 
 	functionArguments := node.GetNodeCallArguments(&n)
 	functionArgumentsOffset := stackOffset
@@ -37,20 +40,20 @@ func CompileNodeCall(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node.
 		if err = CompileNodeValue(ccompiler, elf, functionArguments[i], &argumentDetails); err != nil {
 			return err
 		}
-		saveInstruction := encoder.AwooEncodedInstruction{
-			Instruction: *instructions.AwooInstructionsSave[function.Arguments[i].Size],
-			SourceOne:   cpu.AwooRegisterSavedZero,
-			SourceTwo:   argumentDetails.Register,
-			Immediate:   functionArgumentsOffset,
+		saveInstruction := instruction.AwooInstruction{
+			Definition: *instructions.AwooInstructionsSave[function.Arguments[i].Size],
+			SourceOne:  cpu.AwooRegisterSavedZero,
+			SourceTwo:  argumentDetails.Register,
+			Immediate:  functionArgumentsOffset,
 		}
 		if err = encoder.Encode(elf, saveInstruction); err != nil {
 			return err
 		}
-		functionArgumentsOffset += uint32(function.Arguments[i].Size)
+		functionArgumentsOffset += arch.AwooRegister(function.Arguments[i].Size)
 	}
 
-	stackAdjustmentInstruction := encoder.AwooEncodedInstruction{
-		Instruction: instructions.AwooInstructionADDI,
+	stackAdjustmentInstruction := instruction.AwooInstruction{
+		Definition:  instructions.AwooInstructionADDI,
 		SourceOne:   cpu.AwooRegisterSavedZero,
 		Destination: cpu.AwooRegisterSavedZero,
 		Immediate:   stackOffset,
@@ -60,17 +63,18 @@ func CompileNodeCall(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node.
 	}
 
 	details.Register = cpu.AwooRegisterFunctionZero
-	jumpInstruction := encoder.AwooEncodedInstruction{
-		Instruction: instructions.AwooInstructionJALR,
+	jumpInstruction := instruction.AwooInstruction{
+		Definition:  instructions.AwooInstructionJALR,
 		Destination: cpu.AwooRegisterReturnAddress,
-		Immediate:   uint32(function.Symbol.Start),
+		Immediate:   function.Symbol.Start,
 	}
+	awooElf.PushRelocationEntry(elf, function.Symbol.Name)
 	if err = encoder.Encode(elf, jumpInstruction); err != nil {
 		return err
 	}
 
-	stackAdjustmentInstruction = encoder.AwooEncodedInstruction{
-		Instruction: instructions.AwooInstructionADDI,
+	stackAdjustmentInstruction = instruction.AwooInstruction{
+		Definition:  instructions.AwooInstructionADDI,
 		SourceOne:   cpu.AwooRegisterSavedZero,
 		Destination: cpu.AwooRegisterSavedZero,
 		Immediate:   -stackOffset,

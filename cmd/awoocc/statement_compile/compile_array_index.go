@@ -8,8 +8,10 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
+	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
+	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
@@ -18,11 +20,11 @@ func CompileArrayIndexAddress(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf
 		return err
 	}
 	// TODO: add a method for sizes that are not power of 2
-	return encoder.Encode(elf, encoder.AwooEncodedInstruction{
-		Instruction: instructions.AwooInstructionSLLI,
+	return encoder.Encode(elf, instruction.AwooInstruction{
+		Definition:  instructions.AwooInstructionSLLI,
 		SourceOne:   addressDetails.Register,
 		Destination: addressDetails.Register,
-		Immediate:   uint32(math.Log((float64)(ccompiler.Context.Parser.Lexer.Types.All[addressDetails.Type].Size)) / math.Log(2)),
+		Immediate:   arch.AwooRegister(math.Log((float64)(ccompiler.Context.Parser.Lexer.Types.All[addressDetails.Type].Size)) / math.Log(2)),
 	})
 }
 
@@ -40,8 +42,8 @@ func CompileNodeArrayIndex(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n
 		return err
 	}
 	if !variableMemory.Global {
-		addressAdjustmentInstruction := encoder.AwooEncodedInstruction{
-			Instruction: instructions.AwooInstructionADD,
+		addressAdjustmentInstruction := instruction.AwooInstruction{
+			Definition:  instructions.AwooInstructionADD,
 			SourceOne:   addressDetails.Register,
 			SourceTwo:   cpu.AwooRegisterSavedZero,
 			Destination: addressDetails.Register,
@@ -51,11 +53,11 @@ func CompileNodeArrayIndex(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n
 		}
 	}
 
-	loadInstruction := encoder.AwooEncodedInstruction{
-		Instruction: *instructions.AwooInstructionsLoad[ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Symbol.Type].Size],
+	loadInstruction := instruction.AwooInstruction{
+		Definition:  *instructions.AwooInstructionsLoad[ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Symbol.Type].Size],
 		SourceOne:   addressDetails.Register,
 		Destination: details.Register,
-		Immediate:   uint32(variableMemory.Symbol.Start),
+		Immediate:   arch.AwooRegister(variableMemory.Symbol.Start),
 	}
 	return encoder.Encode(elf, loadInstruction)
 }

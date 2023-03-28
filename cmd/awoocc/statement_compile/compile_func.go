@@ -7,9 +7,11 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
+	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	commonElf "github.com/LamkasDev/awoo-emu/cmd/common/elf"
+	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
@@ -22,7 +24,7 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s 
 	})
 
 	functionArguments := statement.GetStatementFuncArguments(&s)
-	functionArgumentsOffset := uint32(0)
+	functionArgumentsOffset := arch.AwooRegister(0)
 	for _, argument := range functionArguments {
 		_, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, compiler_context.AwooCompilerMemoryEntry{
 			Symbol: commonElf.AwooElfSymbolTableEntry{
@@ -35,7 +37,7 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s 
 		if err != nil {
 			return err
 		}
-		functionArgumentsOffset += uint32(argument.Size)
+		functionArgumentsOffset += argument.Size
 	}
 
 	_, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, compiler_context.AwooCompilerMemoryEntry{
@@ -56,11 +58,11 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s 
 		functionReturnType = &returnType
 	}
 
-	stackAdjustmentInstruction := encoder.AwooEncodedInstruction{
-		Instruction: instructions.AwooInstructionSW,
-		SourceOne:   cpu.AwooRegisterSavedZero,
-		SourceTwo:   cpu.AwooRegisterReturnAddress,
-		Immediate:   functionArgumentsOffset,
+	stackAdjustmentInstruction := instruction.AwooInstruction{
+		Definition: instructions.AwooInstructionSW,
+		SourceOne:  cpu.AwooRegisterSavedZero,
+		SourceTwo:  cpu.AwooRegisterReturnAddress,
+		Immediate:  functionArgumentsOffset,
 	}
 	if err = encoder.Encode(elf, stackAdjustmentInstruction); err != nil {
 		return err
@@ -71,7 +73,7 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s 
 			Name:        functionName,
 			Type:        commonTypes.AwooTypeId(types.AwooTypeFunction),
 			TypeDetails: functionReturnType,
-			Start:       uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents)),
+			Start:       arch.AwooRegister(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents)),
 		},
 		Arguments: statement.GetStatementFuncArguments(&s),
 	}
@@ -79,7 +81,7 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s 
 	if err = CompileStatementGroup(ccompiler, elf, statement.GetStatementFuncBody(&s)); err != nil {
 		return err
 	}
-	compiler_context.SetSizeOfCompilerFunction(&ccompiler.Context, functionName, uint32(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))-compilerFunction.Symbol.Start)
+	compiler_context.SetSizeOfCompilerFunction(&ccompiler.Context, functionName, arch.AwooRegister(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))-compilerFunction.Symbol.Start)
 	compiler_context.PopCompilerScopeCurrentFunction(&ccompiler.Context)
 
 	return nil

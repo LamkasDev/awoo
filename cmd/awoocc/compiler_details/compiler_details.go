@@ -1,6 +1,7 @@
 package compiler_details
 
 import (
+	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
@@ -13,6 +14,6 @@ type CompileNodeValueDetails struct {
 
 type CompileNodeValueDetailsAddress struct {
 	Register  cpu.AwooRegisterId
-	Immediate uint32
+	Immediate arch.AwooRegister
 	Used      bool
 }

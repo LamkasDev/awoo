@@ -39,7 +39,11 @@ func RunCompiler(ccompiler *compiler.AwooCompiler) {
 		end := len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents)
 		compiler.PrintNewCompile(ccompiler, &ccompiler.Current, elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents[start:end])
 	}
-	awooElf.PopulateSymbolTable(ccompiler, &elf)
+	awooElf.AlignSections(ccompiler, &elf)
+	awooElf.PopulateSymbols(ccompiler, &elf)
+	if err := awooElf.AlignSymbols(ccompiler, &elf); err != nil {
+		panic(err)
+	}
 	var data bytes.Buffer
 	if err := gob.NewEncoder(&data).Encode(elf); err != nil {
 		panic(err)

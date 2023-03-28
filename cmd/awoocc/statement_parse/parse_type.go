@@ -5,6 +5,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
+	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 )
 
 func ConstructNodeType(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, error) {
@@ -18,7 +19,7 @@ func ConstructNodeType(cparser *parser.AwooParser, t lexer_token.AwooLexerToken)
 		if err != nil {
 			return node.AwooParserNodeResult{}, err
 		}
-		node.SetNodeTypeArraySize(&n.Node, GetPrimitiveValue[uint32](cparser.Context.Lexer, sizeToken))
+		node.SetNodeTypeArraySize(&n.Node, GetPrimitiveValue[arch.AwooRegister](cparser.Context.Lexer, sizeToken))
 		if _, err := parser.ExpectToken(cparser, token.TokenTypeBracketSquareRight); err != nil {
 			return node.AwooParserNodeResult{}, err
 		}

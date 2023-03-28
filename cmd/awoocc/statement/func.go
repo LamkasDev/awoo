@@ -2,6 +2,7 @@ package statement
 
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
+	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
@@ -14,7 +15,7 @@ type AwooParserStatementDataFunc struct {
 
 type AwooParserStatementFuncArgument struct {
 	Name        string
-	Size        uint32
+	Size        arch.AwooRegister
 	Type        types.AwooTypeId
 	TypeDetails *types.AwooTypeId
 }

@@ -1,12 +1,15 @@
 package instruction
 
-import "github.com/LamkasDev/awoo-emu/cmd/common/arch"
+import (
+	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
+	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
+)
 
 type AwooInstruction struct {
 	Definition  AwooInstructionDefinition
 	Process     interface{}
-	SourceOne   arch.AwooRegister
-	SourceTwo   arch.AwooRegister
-	Destination arch.AwooRegister
+	SourceOne   cpu.AwooRegisterId
+	SourceTwo   cpu.AwooRegisterId
+	Destination cpu.AwooRegisterId
 	Immediate   arch.AwooRegister
 }

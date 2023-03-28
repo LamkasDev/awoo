@@ -2,11 +2,12 @@ package node
 
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/lexer_token"
+	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 )
 
 type AwooParserNodeDataTypeArray struct {
 	Type AwooParserNode
-	Size uint32
+	Size arch.AwooRegister
 }
 
 func GetNodeTypeArrayType(n *AwooParserNode) AwooParserNode {
@@ -19,11 +20,11 @@ func SetNodeTypeArrayType(n *AwooParserNode, arrType AwooParserNode) {
 	n.Data = d
 }
 
-func GetNodeTypeArraySize(n *AwooParserNode) uint32 {
+func GetNodeTypeArraySize(n *AwooParserNode) arch.AwooRegister {
 	return n.Data.(AwooParserNodeDataTypeArray).Size
 }
 
-func SetNodeTypeArraySize(n *AwooParserNode, size uint32) {
+func SetNodeTypeArraySize(n *AwooParserNode, size arch.AwooRegister) {
 	d := n.Data.(AwooParserNodeDataTypeArray)
 	d.Size = size
 	n.Data = d
