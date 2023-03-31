@@ -4,7 +4,6 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
-	awooElf "github.com/LamkasDev/awoo-emu/cmd/awoocc/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
@@ -32,6 +31,7 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 				TypeDetails: &pointedType,
 				Size:        ccompiler.Context.Parser.Lexer.Types.All[commonTypes.AwooTypeId(types.AwooTypePointer)].Size,
 			},
+			Global: ccompiler.Context.Scopes.Functions[uint16(len(ccompiler.Context.Scopes.Functions)-1)].Global,
 		}
 	case node.ParserNodeTypeTypeArray:
 		arraySize := node.GetNodeTypeArraySize(&variableTypeNode)
@@ -43,6 +43,7 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 				Type: arrayType,
 				Size: arraySize * ccompiler.Context.Parser.Lexer.Types.All[arrayType].Size,
 			},
+			Global: ccompiler.Context.Scopes.Functions[uint16(len(ccompiler.Context.Scopes.Functions)-1)].Global,
 		}
 	}
 
@@ -53,15 +54,21 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 			Type: variableType,
 			Size: ccompiler.Context.Parser.Lexer.Types.All[variableType].Size,
 		},
+		Global: ccompiler.Context.Scopes.Functions[uint16(len(ccompiler.Context.Scopes.Functions)-1)].Global,
 	}
 }
 
-func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s statement.AwooParserStatement) error {
+func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s statement.AwooParserStatement) error {
 	variableMemory, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, GetCompilerMemoryEntry(ccompiler, s))
 	if err != nil {
 		return err
 	}
 	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Symbol.Type]
+	if variableMemory.Global {
+		elf.PushSymbol(celf, variableMemory.Symbol)
+		elf.PushSectionData(celf, celf.SectionList.DataIndex, make([]byte, variableMemory.Symbol.Size))
+		elf.PushRelocationEntry(celf, variableMemory.Symbol.Name)
+	}
 
 	valueNode := statement.GetStatementDefinitionVariableValue(&s)
 	if valueNode == nil {
@@ -77,7 +84,7 @@ func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, elf *elf.AwooE
 	if !variableMemory.Global {
 		valueDetails.Address.Register = cpu.AwooRegisterSavedZero
 	}
-	if err = CompileNodeValue(ccompiler, elf, *valueNode, &valueDetails); err != nil {
+	if err = CompileNodeValue(ccompiler, celf, *valueNode, &valueDetails); err != nil {
 		return err
 	}
 	if valueDetails.Address.Used {
@@ -90,8 +97,5 @@ func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, elf *elf.AwooE
 		SourceTwo:  valueDetails.Register,
 		Immediate:  valueDetails.Address.Immediate,
 	}
-	if variableMemory.Global {
-		awooElf.PushRelocationEntry(elf, variableMemory.Symbol.Name)
-	}
-	return encoder.Encode(elf, saveInstruction)
+	return encoder.Encode(celf, saveInstruction)
 }

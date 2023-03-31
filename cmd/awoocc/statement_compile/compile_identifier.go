@@ -4,7 +4,6 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
-	awooElf "github.com/LamkasDev/awoo-emu/cmd/awoocc/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
@@ -13,9 +12,9 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
-func CompileNodeIdentifier(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
+func CompileNodeIdentifier(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
 	identifier := node.GetNodeIdentifierValue(&n)
-	variableMemory, err := compiler_context.GetCompilerScopeCurrentFunctionMemory(&ccompiler.Context, identifier)
+	variableMemory, err := compiler_context.GetCompilerScopeFunctionMemory(&ccompiler.Context, identifier)
 	if err != nil {
 		return err
 	}
@@ -29,7 +28,7 @@ func CompileNodeIdentifier(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n
 	if !variableMemory.Global {
 		loadInstruction.SourceOne = cpu.AwooRegisterSavedZero
 	} else {
-		awooElf.PushRelocationEntry(elf, variableMemory.Symbol.Name)
+		elf.PushRelocationEntry(celf, variableMemory.Symbol.Name)
 	}
-	return encoder.Encode(elf, loadInstruction)
+	return encoder.Encode(celf, loadInstruction)
 }

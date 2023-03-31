@@ -3,27 +3,23 @@ package elf
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/decoder"
-	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
+	commonElf "github.com/LamkasDev/awoo-emu/cmd/common/elf"
+	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
-func PopulateSymbols(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf) {
-	for _, variable := range ccompiler.Context.Scopes.Global.Entries {
-		elf.SymbolTable[variable.Symbol.Name] = variable.Symbol
-	}
-	for _, function := range ccompiler.Context.Functions.Entries {
-		elf.SymbolTable[function.Symbol.Name] = function.Symbol
-	}
-}
-
-func AlignSymbols(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf) error {
+func AlignSymbols(ccompiler *compiler.AwooCompiler, elf *commonElf.AwooElf) error {
 	for _, symbol := range elf.SymbolTable {
+		if symbol.Type == commonTypes.AwooTypeId(types.AwooTypeFunction) {
+			continue
+		}
 		symbol.Start += elf.SectionList.Sections[elf.SectionList.DataIndex].Address
 		elf.SymbolTable[symbol.Name] = symbol
 	}
 	for _, relocEntry := range elf.RelocationList {
-		ins, err := decoder.Decode(ccompiler.Settings.Mappings.InstructionTable, arch.AwooInstruction(ReadSectionData32(elf, elf.SectionList.ProgramIndex, relocEntry.Offset)))
+		ins, err := decoder.Decode(ccompiler.Settings.Mappings.InstructionTable, arch.AwooInstruction(commonElf.ReadSectionData32(elf, elf.SectionList.ProgramIndex, relocEntry.Offset)))
 		if err != nil {
 			return err
 		}

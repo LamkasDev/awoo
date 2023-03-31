@@ -60,12 +60,19 @@ func SetStatementFuncBody(s *AwooParserStatement, body AwooParserStatement) {
 	s.Data = d
 }
 
+func AppendStatementFuncBody(s *AwooParserStatement, statement AwooParserStatement) {
+	d := s.Data.(AwooParserStatementDataFunc)
+	SetStatementGroupBody(&d.Body, append(GetStatementGroupBody(&d.Body), statement))
+	s.Data = d
+}
+
 func CreateStatementFunc(identifier node.AwooParserNode) AwooParserStatement {
 	return AwooParserStatement{
 		Type: ParserStatementTypeFunc,
 		Data: AwooParserStatementDataFunc{
 			Identifier: identifier,
 			Arguments:  []AwooParserStatementFuncArgument{},
+			Body:       CreateStatementGroup([]AwooParserStatement{}),
 		},
 	}
 }

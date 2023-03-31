@@ -4,19 +4,19 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
-	awooElf "github.com/LamkasDev/awoo-emu/cmd/awoocc/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	commonElf "github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
-func CompileStatementAssignmentArrayIndex(ccompiler *compiler.AwooCompiler, elf *commonElf.AwooElf, s statement.AwooParserStatement) error {
+func CompileStatementAssignmentArrayIndex(ccompiler *compiler.AwooCompiler, celf *commonElf.AwooElf, s statement.AwooParserStatement) error {
 	identifierNode := statement.GetStatementAssignmentIdentifier(&s)
-	variableMemory, err := compiler_context.GetCompilerScopeCurrentFunctionMemory(&ccompiler.Context, node.GetNodeArrayIndexIdentifier(&identifierNode))
+	variableMemory, err := compiler_context.GetCompilerScopeFunctionMemory(&ccompiler.Context, node.GetNodeArrayIndexIdentifier(&identifierNode))
 	if err != nil {
 		return err
 	}
@@ -27,14 +27,14 @@ func CompileStatementAssignmentArrayIndex(ccompiler *compiler.AwooCompiler, elf 
 		Type:     variableMemory.Symbol.Type,
 		Register: cpu.AwooRegisterTemporaryZero,
 	}
-	if err = CompileNodeValue(ccompiler, elf, valueNode, &valueDetails); err != nil {
+	if err = CompileNodeValue(ccompiler, celf, valueNode, &valueDetails); err != nil {
 		return err
 	}
 
 	addressDetails := compiler_details.CompileNodeValueDetails{
 		Register: cpu.GetNextTemporaryRegister(valueDetails.Register),
 	}
-	if err = CompileArrayIndexAddress(ccompiler, elf, identifierNode, &addressDetails); err != nil {
+	if err = CompileArrayIndexAddress(ccompiler, celf, identifierNode, &addressDetails); err != nil {
 		return err
 	}
 	if !variableMemory.Global {
@@ -44,7 +44,7 @@ func CompileStatementAssignmentArrayIndex(ccompiler *compiler.AwooCompiler, elf 
 			SourceTwo:   cpu.AwooRegisterSavedZero,
 			Destination: addressDetails.Register,
 		}
-		if err = encoder.Encode(elf, addressAdjustmentInstruction); err != nil {
+		if err = encoder.Encode(celf, addressAdjustmentInstruction); err != nil {
 			return err
 		}
 	}
@@ -56,7 +56,7 @@ func CompileStatementAssignmentArrayIndex(ccompiler *compiler.AwooCompiler, elf 
 		Immediate:  variableMemory.Symbol.Start,
 	}
 	if variableMemory.Global {
-		awooElf.PushRelocationEntry(elf, variableMemory.Symbol.Name)
+		elf.PushRelocationEntry(celf, variableMemory.Symbol.Name)
 	}
-	return encoder.Encode(elf, saveInstruction)
+	return encoder.Encode(celf, saveInstruction)
 }

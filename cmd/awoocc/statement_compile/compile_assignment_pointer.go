@@ -4,7 +4,6 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
-	awooElf "github.com/LamkasDev/awoo-emu/cmd/awoocc/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
@@ -14,10 +13,10 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
-func CompileStatementAssignmentPointer(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s statement.AwooParserStatement) error {
+func CompileStatementAssignmentPointer(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s statement.AwooParserStatement) error {
 	identifierNode := statement.GetStatementAssignmentIdentifier(&s)
 	identifierNode = node.GetNodeSingleValue(&identifierNode)
-	variableMemory, err := compiler_context.GetCompilerScopeCurrentFunctionMemory(&ccompiler.Context, node.GetNodeIdentifierValue(&identifierNode))
+	variableMemory, err := compiler_context.GetCompilerScopeFunctionMemory(&ccompiler.Context, node.GetNodeIdentifierValue(&identifierNode))
 	if err != nil {
 		return err
 	}
@@ -28,7 +27,7 @@ func CompileStatementAssignmentPointer(ccompiler *compiler.AwooCompiler, elf *el
 		Type:     variableMemory.Symbol.Type,
 		Register: cpu.AwooRegisterTemporaryZero,
 	}
-	if err = CompileNodeValue(ccompiler, elf, valueNode, &details); err != nil {
+	if err = CompileNodeValue(ccompiler, celf, valueNode, &details); err != nil {
 		return err
 	}
 
@@ -41,13 +40,13 @@ func CompileStatementAssignmentPointer(ccompiler *compiler.AwooCompiler, elf *el
 	if !variableMemory.Global {
 		loadInstruction.SourceOne = cpu.AwooRegisterSavedZero
 	} else {
-		awooElf.PushRelocationEntry(elf, variableMemory.Symbol.Name)
+		elf.PushRelocationEntry(celf, variableMemory.Symbol.Name)
 	}
-	if err = encoder.Encode(elf, loadInstruction); err != nil {
+	if err = encoder.Encode(celf, loadInstruction); err != nil {
 		return err
 	}
 
-	return encoder.Encode(elf, instruction.AwooInstruction{
+	return encoder.Encode(celf, instruction.AwooInstruction{
 		Definition: *instructions.AwooInstructionsSave[variableType.Size],
 		SourceOne:  addressRegister,
 		SourceTwo:  details.Register,

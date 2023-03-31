@@ -13,12 +13,12 @@ func GetVariableMemoryForAssignment(cparser *parser.AwooParser, identifierNode n
 	switch identifierNode.Type {
 	case node.ParserNodeTypePointer:
 		identifierNode = node.GetNodeSingleValue(&identifierNode)
-		return parser_context.GetParserScopeCurrentFunctionMemory(&cparser.Context, node.GetNodeIdentifierValue(&identifierNode))
+		return parser_context.GetParserScopeFunctionMemory(&cparser.Context, node.GetNodeIdentifierValue(&identifierNode))
 	case node.ParserNodeTypeArrayIndex:
-		return parser_context.GetParserScopeCurrentFunctionMemory(&cparser.Context, node.GetNodeArrayIndexIdentifier(&identifierNode))
+		return parser_context.GetParserScopeFunctionMemory(&cparser.Context, node.GetNodeArrayIndexIdentifier(&identifierNode))
 	}
 
-	return parser_context.GetParserScopeCurrentFunctionMemory(&cparser.Context, node.GetNodeIdentifierValue(&identifierNode))
+	return parser_context.GetParserScopeFunctionMemory(&cparser.Context, node.GetNodeIdentifierValue(&identifierNode))
 }
 
 func ConstructStatementAssignment(cparser *parser.AwooParser, identifierNode node.AwooParserNode, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {

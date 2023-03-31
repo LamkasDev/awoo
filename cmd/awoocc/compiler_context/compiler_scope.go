@@ -3,7 +3,6 @@ package compiler_context
 import "github.com/LamkasDev/awoo-emu/cmd/common/arch"
 
 type AwooCompilerScopeContainer struct {
-	Global    AwooCompilerMemory
 	Functions map[uint16]AwooCompilerScopeFunction
 }
 
@@ -11,6 +10,7 @@ type AwooCompilerScopeFunction struct {
 	Id     uint16
 	Name   string
 	Blocks map[uint16]AwooCompilerScopeBlock
+	Global bool
 }
 
 type AwooCompilerScopeBlock struct {
@@ -73,9 +73,6 @@ func GetCompilerScopeCurrentFunctionSize(context *AwooCompilerContext) arch.Awoo
 
 func SetupCompilerScopeContainer() AwooCompilerScopeContainer {
 	container := AwooCompilerScopeContainer{
-		Global: AwooCompilerMemory{
-			Entries: map[string]AwooCompilerMemoryEntry{},
-		},
 		Functions: map[uint16]AwooCompilerScopeFunction{},
 	}
 

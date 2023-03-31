@@ -1,17 +1,18 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/gob"
 	"flag"
 	"os"
 	"os/user"
 	"path"
-	"path/filepath"
 
+	"github.com/LamkasDev/awoo-emu/cmd/awoold/linker"
+	"github.com/LamkasDev/awoo-emu/cmd/awoold/linker_run"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/flags"
+	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/LamkasDev/awoo-emu/cmd/common/paths"
 )
@@ -42,21 +43,13 @@ func main() {
 		panic(err)
 	}
 
-	err = os.MkdirAll(filepath.Dir(output), 0644)
-	if err != nil {
-		panic(err)
+	linkerSettings := linker.AwooLinkerSettings{
+		Path: output,
+		Mappings: linker.AwooLinkerMappings{
+			InstructionTable: instructions.SetupInstructionTable(),
+		},
 	}
-	outputFile, err := os.Create(output)
-	if err != nil {
-		panic(err)
-	}
-
-	writer := bufio.NewWriter(outputFile)
-	var data bytes.Buffer
-	if err := gob.NewEncoder(&data).Encode(elf); err != nil {
-		panic(err)
-	}
-	writer.Write(data.Bytes())
-	writer.Flush()
-	outputFile.Close()
+	clinker := linker.SetupLinker(linkerSettings)
+	linker.LoadLinker(&clinker, elf)
+	linker_run.RunLinker(&clinker)
 }

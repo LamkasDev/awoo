@@ -117,7 +117,7 @@ func main() {
 			Statement: map[uint16]compiler.AwooCompileStatement{
 				statement.ParserStatementTypeDefinitionVariable: statement_compile.CompileStatementDefinition,
 				statement.ParserStatementTypeAssignment:         statement_compile.CompileStatementAssignment,
-				statement.ParserStatementTypeDefinitionType: func(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s statement.AwooParserStatement) error {
+				statement.ParserStatementTypeDefinitionType: func(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s statement.AwooParserStatement) error {
 					return nil
 				},
 				statement.ParserStatementTypeIf:     statement_compile.CompileStatementIf,

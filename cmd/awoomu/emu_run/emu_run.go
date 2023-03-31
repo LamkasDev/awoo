@@ -31,12 +31,17 @@ func Load(emulator *emu.AwooEmulator, path string) {
 	}
 
 	memoryLength := arch.AwooRegister(0)
-	copy(emulator.Internal.Memory.Data[memoryLength:], osElf.SectionList.Sections[osElf.SectionList.DataIndex].Contents)
-	memoryLength += arch.AwooRegister(len(osElf.SectionList.Sections[osElf.SectionList.DataIndex].Contents))
+
 	copy(emulator.Internal.Memory.Data[memoryLength:], osElf.SectionList.Sections[osElf.SectionList.ProgramIndex].Contents)
-	memoryLength += arch.AwooRegister(len(osElf.SectionList.Sections[osElf.SectionList.ProgramIndex].Contents))
+	programLenght := arch.AwooRegister(len(osElf.SectionList.Sections[osElf.SectionList.ProgramIndex].Contents))
+	memoryLength += programLenght
+	emulator.Internal.Memory.ProgramEnd = programLenght
+
+	copy(emulator.Internal.Memory.Data[memoryLength:], osElf.SectionList.Sections[osElf.SectionList.DataIndex].Contents)
+	/* dataLength := arch.AwooRegister(len(osElf.SectionList.Sections[osElf.SectionList.DataIndex].Contents))
+	memoryLength += dataLength */
+
 	emulator.Internal.CPU.Counter = osElf.Counter
-	emulator.Internal.Memory.ProgramEnd = memoryLength
 }
 
 func Run(emulator *emu.AwooEmulator) {

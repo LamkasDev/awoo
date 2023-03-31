@@ -30,8 +30,6 @@ func PushParserScopeBlockMemory(context *AwooParserContext, funcId uint16, block
 func PushParserScopeCurrentBlockMemory(context *AwooParserContext, blockEntry AwooParserMemoryEntry) (AwooParserMemoryEntry, error) {
 	scopeFunction, ok := context.Scopes.Functions[uint16(len(context.Scopes.Functions)-1)]
 	if !ok {
-		blockEntry.Global = true
-		context.Scopes.Global.Entries[blockEntry.Name] = blockEntry
 		return blockEntry, nil
 	}
 
@@ -46,24 +44,17 @@ func PopParserScopeBlockMemory(context *AwooParserContext, funcId uint16, blockI
 	return nil
 }
 
-func PopParserScopeFunctionMemory(context *AwooParserContext, funcId uint16, name string) error {
-	_, ok := context.Scopes.Global.Entries[name]
-	if ok {
-		delete(context.Scopes.Global.Entries, name)
-		return nil
-	}
-	for blockId := len(context.Scopes.Functions[funcId].Blocks); blockId >= 0; blockId-- {
-		err := PopParserScopeBlockMemory(context, funcId, uint16(blockId), name)
-		if err == nil {
-			return nil
+func PopParserScopeFunctionMemory(context *AwooParserContext, name string) error {
+	for funcId := len(context.Scopes.Functions); funcId >= 0; funcId-- {
+		for blockId := len(context.Scopes.Functions[uint16(funcId)].Blocks); blockId >= 0; blockId-- {
+			err := PopParserScopeBlockMemory(context, uint16(funcId), uint16(blockId), name)
+			if err == nil {
+				return nil
+			}
 		}
 	}
 
 	return fmt.Errorf("%w: %s", awerrors.ErrorUnknownVariable, gchalk.Red(name))
-}
-
-func PopParserScopeCurrentFunctionMemory(context *AwooParserContext, name string) error {
-	return PopParserScopeFunctionMemory(context, uint16(len(context.Scopes.Functions)-1), name)
 }
 
 func GetParserScopeBlockMemory(context *AwooParserContext, funcId uint16, blockId uint16, name string) (AwooParserMemoryEntry, error) {
@@ -75,21 +66,15 @@ func GetParserScopeBlockMemory(context *AwooParserContext, funcId uint16, blockI
 	return blockEntry, nil
 }
 
-func GetParserScopeFunctionMemory(context *AwooParserContext, funcId uint16, name string) (AwooParserMemoryEntry, error) {
-	globalEntry, ok := context.Scopes.Global.Entries[name]
-	if ok {
-		return globalEntry, nil
-	}
-	for blockId := len(context.Scopes.Functions[funcId].Blocks); blockId >= 0; blockId-- {
-		blockEntry, err := GetParserScopeBlockMemory(context, funcId, uint16(blockId), name)
-		if err == nil {
-			return blockEntry, nil
+func GetParserScopeFunctionMemory(context *AwooParserContext, name string) (AwooParserMemoryEntry, error) {
+	for funcId := len(context.Scopes.Functions); funcId >= 0; funcId-- {
+		for blockId := len(context.Scopes.Functions[uint16(funcId)].Blocks); blockId >= 0; blockId-- {
+			blockEntry, err := GetParserScopeBlockMemory(context, uint16(funcId), uint16(blockId), name)
+			if err == nil {
+				return blockEntry, nil
+			}
 		}
 	}
 
 	return AwooParserMemoryEntry{}, fmt.Errorf("%w: %s", awerrors.ErrorUnknownVariable, gchalk.Red(name))
-}
-
-func GetParserScopeCurrentFunctionMemory(context *AwooParserContext, name string) (AwooParserMemoryEntry, error) {
-	return GetParserScopeFunctionMemory(context, uint16(len(context.Scopes.Functions)-1), name)
 }

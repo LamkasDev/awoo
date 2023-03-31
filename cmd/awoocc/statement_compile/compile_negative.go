@@ -10,13 +10,13 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
-func CompileNodeNegative(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
-	err := CompileNodeValue(ccompiler, elf, node.GetNodeSingleValue(&n), details)
+func CompileNodeNegative(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
+	err := CompileNodeValue(ccompiler, celf, node.GetNodeSingleValue(&n), details)
 	if err != nil {
 		return err
 	}
 
-	return encoder.Encode(elf, instruction.AwooInstruction{
+	return encoder.Encode(celf, instruction.AwooInstruction{
 		Definition:  instructions.AwooInstructionSUB,
 		Destination: details.Register,
 		SourceTwo:   details.Register,

@@ -12,7 +12,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
-func CompileStatementReturn(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s statement.AwooParserStatement) error {
+func CompileStatementReturn(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s statement.AwooParserStatement) error {
 	currentScopeFunction := ccompiler.Context.Scopes.Functions[uint16(len(ccompiler.Context.Scopes.Functions)-1)]
 	currentFunction, _ := compiler_context.GetCompilerFunction(&ccompiler.Context, currentScopeFunction.Name)
 	if currentFunction.Symbol.TypeDetails != nil {
@@ -21,7 +21,7 @@ func CompileStatementReturn(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, 
 			Type:     *currentFunction.Symbol.TypeDetails,
 			Register: cpu.AwooRegisterFunctionZero,
 		}
-		if err := CompileNodeValue(ccompiler, elf, *returnValueNode, &returnDetails); err != nil {
+		if err := CompileNodeValue(ccompiler, celf, *returnValueNode, &returnDetails); err != nil {
 			return err
 		}
 	}
@@ -32,11 +32,11 @@ func CompileStatementReturn(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, 
 		Immediate:   compiler_context.GetCompilerFunctionArgumentsSize(currentFunction),
 		Destination: cpu.AwooRegisterReturnAddress,
 	}
-	if err := encoder.Encode(elf, loadReturnAddressInstruction); err != nil {
+	if err := encoder.Encode(celf, loadReturnAddressInstruction); err != nil {
 		return err
 	}
 
-	return encoder.Encode(elf, instruction.AwooInstruction{
+	return encoder.Encode(celf, instruction.AwooInstruction{
 		Definition: instructions.AwooInstructionJALR,
 		SourceOne:  cpu.AwooRegisterReturnAddress,
 	})

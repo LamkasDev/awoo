@@ -15,12 +15,12 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
-func CompileArrayIndexAddress(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node.AwooParserNode, addressDetails *compiler_details.CompileNodeValueDetails) error {
-	if err := CompileNodeValue(ccompiler, elf, node.GetNodeArrayIndexIndex(&n), addressDetails); err != nil {
+func CompileArrayIndexAddress(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node.AwooParserNode, addressDetails *compiler_details.CompileNodeValueDetails) error {
+	if err := CompileNodeValue(ccompiler, celf, node.GetNodeArrayIndexIndex(&n), addressDetails); err != nil {
 		return err
 	}
 	// TODO: add a method for sizes that are not power of 2
-	return encoder.Encode(elf, instruction.AwooInstruction{
+	return encoder.Encode(celf, instruction.AwooInstruction{
 		Definition:  instructions.AwooInstructionSLLI,
 		SourceOne:   addressDetails.Register,
 		Destination: addressDetails.Register,
@@ -28,8 +28,8 @@ func CompileArrayIndexAddress(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf
 	})
 }
 
-func CompileNodeArrayIndex(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
-	variableMemory, err := compiler_context.GetCompilerScopeCurrentFunctionMemory(&ccompiler.Context, node.GetNodeArrayIndexIdentifier(&n))
+func CompileNodeArrayIndex(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
+	variableMemory, err := compiler_context.GetCompilerScopeFunctionMemory(&ccompiler.Context, node.GetNodeArrayIndexIdentifier(&n))
 	if err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func CompileNodeArrayIndex(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n
 		Type:     variableMemory.Symbol.Type,
 		Register: cpu.GetNextTemporaryRegister(details.Register),
 	}
-	if err = CompileArrayIndexAddress(ccompiler, elf, n, &addressDetails); err != nil {
+	if err = CompileArrayIndexAddress(ccompiler, celf, n, &addressDetails); err != nil {
 		return err
 	}
 	if !variableMemory.Global {
@@ -48,7 +48,7 @@ func CompileNodeArrayIndex(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n
 			SourceTwo:   cpu.AwooRegisterSavedZero,
 			Destination: addressDetails.Register,
 		}
-		if err = encoder.Encode(elf, addressAdjustmentInstruction); err != nil {
+		if err = encoder.Encode(celf, addressAdjustmentInstruction); err != nil {
 			return err
 		}
 	}
@@ -59,5 +59,5 @@ func CompileNodeArrayIndex(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n
 		Destination: details.Register,
 		Immediate:   arch.AwooRegister(variableMemory.Symbol.Start),
 	}
-	return encoder.Encode(elf, loadInstruction)
+	return encoder.Encode(celf, loadInstruction)
 }

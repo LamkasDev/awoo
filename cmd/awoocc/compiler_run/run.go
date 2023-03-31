@@ -11,6 +11,7 @@ import (
 	awooElf "github.com/LamkasDev/awoo-emu/cmd/awoocc/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement_compile"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	commonElf "github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/jwalton/gchalk"
@@ -29,23 +30,22 @@ func RunCompiler(ccompiler *compiler.AwooCompiler) {
 	}
 
 	writer := bufio.NewWriter(file)
-	elf := commonElf.NewAwooElf(commonElf.AwooElfTypeObject)
+	celf := commonElf.NewAwooElf(commonElf.AwooElfTypeObject)
 	for ok := true; ok; ok = compiler.AdvanceCompiler(ccompiler) {
-		start := len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents)
+		start := len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents)
 		parser.PrintStatement(&ccompiler.Settings.Parser, &ccompiler.Context.Parser, &ccompiler.Current)
-		if err := statement_compile.CompileStatement(ccompiler, &elf, ccompiler.Current); err != nil {
+		if err := statement_compile.CompileStatement(ccompiler, &celf, ccompiler.Current); err != nil {
 			panic(err)
 		}
-		end := len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents)
-		compiler.PrintNewCompile(ccompiler, &ccompiler.Current, elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents[start:end])
+		end := len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents)
+		compiler.PrintNewCompile(ccompiler, &ccompiler.Current, celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents[start:end])
 	}
-	awooElf.AlignSections(ccompiler, &elf)
-	awooElf.PopulateSymbols(ccompiler, &elf)
-	if err := awooElf.AlignSymbols(ccompiler, &elf); err != nil {
+	elf.AlignSections(&celf)
+	if err := awooElf.AlignSymbols(ccompiler, &celf); err != nil {
 		panic(err)
 	}
 	var data bytes.Buffer
-	if err := gob.NewEncoder(&data).Encode(elf); err != nil {
+	if err := gob.NewEncoder(&data).Encode(celf); err != nil {
 		panic(err)
 	}
 	writer.Write(data.Bytes())

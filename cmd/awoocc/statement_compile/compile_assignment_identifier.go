@@ -4,7 +4,6 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
-	awooElf "github.com/LamkasDev/awoo-emu/cmd/awoocc/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
@@ -14,9 +13,9 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
-func CompileStatementAssignmentIdentifier(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s statement.AwooParserStatement) error {
+func CompileStatementAssignmentIdentifier(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s statement.AwooParserStatement) error {
 	identifierNode := statement.GetStatementAssignmentIdentifier(&s)
-	variableMemory, err := compiler_context.GetCompilerScopeCurrentFunctionMemory(&ccompiler.Context, node.GetNodeIdentifierValue(&identifierNode))
+	variableMemory, err := compiler_context.GetCompilerScopeFunctionMemory(&ccompiler.Context, node.GetNodeIdentifierValue(&identifierNode))
 	if err != nil {
 		return err
 	}
@@ -33,7 +32,7 @@ func CompileStatementAssignmentIdentifier(ccompiler *compiler.AwooCompiler, elf 
 	if !variableMemory.Global {
 		valueDetails.Address.Register = cpu.AwooRegisterSavedZero
 	}
-	if err = CompileNodeValue(ccompiler, elf, valueNode, &valueDetails); err != nil {
+	if err = CompileNodeValue(ccompiler, celf, valueNode, &valueDetails); err != nil {
 		return err
 	}
 	if valueDetails.Address.Used {
@@ -47,7 +46,7 @@ func CompileStatementAssignmentIdentifier(ccompiler *compiler.AwooCompiler, elf 
 		Immediate:  valueDetails.Address.Immediate,
 	}
 	if variableMemory.Global {
-		awooElf.PushRelocationEntry(elf, variableMemory.Symbol.Name)
+		elf.PushRelocationEntry(celf, variableMemory.Symbol.Name)
 	}
-	return encoder.Encode(elf, saveInstruction)
+	return encoder.Encode(celf, saveInstruction)
 }

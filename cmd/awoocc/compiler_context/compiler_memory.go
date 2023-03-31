@@ -32,10 +32,6 @@ func PushCompilerScopeBlockMemory(context *AwooCompilerContext, funcId uint16, b
 func PushCompilerScopeCurrentBlockMemory(context *AwooCompilerContext, blockEntry AwooCompilerMemoryEntry) (AwooCompilerMemoryEntry, error) {
 	scopeFunction, ok := context.Scopes.Functions[uint16(len(context.Scopes.Functions)-1)]
 	if !ok {
-		blockEntry.Global = true
-		blockEntry.Symbol.Start = context.Scopes.Global.Position
-		context.Scopes.Global.Entries[blockEntry.Symbol.Name] = blockEntry
-		context.Scopes.Global.Position += blockEntry.Symbol.Size
 		return blockEntry, nil
 	}
 
@@ -56,25 +52,17 @@ func PopCompilerScopeBlockMemory(context *AwooCompilerContext, funcId uint16, bl
 	return nil
 }
 
-func PopCompilerScopeFunctionMemory(context *AwooCompilerContext, funcId uint16, name string) error {
-	globalEntry, ok := context.Scopes.Global.Entries[name]
-	if ok {
-		context.Scopes.Global.Position -= globalEntry.Symbol.Size
-		delete(context.Scopes.Global.Entries, name)
-		return nil
-	}
-	for blockId := len(context.Scopes.Functions[funcId].Blocks); blockId >= 0; blockId-- {
-		err := PopCompilerScopeBlockMemory(context, funcId, uint16(blockId), name)
-		if err == nil {
-			return nil
+func PopCompilerScopeFunctionMemory(context *AwooCompilerContext, name string) error {
+	for funcId := len(context.Scopes.Functions); funcId >= 0; funcId-- {
+		for blockId := len(context.Scopes.Functions[uint16(funcId)].Blocks); blockId >= 0; blockId-- {
+			err := PopCompilerScopeBlockMemory(context, uint16(funcId), uint16(blockId), name)
+			if err == nil {
+				return nil
+			}
 		}
 	}
 
 	return fmt.Errorf("%w: %s", awerrors.ErrorUnknownVariable, gchalk.Red(name))
-}
-
-func PopCompilerScopeCurrentFunctionMemory(context *AwooCompilerContext, name string) error {
-	return PopCompilerScopeFunctionMemory(context, uint16(len(context.Scopes.Functions)-1), name)
 }
 
 func GetCompilerScopeBlockMemory(context *AwooCompilerContext, funcId uint16, blockId uint16, name string) (AwooCompilerMemoryEntry, error) {
@@ -86,21 +74,15 @@ func GetCompilerScopeBlockMemory(context *AwooCompilerContext, funcId uint16, bl
 	return blockEntry, nil
 }
 
-func GetCompilerScopeFunctionMemory(context *AwooCompilerContext, funcId uint16, name string) (AwooCompilerMemoryEntry, error) {
-	globalEntry, ok := context.Scopes.Global.Entries[name]
-	if ok {
-		return globalEntry, nil
-	}
-	for blockId := len(context.Scopes.Functions[funcId].Blocks); blockId >= 0; blockId-- {
-		blockEntry, err := GetCompilerScopeBlockMemory(context, funcId, uint16(blockId), name)
-		if err == nil {
-			return blockEntry, nil
+func GetCompilerScopeFunctionMemory(context *AwooCompilerContext, name string) (AwooCompilerMemoryEntry, error) {
+	for funcId := len(context.Scopes.Functions); funcId >= 0; funcId-- {
+		for blockId := len(context.Scopes.Functions[uint16(funcId)].Blocks); blockId >= 0; blockId-- {
+			blockEntry, err := GetCompilerScopeBlockMemory(context, uint16(funcId), uint16(blockId), name)
+			if err == nil {
+				return blockEntry, nil
+			}
 		}
 	}
 
 	return AwooCompilerMemoryEntry{}, fmt.Errorf("%w: %s", awerrors.ErrorUnknownVariable, gchalk.Red(name))
-}
-
-func GetCompilerScopeCurrentFunctionMemory(context *AwooCompilerContext, name string) (AwooCompilerMemoryEntry, error) {
-	return GetCompilerScopeFunctionMemory(context, uint16(len(context.Scopes.Functions)-1), name)
 }

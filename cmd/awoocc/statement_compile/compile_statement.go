@@ -10,11 +10,11 @@ import (
 	"github.com/jwalton/gchalk"
 )
 
-func CompileStatement(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s statement.AwooParserStatement) error {
+func CompileStatement(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s statement.AwooParserStatement) error {
 	entry, ok := ccompiler.Settings.Mappings.Statement[s.Type]
 	if !ok {
 		return fmt.Errorf("%w: %s", awerrors.ErrorCantCompileStatement, gchalk.Red(fmt.Sprintf("%#x", s.Type)))
 	}
 
-	return entry(ccompiler, elf, s)
+	return entry(ccompiler, celf, s)
 }

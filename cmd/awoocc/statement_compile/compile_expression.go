@@ -16,8 +16,8 @@ import (
 )
 
 func HandleNodeExpressionLeftRight(ins instruction.AwooInstructionDefinition) compiler.AwooCompileNodeExpression {
-	return func(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) error {
-		return encoder.Encode(elf, instruction.AwooInstruction{
+	return func(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) error {
+		return encoder.Encode(celf, instruction.AwooInstruction{
 			Definition:  ins,
 			SourceOne:   leftDetails.Register,
 			SourceTwo:   rightDetails.Register,
@@ -27,8 +27,8 @@ func HandleNodeExpressionLeftRight(ins instruction.AwooInstructionDefinition) co
 }
 
 func HandleNodeExpressionRightLeft(ins instruction.AwooInstructionDefinition) compiler.AwooCompileNodeExpression {
-	return func(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) error {
-		return encoder.Encode(elf, instruction.AwooInstruction{
+	return func(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) error {
+		return encoder.Encode(celf, instruction.AwooInstruction{
 			Definition:  ins,
 			SourceOne:   rightDetails.Register,
 			SourceTwo:   leftDetails.Register,
@@ -37,12 +37,12 @@ func HandleNodeExpressionRightLeft(ins instruction.AwooInstructionDefinition) co
 	}
 }
 
-func CompileNodeExpressionEqEq(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) error {
-	err := HandleNodeExpressionLeftRight(instructions.AwooInstructionSUB)(ccompiler, elf, leftDetails, rightDetails)
+func CompileNodeExpressionEqEq(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) error {
+	err := HandleNodeExpressionLeftRight(instructions.AwooInstructionSUB)(ccompiler, celf, leftDetails, rightDetails)
 	if err != nil {
 		return err
 	}
-	return encoder.Encode(elf, instruction.AwooInstruction{
+	return encoder.Encode(celf, instruction.AwooInstruction{
 		Definition:  instructions.AwooInstructionSLTIU,
 		SourceOne:   leftDetails.Register,
 		Destination: leftDetails.Register,
@@ -50,12 +50,12 @@ func CompileNodeExpressionEqEq(ccompiler *compiler.AwooCompiler, elf *elf.AwooEl
 	})
 }
 
-func CompileNodeExpressionNotEq(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) error {
-	err := HandleNodeExpressionLeftRight(instructions.AwooInstructionSUB)(ccompiler, elf, leftDetails, rightDetails)
+func CompileNodeExpressionNotEq(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) error {
+	err := HandleNodeExpressionLeftRight(instructions.AwooInstructionSUB)(ccompiler, celf, leftDetails, rightDetails)
 	if err != nil {
 		return err
 	}
-	return encoder.Encode(elf, instruction.AwooInstruction{
+	return encoder.Encode(celf, instruction.AwooInstruction{
 		Definition:  instructions.AwooInstructionSLTU,
 		SourceOne:   cpu.AwooRegisterZero,
 		SourceTwo:   leftDetails.Register,
@@ -63,12 +63,12 @@ func CompileNodeExpressionNotEq(ccompiler *compiler.AwooCompiler, elf *elf.AwooE
 	})
 }
 
-func CompileNodeExpressionLTEQ(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) error {
-	err := HandleNodeExpressionRightLeft(instructions.AwooInstructionSLT)(ccompiler, elf, leftDetails, rightDetails)
+func CompileNodeExpressionLTEQ(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) error {
+	err := HandleNodeExpressionRightLeft(instructions.AwooInstructionSLT)(ccompiler, celf, leftDetails, rightDetails)
 	if err != nil {
 		return err
 	}
-	return encoder.Encode(elf, instruction.AwooInstruction{
+	return encoder.Encode(celf, instruction.AwooInstruction{
 		Definition:  instructions.AwooInstructionXORI,
 		SourceOne:   leftDetails.Register,
 		Destination: leftDetails.Register,
@@ -76,12 +76,12 @@ func CompileNodeExpressionLTEQ(ccompiler *compiler.AwooCompiler, elf *elf.AwooEl
 	})
 }
 
-func CompileNodeExpressionGTEQ(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) error {
-	err := HandleNodeExpressionLeftRight(instructions.AwooInstructionSLT)(ccompiler, elf, leftDetails, rightDetails)
+func CompileNodeExpressionGTEQ(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) error {
+	err := HandleNodeExpressionLeftRight(instructions.AwooInstructionSLT)(ccompiler, celf, leftDetails, rightDetails)
 	if err != nil {
 		return err
 	}
-	return encoder.Encode(elf, instruction.AwooInstruction{
+	return encoder.Encode(celf, instruction.AwooInstruction{
 		Definition:  instructions.AwooInstructionXORI,
 		SourceOne:   leftDetails.Register,
 		Destination: leftDetails.Register,
@@ -89,7 +89,7 @@ func CompileNodeExpressionGTEQ(ccompiler *compiler.AwooCompiler, elf *elf.AwooEl
 	})
 }
 
-func CompileNodeExpression(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
+func CompileNodeExpression(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
 	entry, ok := ccompiler.Settings.Mappings.NodeExpression[n.Token.Type]
 	if !ok {
 		return fmt.Errorf("%w: %s", awerrors.ErrorCantCompileOperator, gchalk.Red(ccompiler.Settings.Parser.Lexer.Tokens.All[n.Token.Type].Name))
@@ -101,7 +101,7 @@ func CompileNodeExpression(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n
 		Type:     details.Type,
 		Register: details.Register,
 	}
-	if err = CompileNodeValue(ccompiler, elf, left, &leftDetails); err != nil {
+	if err = CompileNodeValue(ccompiler, celf, left, &leftDetails); err != nil {
 		return err
 	}
 	right := node.GetNodeExpressionRight(&n)
@@ -109,9 +109,9 @@ func CompileNodeExpression(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n
 		Type:     details.Type,
 		Register: cpu.GetNextTemporaryRegister(details.Register),
 	}
-	if err = CompileNodeValue(ccompiler, elf, right, &rightDetails); err != nil {
+	if err = CompileNodeValue(ccompiler, celf, right, &rightDetails); err != nil {
 		return err
 	}
 
-	return entry(ccompiler, elf, &leftDetails, &rightDetails)
+	return entry(ccompiler, celf, &leftDetails, &rightDetails)
 }

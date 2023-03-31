@@ -7,14 +7,14 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 )
 
-func CompileStatementAssignment(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, s statement.AwooParserStatement) error {
+func CompileStatementAssignment(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s statement.AwooParserStatement) error {
 	identifierNode := statement.GetStatementAssignmentIdentifier(&s)
 	switch identifierNode.Type {
 	case node.ParserNodeTypePointer:
-		return CompileStatementAssignmentPointer(ccompiler, elf, s)
+		return CompileStatementAssignmentPointer(ccompiler, celf, s)
 	case node.ParserNodeTypeArrayIndex:
-		return CompileStatementAssignmentArrayIndex(ccompiler, elf, s)
+		return CompileStatementAssignmentArrayIndex(ccompiler, celf, s)
 	}
 
-	return CompileStatementAssignmentIdentifier(ccompiler, elf, s)
+	return CompileStatementAssignmentIdentifier(ccompiler, celf, s)
 }

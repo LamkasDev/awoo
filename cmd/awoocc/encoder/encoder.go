@@ -9,7 +9,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/util"
 )
 
-func EncodeAt(elf *elf.AwooElf, offset arch.AwooRegister, ins instruction.AwooInstruction) error {
+func EncodeAt(celf *elf.AwooElf, offset arch.AwooRegister, ins instruction.AwooInstruction) error {
 	raw := arch.AwooRegister(ins.Definition.Code)
 	switch ins.Definition.Format {
 	case instruction.AwooInstructionFormatR:
@@ -47,13 +47,13 @@ func EncodeAt(elf *elf.AwooElf, offset arch.AwooRegister, ins instruction.AwooIn
 		raw = util.InsertRangeRegister(raw, arch.AwooRegister(ins.Immediate)>>1, 21, 10)
 		raw = util.InsertRangeRegister(raw, arch.AwooRegister(ins.Immediate)>>20, 31, 1)
 	}
-	binary.BigEndian.PutUint32(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents[offset:], uint32(raw))
+	binary.BigEndian.PutUint32(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents[offset:], uint32(raw))
 
 	return nil
 }
 
-func Encode(elf *elf.AwooElf, ins instruction.AwooInstruction) error {
-	offset := arch.AwooRegister(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
-	elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents = binary.BigEndian.AppendUint32(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents, uint32(0))
-	return EncodeAt(elf, offset, ins)
+func Encode(celf *elf.AwooElf, ins instruction.AwooInstruction) error {
+	offset := arch.AwooRegister(len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents))
+	celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents = binary.BigEndian.AppendUint32(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents, uint32(0))
+	return EncodeAt(celf, offset, ins)
 }

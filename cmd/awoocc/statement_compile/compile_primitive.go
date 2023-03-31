@@ -11,7 +11,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
-func CompileNodePrimitive(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
+func CompileNodePrimitive(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
 	// TODO: handle unsigned.
 	primitiveValue := node.GetNodePrimitiveValueFormat[int64](ccompiler.Context.Parser.Lexer, &n)
 	if primitiveValue > arch.AwooImmediateSmallMax {
@@ -22,7 +22,7 @@ func CompileNodePrimitive(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n 
 		}
 
 		// Load upper 20-bits, if primitive value is over 12-bits
-		err := encoder.Encode(elf, instruction.AwooInstruction{
+		err := encoder.Encode(celf, instruction.AwooInstruction{
 			Definition:  instructions.AwooInstructionLUI,
 			Immediate:   arch.AwooRegister(luiValue),
 			Destination: details.Register,
@@ -33,7 +33,7 @@ func CompileNodePrimitive(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n 
 
 		if addiValue != 0 {
 			// Load lower 12-bits
-			return encoder.Encode(elf, instruction.AwooInstruction{
+			return encoder.Encode(celf, instruction.AwooInstruction{
 				Definition:  instructions.AwooInstructionADDI,
 				Immediate:   arch.AwooRegister(addiValue),
 				SourceOne:   details.Register,
@@ -44,7 +44,7 @@ func CompileNodePrimitive(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n 
 		return nil
 	}
 
-	return encoder.Encode(elf, instruction.AwooInstruction{
+	return encoder.Encode(celf, instruction.AwooInstruction{
 		Definition:  instructions.AwooInstructionADDI,
 		Immediate:   arch.AwooRegister(primitiveValue),
 		Destination: details.Register,

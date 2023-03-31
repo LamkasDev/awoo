@@ -17,7 +17,7 @@ import (
 
 func CreateNodeIdentifierVariableSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, error) {
 	identifier := lexer_token.GetTokenIdentifierValue(&t)
-	if _, err := parser_context.GetParserScopeCurrentFunctionMemory(&cparser.Context, identifier); err != nil {
+	if _, err := parser_context.GetParserScopeFunctionMemory(&cparser.Context, identifier); err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
 	if arrToken, _ := parser.ExpectTokenOptional(cparser, token.TokenTypeBracketSquareLeft); arrToken != nil {

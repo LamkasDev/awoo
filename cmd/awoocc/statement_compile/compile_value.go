@@ -11,11 +11,11 @@ import (
 	"github.com/jwalton/gchalk"
 )
 
-func CompileNodeValue(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
+func CompileNodeValue(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
 	entry, ok := ccompiler.Settings.Mappings.NodeValue[n.Type]
 	if !ok {
 		return fmt.Errorf("%w: %s", awerrors.ErrorCantCompileNode, gchalk.Red(fmt.Sprintf("%#x", n.Type)))
 	}
 
-	return entry(ccompiler, elf, n, details)
+	return entry(ccompiler, celf, n, details)
 }

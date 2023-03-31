@@ -14,3 +14,7 @@ type AwooElfSymbolTableEntry struct {
 	Start       arch.AwooRegister
 	Size        arch.AwooRegister
 }
+
+func PushSymbol(elf *AwooElf, symbol AwooElfSymbolTableEntry) {
+	elf.SymbolTable[symbol.Name] = symbol
+}

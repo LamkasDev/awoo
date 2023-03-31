@@ -1,7 +1,6 @@
 package parser_context
 
 type AwooParserScopeContainer struct {
-	Global    AwooParserMemory
 	Functions map[uint16]AwooParserScopeFunction
 }
 
@@ -57,9 +56,6 @@ func PopParserScopeCurrentBlock(context *AwooParserContext) {
 
 func SetupParserScopeContainer() AwooParserScopeContainer {
 	container := AwooParserScopeContainer{
-		Global: AwooParserMemory{
-			Entries: map[string]AwooParserMemoryEntry{},
-		},
 		Functions: map[uint16]AwooParserScopeFunction{},
 	}
 

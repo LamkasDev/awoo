@@ -25,8 +25,8 @@ type AwooCompilerIfBodyDescriptor struct {
 	Length arch.AwooRegister
 }
 
-func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, descriptor *AwooCompilerIfBodiesDescriptor, s statement.AwooParserStatement) error {
-	start := arch.AwooRegister(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
+func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, descriptor *AwooCompilerIfBodiesDescriptor, s statement.AwooParserStatement) error {
+	start := arch.AwooRegister(len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents))
 	switch s.Type {
 	case statement.ParserStatementTypeIf:
 		// TODO: this could be optimized using top level comparison from value node (because the below instruction can compare).
@@ -35,13 +35,13 @@ func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, 
 			Type:     commonTypes.AwooTypeId(types.AwooTypeBoolean),
 			Register: cpu.AwooRegisterTemporaryZero,
 		}
-		if err := CompileNodeValue(ccompiler, elf, valueNode, &valueDetails); err != nil {
+		if err := CompileNodeValue(ccompiler, celf, valueNode, &valueDetails); err != nil {
 			return err
 		}
 
 		// Reserve instruction for jump to next block.
-		jumpToNextBlockStart := arch.AwooRegister(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
-		if err := encoder.Encode(elf, instruction.AwooInstruction{}); err != nil {
+		jumpToNextBlockStart := arch.AwooRegister(len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents))
+		if err := encoder.Encode(celf, instruction.AwooInstruction{}); err != nil {
 			return err
 		}
 
@@ -49,11 +49,11 @@ func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, 
 		compiler_context.PushCompilerScopeCurrentBlock(&ccompiler.Context, compiler_context.AwooCompilerScopeBlock{
 			Name: "if",
 		})
-		if err := CompileStatementGroup(ccompiler, elf, statement.GetStatementIfBody(&s)); err != nil {
+		if err := CompileStatementGroup(ccompiler, celf, statement.GetStatementIfBody(&s)); err != nil {
 			return err
 		}
 		compiler_context.PopCompilerScopeCurrentBlock(&ccompiler.Context)
-		bodyEnd := arch.AwooRegister(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
+		bodyEnd := arch.AwooRegister(len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents))
 		bodyLength := bodyEnd - jumpToNextBlockStart
 
 		// Populate reserved instruction with jump.
@@ -62,24 +62,24 @@ func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, 
 			SourceOne:  valueDetails.Register,
 			Immediate:  bodyLength + 8,
 		}
-		if err := encoder.EncodeAt(elf, jumpToNextBlockStart, jumpToNextBlockInstruction); err != nil {
+		if err := encoder.EncodeAt(celf, jumpToNextBlockStart, jumpToNextBlockInstruction); err != nil {
 			return err
 		}
 	case statement.ParserStatementTypeGroup:
 		compiler_context.PushCompilerScopeCurrentBlock(&ccompiler.Context, compiler_context.AwooCompilerScopeBlock{
 			Name: "else",
 		})
-		if err := CompileStatementGroup(ccompiler, elf, s); err != nil {
+		if err := CompileStatementGroup(ccompiler, celf, s); err != nil {
 			return err
 		}
 		compiler_context.PopCompilerScopeCurrentBlock(&ccompiler.Context)
 	}
 
 	// Reserve instruction for jump beyond subsequent blocks.
-	if err := encoder.Encode(elf, instruction.AwooInstruction{}); err != nil {
+	if err := encoder.Encode(celf, instruction.AwooInstruction{}); err != nil {
 		return err
 	}
-	end := arch.AwooRegister(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
+	end := arch.AwooRegister(len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents))
 	length := end - start
 	descriptor.Bodies = append(descriptor.Bodies, AwooCompilerIfBodyDescriptor{
 		Start:  start,
@@ -90,17 +90,17 @@ func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, 
 	return nil
 }
 
-func CompileStatementIf(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, ifNode statement.AwooParserStatement) error {
+func CompileStatementIf(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, ifNode statement.AwooParserStatement) error {
 	descriptor := AwooCompilerIfBodiesDescriptor{
 		Jump:   arch.AwooRegister(4),
 		Bodies: []AwooCompilerIfBodyDescriptor{},
 	}
-	if err := CompileStatementIfNode(ccompiler, elf, &descriptor, ifNode); err != nil {
+	if err := CompileStatementIfNode(ccompiler, celf, &descriptor, ifNode); err != nil {
 		return err
 	}
 	elseGroups := statement.GetStatementIfElse(&ifNode)
 	for _, elseGroup := range elseGroups {
-		if err := CompileStatementIfNode(ccompiler, elf, &descriptor, elseGroup); err != nil {
+		if err := CompileStatementIfNode(ccompiler, celf, &descriptor, elseGroup); err != nil {
 			return err
 		}
 	}
@@ -114,7 +114,7 @@ func CompileStatementIf(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, ifNo
 			Definition: instructions.AwooInstructionJAL,
 			Immediate:  descriptor.Jump,
 		}
-		if err := encoder.EncodeAt(elf, (body.Start+body.Length)-4, jumpBeyondSubsequentBlocksInstruction); err != nil {
+		if err := encoder.EncodeAt(celf, (body.Start+body.Length)-4, jumpBeyondSubsequentBlocksInstruction); err != nil {
 			return err
 		}
 	}

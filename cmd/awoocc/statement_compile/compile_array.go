@@ -12,14 +12,14 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
-func CompileNodeArray(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
+func CompileNodeArray(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
 	addressAdjustmentInstruction := instruction.AwooInstruction{
 		Definition:  instructions.AwooInstructionADDI,
 		SourceOne:   details.Address.Register,
 		Immediate:   details.Address.Immediate,
 		Destination: details.Register,
 	}
-	if err := encoder.Encode(elf, addressAdjustmentInstruction); err != nil {
+	if err := encoder.Encode(celf, addressAdjustmentInstruction); err != nil {
 		return err
 	}
 
@@ -31,7 +31,7 @@ func CompileNodeArray(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node
 				Immediate:   arch.AwooRegister(ccompiler.Context.Parser.Lexer.Types.All[details.Type].Size),
 				Destination: details.Register,
 			}
-			if err := encoder.Encode(elf, addressAdjustmentInstruction); err != nil {
+			if err := encoder.Encode(celf, addressAdjustmentInstruction); err != nil {
 				return err
 			}
 		}
@@ -41,7 +41,7 @@ func CompileNodeArray(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node
 			Type:     details.Type,
 			Register: cpu.GetNextTemporaryRegister(details.Register),
 		}
-		if err := CompileNodeValue(ccompiler, elf, elementNode, &elementDetails); err != nil {
+		if err := CompileNodeValue(ccompiler, celf, elementNode, &elementDetails); err != nil {
 			return err
 		}
 
@@ -50,7 +50,7 @@ func CompileNodeArray(ccompiler *compiler.AwooCompiler, elf *elf.AwooElf, n node
 			SourceOne:  details.Register,
 			SourceTwo:  elementDetails.Register,
 		}
-		if err := encoder.Encode(elf, saveInstruction); err != nil {
+		if err := encoder.Encode(celf, saveInstruction); err != nil {
 			return err
 		}
 	}

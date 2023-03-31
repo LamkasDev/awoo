@@ -8,11 +8,11 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
-type AwooCompileStatement func(ccompiler *AwooCompiler, elf *elf.AwooElf, s statement.AwooParserStatement) error
+type AwooCompileStatement func(ccompiler *AwooCompiler, celf *elf.AwooElf, s statement.AwooParserStatement) error
 
-type AwooCompileNodeExpression func(ccompiler *AwooCompiler, elf *elf.AwooElf, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) error
+type AwooCompileNodeExpression func(ccompiler *AwooCompiler, celf *elf.AwooElf, leftDetails *compiler_details.CompileNodeValueDetails, rightDetails *compiler_details.CompileNodeValueDetails) error
 
-type AwooCompileNodeValue func(ccompiler *AwooCompiler, elf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error
+type AwooCompileNodeValue func(ccompiler *AwooCompiler, celf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error
 
 type AwooCompilerMappings struct {
 	Statement        map[uint16]AwooCompileStatement
