@@ -34,11 +34,11 @@ func SetupDriverVga(internal *internal.AwooEmulatorInternal) driver.AwooDriver {
 	}
 }
 
-func ReadCharacterDriverVga(internal *internal.AwooEmulatorInternal, data *AwooDriverDataVga, offset arch.AwooRegister) (*sdl.Surface, uint8, bool) {
+func ReadCharacterDriverVga(internal *internal.AwooEmulatorInternal, data *AwooDriverDataVga, offset arch.AwooRegister) (*sdl.Surface, uint8, error) {
 	characterData := memory.ReadMemorySafe(&internal.Memory, arch.AwooRegister(AwooDriverVgaVector+offset), memory.ReadMemory16)
 	internal.Memory.TotalRead -= 2
 	if characterData == 0 {
-		return nil, 0, false
+		return nil, 0, nil
 	}
 
 	fgColor := uint8(characterData & 0b1111)
@@ -47,11 +47,15 @@ func ReadCharacterDriverVga(internal *internal.AwooEmulatorInternal, data *AwooD
 	sheetCode := uint16(asciiCode) + uint16(fgColor)
 	text, ok := data.Renderer.Fontsheet[sheetCode]
 	if !ok {
-		text, _ = data.Renderer.Font.RenderUTF8Blended(string(rune(asciiCode)), AwooDriverVGAColors[fgColor])
+		var err error
+		text, err = data.Renderer.Font.RenderUTF8Blended(string(rune(asciiCode)), AwooDriverVGAColors[fgColor])
+		if err != nil {
+			return nil, 0, err
+		}
 		data.Renderer.Fontsheet[sheetCode] = text
 	}
 
-	return text, bgColor, true
+	return text, bgColor, nil
 }
 
 func HandleEventsDriverVga(internal *internal.AwooEmulatorInternal, data *AwooDriverDataVga) {
@@ -82,9 +86,12 @@ func TickLongDriverVga(internal *internal.AwooEmulatorInternal, driver driver.Aw
 		for y := 0; y < AwooDriverVgaFrameHeight; y++ {
 			for x := 0; x < AwooDriverVgaFrameWidth; x++ {
 				offset := arch.AwooRegister((y * AwooDriverVgaFrameWidth * AwooDriverVgaCharacterSize) + (x * AwooDriverVgaCharacterSize))
-				text, bgColor, ok := ReadCharacterDriverVga(internal, &data, offset)
-				if !ok {
-					break
+				text, bgColor, err := ReadCharacterDriverVga(internal, &data, offset)
+				if err != nil {
+					panic(err)
+				}
+				if text == nil {
+					continue
 				}
 				if err := data.Renderer.Surface.FillRect(&sdl.Rect{X: int32(fontX), Y: int32(fontY), W: text.W, H: text.H}, AwooDriverVGAColors[bgColor].Uint32()); err != nil {
 					panic(err)

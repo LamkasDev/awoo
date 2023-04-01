@@ -34,6 +34,7 @@ func ProcessSUB(internal *internal.AwooEmulatorInternal, ins instruction.AwooIns
 	}
 }
 
+// TODO: if src and dst is same, debug will show wrong details.
 func ProcessADDI(internal *internal.AwooEmulatorInternal, ins instruction.AwooInstruction) {
 	internal.CPU.Registers[ins.Destination] = internal.CPU.Registers[ins.SourceOne] + ins.Immediate
 	if arch.AwooDebug {

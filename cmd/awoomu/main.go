@@ -17,17 +17,17 @@ import (
 
 func main() {
 	logger.Log(fmt.Sprintf("hi from %s :3\n", gchalk.Red(arch.AwooPlatform)))
-
 	u, _ := user.Current()
-	defaultInput := path.Join(u.HomeDir, "Documents", "awoo", "data", "obj", "input.awoobj")
+	defaultInput := path.Join(u.HomeDir, "Documents", "awoo", "data", "bin", "input.awooxe")
+
 	var input string
 	var quiet bool
-	flag.StringVar(&input, "i", defaultInput, "path to input .awoobj file")
+	flag.StringVar(&input, "i", defaultInput, "path to input .awooxe file")
 	flag.BoolVar(&quiet, "q", false, "set to disable log")
 	flag.Parse()
 	logger.AwooLoggerEnabled = !quiet
 	flags.ResolveColor()
-	input = paths.ResolvePath(input, ".awoobj")
+	input = paths.ResolvePath(input, ".awooxe")
 
 	emulator := emu.SetupEmulator()
 	emu_run.Load(&emulator, input)

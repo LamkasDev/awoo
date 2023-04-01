@@ -64,11 +64,6 @@ func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, celf *elf.Awoo
 		return err
 	}
 	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Symbol.Type]
-	if variableMemory.Global {
-		elf.PushSymbol(celf, variableMemory.Symbol)
-		elf.PushSectionData(celf, celf.SectionList.DataIndex, make([]byte, variableMemory.Symbol.Size))
-		elf.PushRelocationEntry(celf, variableMemory.Symbol.Name)
-	}
 
 	valueNode := statement.GetStatementDefinitionVariableValue(&s)
 	if valueNode == nil {
@@ -91,6 +86,11 @@ func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, celf *elf.Awoo
 		return nil
 	}
 
+	if variableMemory.Global {
+		elf.PushSymbol(celf, variableMemory.Symbol)
+		elf.PushSectionData(celf, celf.SectionList.DataIndex, make([]byte, variableMemory.Symbol.Size))
+		elf.PushRelocationEntry(celf, variableMemory.Symbol.Name)
+	}
 	saveInstruction := instruction.AwooInstruction{
 		Definition: *instructions.AwooInstructionsSave[variableType.Size],
 		SourceOne:  valueDetails.Address.Register,

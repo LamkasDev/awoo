@@ -62,7 +62,7 @@ var AwooInstructionFormats = map[uint8]AwooInstructionFormat{
 		SourceTwo: AwooInstructionRange{Start: 20, Length: 5},
 		Immediate: AwooInstructionRangeExtended{
 			Offset: 1,
-			Ranges: []AwooInstructionRange{{Start: 8, Length: 4}, {Start: 7, Length: 1}, {Start: 25, Length: 6}, {Start: 31, Length: 1}},
+			Ranges: []AwooInstructionRange{{Start: 8, Length: 4}, {Start: 25, Length: 6}, {Start: 7, Length: 1}, {Start: 31, Length: 1}},
 		},
 		Argument: AwooInstructionRangeExtended{
 			Ranges: []AwooInstructionRange{{Start: 12, Length: 3}},

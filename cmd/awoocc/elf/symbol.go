@@ -23,7 +23,7 @@ func AlignSymbols(ccompiler *compiler.AwooCompiler, elf *commonElf.AwooElf) erro
 		if err != nil {
 			return err
 		}
-		ins.Immediate += elf.SymbolTable[relocEntry.Name].Start
+		ins.Immediate = elf.SymbolTable[relocEntry.Name].Start
 		encoder.EncodeAt(elf, relocEntry.Offset, ins)
 	}
 

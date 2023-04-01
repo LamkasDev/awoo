@@ -19,17 +19,18 @@ func CompileStatementFor(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s 
 		return err
 	}
 
-	// Reserve instruction for condition.
-	conditionStart := arch.AwooRegister(len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents))
-	if err := encoder.Encode(celf, instruction.AwooInstruction{}); err != nil {
-		return err
-	}
-
+	conditionOffset := arch.AwooRegister(len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents))
 	conditionDetails := compiler_details.CompileNodeValueDetails{
 		Type:     commonTypes.AwooTypeId(types.AwooTypeBoolean),
 		Register: cpu.AwooRegisterTemporaryZero,
 	}
 	if err := CompileNodeValue(ccompiler, celf, statement.GetStatementForCondition(&s), &conditionDetails); err != nil {
+		return err
+	}
+
+	// Reserve instruction for condition.
+	jumpBeyondEndOffset := arch.AwooRegister(len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents))
+	if err := encoder.Encode(celf, instruction.AwooInstruction{}); err != nil {
 		return err
 	}
 
@@ -41,22 +42,22 @@ func CompileStatementFor(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s 
 		return err
 	}
 
-	end := arch.AwooRegister(len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents))
+	jumpToConditionOffset := arch.AwooRegister(len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents))
 	jumpToConditionInstruction := instruction.AwooInstruction{
 		Definition: instructions.AwooInstructionJAL,
-		Immediate:  conditionStart - end,
+		Immediate:  conditionOffset - jumpToConditionOffset,
 	}
 	if err := encoder.Encode(celf, jumpToConditionInstruction); err != nil {
 		return err
 	}
 
-	end = arch.AwooRegister(len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents))
+	end := arch.AwooRegister(len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents))
 	jumpBeyondEndInstruction := instruction.AwooInstruction{
 		Definition: instructions.AwooInstructionBEQ,
 		SourceOne:  cpu.AwooRegisterTemporaryZero,
-		Immediate:  end - conditionStart,
+		Immediate:  end - jumpBeyondEndOffset,
 	}
-	if err := encoder.EncodeAt(celf, conditionStart, jumpBeyondEndInstruction); err != nil {
+	if err := encoder.EncodeAt(celf, jumpBeyondEndOffset, jumpBeyondEndInstruction); err != nil {
 		return err
 	}
 
