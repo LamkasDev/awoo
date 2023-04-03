@@ -6,12 +6,13 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_details"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_error"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
 )
 
-func ConstructStatementDefinitionType(cparser *parser.AwooParser, _ lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
+func ConstructStatementDefinitionType(cparser *parser.AwooParser, _ lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, *parser_error.AwooParserError) {
 	t, err := parser.ExpectToken(cparser, token.TokenTypeIdentifier)
 	if err != nil {
 		return statement.AwooParserStatement{}, err

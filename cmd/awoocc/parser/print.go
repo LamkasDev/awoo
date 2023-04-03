@@ -67,7 +67,7 @@ func PrintStatementFunc(settings *AwooParserSettings, context *parser_context.Aw
 }
 
 func PrintNewStatement(settings *AwooParserSettings, context *parser_context.AwooParserContext, s *statement.AwooParserStatement) {
-	logger.Log("┗━━► %s \n", PrintStatement(settings, context, s))
+	logger.LogExtra("┗━━► %s \n", PrintStatement(settings, context, s))
 }
 
 func PrintStatement(settings *AwooParserSettings, context *parser_context.AwooParserContext, s *statement.AwooParserStatement) string {

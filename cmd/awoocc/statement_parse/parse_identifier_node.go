@@ -3,19 +3,19 @@ package statement_parse
 import (
 	"fmt"
 
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_details"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_error"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
 	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 	"github.com/jwalton/gchalk"
 )
 
-func CreateNodeIdentifierVariableSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, error) {
+func CreateNodeIdentifierVariableSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
 	identifier := lexer_token.GetTokenIdentifierValue(&t)
 	if _, err := parser_context.GetParserScopeFunctionMemory(&cparser.Context, identifier); err != nil {
 		return node.AwooParserNodeResult{}, err
@@ -36,7 +36,7 @@ func CreateNodeIdentifierVariableSafe(cparser *parser.AwooParser, t lexer_token.
 	return node.CreateNodeIdentifier(t), nil
 }
 
-func CreateNodeIdentifierVariableSafeFast(cparser *parser.AwooParser) (node.AwooParserNodeResult, error) {
+func CreateNodeIdentifierVariableSafeFast(cparser *parser.AwooParser) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
 	t, err := parser.ExpectTokens(cparser, []uint16{token.TokenTypeIdentifier})
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
@@ -45,14 +45,16 @@ func CreateNodeIdentifierVariableSafeFast(cparser *parser.AwooParser) (node.Awoo
 	return CreateNodeIdentifierVariableSafe(cparser, t)
 }
 
-func CreateNodeIdentifierCallSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, error) {
+func CreateNodeIdentifierCallSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
 	callFunctionName := lexer_token.GetTokenIdentifierValue(&t)
 	if _, err := parser.ExpectTokens(cparser, []uint16{token.TokenTypeBracketLeft}); err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
 	callFunction, ok := parser_context.GetParserFunction(&cparser.Context, callFunctionName)
 	if !ok {
-		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s", awerrors.ErrorUnknownFunction, gchalk.Red(callFunctionName))
+		return node.AwooParserNodeResult{}, parser_error.CreateParserErrorText(parser_error.AwooParserErrorUnknownFunction,
+			fmt.Sprintf("%s: %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorUnknownFunction], gchalk.Red(callFunctionName)),
+			cparser.Position, 1, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorUnknownFunction])
 	}
 
 	callNode := node.CreateNodeCall(t)
@@ -76,7 +78,7 @@ func CreateNodeIdentifierCallSafe(cparser *parser.AwooParser, t lexer_token.Awoo
 	return callNode, nil
 }
 
-func CreateNodeIdentifierCallSafeFast(cparser *parser.AwooParser) (node.AwooParserNodeResult, error) {
+func CreateNodeIdentifierCallSafeFast(cparser *parser.AwooParser) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
 	t, err := parser.ExpectTokens(cparser, []uint16{node.ParserNodeTypeIdentifier})
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
@@ -85,7 +87,7 @@ func CreateNodeIdentifierCallSafeFast(cparser *parser.AwooParser) (node.AwooPars
 	return CreateNodeIdentifierCallSafe(cparser, t)
 }
 
-func CreateNodeIdentifierSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, _ *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
+func CreateNodeIdentifierSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, _ *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
 	variableNode, variableErr := CreateNodeIdentifierVariableSafe(cparser, t)
 	if variableErr == nil {
 		return variableNode, nil
@@ -98,7 +100,7 @@ func CreateNodeIdentifierSafe(cparser *parser.AwooParser, t lexer_token.AwooLexe
 	return node.AwooParserNodeResult{}, variableErr
 }
 
-func CreateNodeIdentifierSafeFast(cparser *parser.AwooParser, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
+func CreateNodeIdentifierSafeFast(cparser *parser.AwooParser, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
 	t, err := parser.ExpectToken(cparser, token.TokenTypeIdentifier)
 	if err != nil {
 		return node.AwooParserNodeResult{}, err

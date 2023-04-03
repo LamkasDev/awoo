@@ -5,14 +5,15 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_details"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_error"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 )
 
-type AwooParseStatement func(cparser *AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error)
+type AwooParseStatement func(cparser *AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, *parser_error.AwooParserError)
 
-type AwooParseNodeExpression func(cparser *AwooParser, leftNode node.AwooParserNodeResult, op lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error)
+type AwooParseNodeExpression func(cparser *AwooParser, leftNode node.AwooParserNodeResult, op lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError)
 
-type AwooParseNodeValue func(cparser *AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error)
+type AwooParseNodeValue func(cparser *AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError)
 
 type AwooPrintStatement func(settings *AwooParserSettings, context *parser_context.AwooParserContext, s *statement.AwooParserStatement) string
 

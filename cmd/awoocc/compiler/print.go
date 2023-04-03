@@ -15,7 +15,7 @@ func PrintNewCompile(ccompiler *AwooCompiler, s *statement.AwooParserStatement, 
 		text += fmt.Sprintf("[%#x %#x %#x %#x] ", data[i], data[i+1], data[i+2], data[i+3])
 	}
 
-	logger.Log("%s %s  %s\n",
+	logger.LogExtra("%s %s  %s\n",
 		parser.PrintStatement(&ccompiler.Settings.Parser, &ccompiler.Context.Parser, s),
 		gchalk.Gray("➔"),
 		gchalk.Cyan(text),

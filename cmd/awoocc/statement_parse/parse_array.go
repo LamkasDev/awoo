@@ -5,10 +5,11 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_details"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_error"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
 )
 
-func CreateNodeArray(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
+func CreateNodeArray(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
 	elements := []node.AwooParserNode{}
 	if t, _ := parser.ExpectTokenOptional(cparser, token.TokenTypeBracketCurlyLeft); t == nil {
 		elementDetails := &parser_details.ConstructExpressionDetails{

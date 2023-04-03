@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/lexer_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_details"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_error"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
 	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 	"github.com/jwalton/gchalk"
@@ -59,15 +59,19 @@ func GetPrimitiveLimits(cparser *parser.AwooParser, t lexer_token.AwooLexerToken
 	}
 }
 
-func CreateNodePrimitiveSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
+func CreateNodePrimitiveSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
 	// TODO: handle unsigned.
 	primValue := GetPrimitiveValue[int64](cparser.Context.Lexer, t)
 	primUp, primDown := GetPrimitiveLimits(cparser, t)
 	if primValue > primUp {
-		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s > %s", awerrors.ErrorPrimitiveOverflow, gchalk.Red(fmt.Sprint(primValue)), gchalk.Green(fmt.Sprint(primUp)))
+		return node.AwooParserNodeResult{}, parser_error.CreateParserErrorText(parser_error.AwooParserErrorPrimitiveOverflow,
+			fmt.Sprintf("%s: %s > %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorPrimitiveOverflow], gchalk.Red(fmt.Sprint(primValue)), gchalk.Green(fmt.Sprint(primUp))),
+			uint32(cparser.Current.Start), 1, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorPrimitiveOverflow])
 	}
 	if primValue < primDown {
-		return node.AwooParserNodeResult{}, fmt.Errorf("%w: %s < %s", awerrors.ErrorPrimitiveUnderflow, gchalk.Red(fmt.Sprint(primValue)), gchalk.Green(fmt.Sprint(primDown)))
+		return node.AwooParserNodeResult{}, parser_error.CreateParserErrorText(parser_error.AwooParserErrorPrimitiveUnderflow,
+			fmt.Sprintf("%s: %s < %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorPrimitiveUnderflow], gchalk.Red(fmt.Sprint(primValue)), gchalk.Green(fmt.Sprint(primDown))),
+			uint32(cparser.Current.Start), 1, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorPrimitiveUnderflow])
 	}
 
 	return node.CreateNodePrimitive(t), nil

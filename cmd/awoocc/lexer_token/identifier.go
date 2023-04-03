@@ -14,7 +14,7 @@ func SetTokenIdentifierValue(t *AwooLexerToken, value string) {
 	t.Data.(*AwooLexerTokenDataIdentifier).Value = value
 }
 
-func CreateTokenIdentifier(start uint16, text string) AwooLexerToken {
+func CreateTokenIdentifier(start uint32, text string) AwooLexerToken {
 	return AwooLexerToken{
 		Type:  token.TokenTypeIdentifier,
 		Start: start,

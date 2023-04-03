@@ -5,11 +5,12 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_details"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_error"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
 )
 
-func GetVariableMemoryForAssignment(cparser *parser.AwooParser, identifierNode node.AwooParserNode) (parser_context.AwooParserMemoryEntry, error) {
+func GetVariableMemoryForAssignment(cparser *parser.AwooParser, identifierNode node.AwooParserNode) (parser_context.AwooParserMemoryEntry, *parser_error.AwooParserError) {
 	switch identifierNode.Type {
 	case node.ParserNodeTypePointer:
 		identifierNode = node.GetNodeSingleValue(&identifierNode)
@@ -21,7 +22,7 @@ func GetVariableMemoryForAssignment(cparser *parser.AwooParser, identifierNode n
 	return parser_context.GetParserScopeFunctionMemory(&cparser.Context, node.GetNodeIdentifierValue(&identifierNode))
 }
 
-func ConstructStatementAssignment(cparser *parser.AwooParser, identifierNode node.AwooParserNode, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
+func ConstructStatementAssignment(cparser *parser.AwooParser, identifierNode node.AwooParserNode, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, *parser_error.AwooParserError) {
 	variableMemory, err := GetVariableMemoryForAssignment(cparser, identifierNode)
 	if err != nil {
 		return statement.AwooParserStatement{}, err

@@ -7,6 +7,7 @@ import (
 
 type AwooLexerResult struct {
 	Error   error
+	Text    []rune
 	Context lexer_context.AwooLexerContext
 	Tokens  []lexer_token.AwooLexerToken
 }

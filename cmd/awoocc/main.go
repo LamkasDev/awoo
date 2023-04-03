@@ -45,6 +45,7 @@ func main() {
 	}
 
 	lexSettings := lexer.AwooLexerSettings{
+		Path:   input,
 		Tokens: token.SetupTokenMap(),
 		Mappings: lexer.AwooLexerMappings{
 			PrintNode: map[uint16]lexer.AwooPrintNode{

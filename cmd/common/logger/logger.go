@@ -3,7 +3,7 @@ package logger
 import "fmt"
 
 var AwooLoggerEnabled = true
-var AwooLoggerExtraEnabled = true
+var AwooLoggerExtraEnabled = false
 
 func Log(format string, v ...any) {
 	if !AwooLoggerEnabled {

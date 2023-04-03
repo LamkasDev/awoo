@@ -18,7 +18,7 @@ import (
 )
 
 func RunCompiler(ccompiler *compiler.AwooCompiler) {
-	logger.Log(gchalk.Yellow("\n> Compiler\n"))
+	logger.LogExtra(gchalk.Yellow("\n> Compiler\n"))
 
 	err := os.MkdirAll(filepath.Dir(ccompiler.Settings.Path), 0644)
 	if err != nil {

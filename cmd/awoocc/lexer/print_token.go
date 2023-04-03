@@ -10,7 +10,7 @@ import (
 )
 
 func PrintNewToken(settings *AwooLexerSettings, cs string, t *lexer_token.AwooLexerToken) {
-	logger.Log("%s %s  %s\n", cs, gchalk.Gray("➔"), PrintToken(settings, t))
+	logger.LogExtra("%s %s  %s\n", cs, gchalk.Gray("➔"), PrintToken(settings, t))
 }
 
 func PrintToken(settings *AwooLexerSettings, t *lexer_token.AwooLexerToken) string {

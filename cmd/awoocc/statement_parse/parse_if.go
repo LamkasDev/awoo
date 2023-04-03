@@ -4,11 +4,12 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_details"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_error"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
 )
 
-func ConstructStatementIfOuter(cparser *parser.AwooParser, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
+func ConstructStatementIfOuter(cparser *parser.AwooParser, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, *parser_error.AwooParserError) {
 	n, err := ConstructExpressionStart(cparser, &parser_details.ConstructExpressionDetails{
 		EndTokens: []uint16{token.TokenTypeBracketCurlyRight},
 	})
@@ -25,7 +26,7 @@ func ConstructStatementIfOuter(cparser *parser.AwooParser, details *parser_detai
 	return ifStatement, nil
 }
 
-func ConstructStatementIf(cparser *parser.AwooParser, _ lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
+func ConstructStatementIf(cparser *parser.AwooParser, _ lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, *parser_error.AwooParserError) {
 	ifStatement, err := ConstructStatementIfOuter(cparser, details)
 	if err != nil {
 		return ifStatement, err

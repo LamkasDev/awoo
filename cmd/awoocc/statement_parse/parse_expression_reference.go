@@ -5,10 +5,11 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_details"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_error"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
 )
 
-func ConstructExpressionReference(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
+func ConstructExpressionReference(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
 	switch t.Type {
 	case token.TokenOperatorDereference:
 		n, err := CreateNodeIdentifierVariableSafeFast(cparser)
@@ -26,7 +27,7 @@ func ConstructExpressionReference(cparser *parser.AwooParser, t lexer_token.Awoo
 	return ConstructExpressionNegative(cparser, t, details)
 }
 
-func ConstructExpressionReferenceFast(cparser *parser.AwooParser, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, error) {
+func ConstructExpressionReferenceFast(cparser *parser.AwooParser, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
 	t, err := parser.ExpectTokens(cparser, []uint16{token.TokenTypePrimitive, node.ParserNodeTypeIdentifier, token.TokenTypeBracketCurlyLeft, token.TokenTypeBracketLeft, token.TokenOperatorSubstraction, token.TokenOperatorDereference, token.TokenOperatorReference})
 	if err != nil {
 		return node.AwooParserNodeResult{}, err

@@ -15,14 +15,15 @@ import (
 
 type AwooLexer struct {
 	Contents []rune
-	Length   uint16
-	Position uint16
+	Length   uint32
+	Position uint32
 	Current  rune
 	Context  lexer_context.AwooLexerContext
 	Settings AwooLexerSettings
 }
 
 type AwooLexerSettings struct {
+	Path     string
 	Tokens   token.AwooTokenMap
 	Mappings AwooLexerMappings
 }
@@ -40,13 +41,13 @@ func SetupLexer(settings AwooLexerSettings) AwooLexer {
 
 func LoadLexer(lexer *AwooLexer, contents []rune) {
 	lexer.Contents = contents
-	lexer.Length = (uint16)(len(contents))
+	lexer.Length = (uint32)(len(contents))
 	lexer.Position = 0
 	lexer.Current = lexer.Contents[lexer.Position]
 }
 
-func AdvanceLexerFor(lexer *AwooLexer, n int16) (rune, error) {
-	lexer.Position = (uint16)((int16)(lexer.Position) + n)
+func AdvanceLexerFor(lexer *AwooLexer, n int32) (rune, error) {
+	lexer.Position = (uint32)((int32)(lexer.Position) + n)
 	if lexer.Position >= lexer.Length {
 		return 0, awerrors.ErrorNoMoreTokens
 	}
@@ -71,9 +72,10 @@ func StepbackLexer(lexer *AwooLexer) (rune, error) {
 
 func RunLexer(lexer *AwooLexer) AwooLexerResult {
 	result := AwooLexerResult{
+		Text:    lexer.Contents,
 		Context: lexer.Context,
 	}
-	logger.Log(gchalk.Yellow("> Lexer\n"))
+	logger.LogExtra(gchalk.Yellow("> Lexer\n"))
 	var err error
 	for ; err == nil; _, err = AdvanceLexer(lexer) {
 		if unicode.IsSpace(lexer.Current) {

@@ -4,10 +4,11 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_details"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_error"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 )
 
-func ConstructStatementReturn(cparser *parser.AwooParser, _ lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, error) {
+func ConstructStatementReturn(cparser *parser.AwooParser, _ lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, *parser_error.AwooParserError) {
 	returnStatement := statement.CreateStatementReturn(nil)
 	currentScopeFunction := cparser.Context.Scopes.Functions[uint16(len(cparser.Context.Scopes.Functions)-1)]
 	currentFunction := cparser.Context.Functions.Entries[currentScopeFunction.Name]
