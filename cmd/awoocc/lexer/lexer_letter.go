@@ -8,13 +8,17 @@ import (
 )
 
 func CreateTokenLetter(lexer *AwooLexer) (lexer_token.AwooLexerToken, string) {
-	matchedString := ConstructChunkFast(lexer, string(lexer.Current), func(c rune) bool {
+	tokenPosition := lexer.Current.Position
+	matchedString := ConstructChunkFast(lexer, string(lexer.Current.Character), func(c rune) bool {
 		return unicode.IsLetter(c) || unicode.IsNumber(c)
+	})
+	tokenPosition = lexer_token.ExtendAwooLexerTokenPosition(tokenPosition, lexer_token.AwooLexerTokenPosition{
+		Length: uint32(len(matchedString)) - tokenPosition.Length,
 	})
 	matchingKeyword, ok := lexer.Settings.Tokens.Keywords[strings.ToLower(matchedString)]
 	if ok {
-		return lexer_token.CreateToken(lexer.Position, matchingKeyword), matchedString
+		return lexer_token.NewAwooLexerToken(tokenPosition, matchingKeyword), matchedString
 	}
 
-	return lexer_token.CreateTokenIdentifier(lexer.Position, matchedString), matchedString
+	return lexer_token.CreateTokenIdentifier(tokenPosition, matchedString), matchedString
 }

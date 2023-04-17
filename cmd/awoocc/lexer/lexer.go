@@ -9,17 +9,26 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
+	"github.com/LamkasDev/awoo-emu/cmd/common/cc"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/jwalton/gchalk"
 )
 
 type AwooLexer struct {
-	Contents []rune
-	Length   uint32
-	Position uint32
-	Current  rune
+	Contents AwooLexerContents
+	Current  AwooLexerCurrent
 	Context  lexer_context.AwooLexerContext
 	Settings AwooLexerSettings
+}
+
+type AwooLexerContents struct {
+	Text   []rune
+	Length uint32
+}
+
+type AwooLexerCurrent struct {
+	Position  lexer_token.AwooLexerTokenPosition
+	Character rune
 }
 
 type AwooLexerSettings struct {
@@ -28,7 +37,7 @@ type AwooLexerSettings struct {
 	Mappings AwooLexerMappings
 }
 
-func SetupLexer(settings AwooLexerSettings) AwooLexer {
+func NewLexer(settings AwooLexerSettings) AwooLexer {
 	lexer := AwooLexer{
 		Context: lexer_context.AwooLexerContext{
 			Types: types.SetupTypeMap(),
@@ -39,20 +48,36 @@ func SetupLexer(settings AwooLexerSettings) AwooLexer {
 	return lexer
 }
 
+func NewAwooLexerTokenPosition(lexer *AwooLexer, length uint32) lexer_token.AwooLexerTokenPosition {
+	return lexer_token.AwooLexerTokenPosition{
+		Line:   lexer.Current.Position.Line,
+		Column: lexer.Current.Position.Column,
+		Length: length,
+	}
+}
+
 func LoadLexer(lexer *AwooLexer, contents []rune) {
-	lexer.Contents = contents
-	lexer.Length = (uint32)(len(contents))
-	lexer.Position = 0
-	lexer.Current = lexer.Contents[lexer.Position]
+	lexer.Contents = AwooLexerContents{
+		Text:   contents,
+		Length: (uint32)(len(contents)),
+	}
+	lexer.Current = AwooLexerCurrent{
+		Position: lexer_token.AwooLexerTokenPosition{
+			Line:   1,
+			Column: 1,
+		},
+		Character: lexer.Contents.Text[lexer.Current.Position.Index],
+	}
 }
 
 func AdvanceLexerFor(lexer *AwooLexer, n int32) (rune, error) {
-	lexer.Position = (uint32)((int32)(lexer.Position) + n)
-	if lexer.Position >= lexer.Length {
+	lexer.Current.Position.Index = (uint32)((int32)(lexer.Current.Position.Index) + n)
+	if lexer.Current.Position.Index >= lexer.Contents.Length {
 		return 0, awerrors.ErrorNoMoreTokens
 	}
-	lexer.Current = lexer.Contents[lexer.Position]
-	return lexer.Current, nil
+	lexer.Current.Position.Column = (uint32)((int32)(lexer.Current.Position.Column) + n)
+	lexer.Current.Character = lexer.Contents.Text[lexer.Current.Position.Index]
+	return lexer.Current.Character, nil
 }
 
 func AdvanceLexer(lexer *AwooLexer) (rune, error) {
@@ -60,10 +85,10 @@ func AdvanceLexer(lexer *AwooLexer) (rune, error) {
 }
 
 func PeekLexer(lexer *AwooLexer) (rune, error) {
-	if lexer.Position+1 >= lexer.Length {
+	if lexer.Current.Position.Index+1 >= lexer.Contents.Length {
 		return 0, awerrors.ErrorNoMoreTokens
 	}
-	return lexer.Contents[lexer.Position+1], nil
+	return lexer.Contents.Text[lexer.Current.Position.Index+1], nil
 }
 
 func StepbackLexer(lexer *AwooLexer) (rune, error) {
@@ -72,56 +97,68 @@ func StepbackLexer(lexer *AwooLexer) (rune, error) {
 
 func RunLexer(lexer *AwooLexer) AwooLexerResult {
 	result := AwooLexerResult{
-		Text:    lexer.Contents,
-		Context: lexer.Context,
+		Contents: lexer.Contents,
+		Context:  lexer.Context,
 	}
 	logger.LogExtra(gchalk.Yellow("> Lexer\n"))
 	var err error
 	for ; err == nil; _, err = AdvanceLexer(lexer) {
-		if unicode.IsSpace(lexer.Current) {
+		if unicode.IsSpace(lexer.Current.Character) {
+			switch lexer.Current.Character {
+			case '\n':
+				lexer.Current.Position.Column = 0
+				lexer.Current.Position.Line++
+			case '\t':
+				lexer.Current.Position.Column += (cc.AwooTabIndent - 1)
+			}
 			continue
 		}
 
-		single, ok := lexer.Settings.Tokens.Single[lexer.Current]
+		single, ok := lexer.Settings.Tokens.Single[lexer.Current.Character]
 		if ok {
-			token := lexer_token.CreateToken(lexer.Position, single)
-			PrintNewToken(&lexer.Settings, string(lexer.Current), &token)
+			token := lexer_token.NewAwooLexerToken(NewAwooLexerTokenPosition(lexer, 1), single)
+			PrintNewToken(&lexer.Settings, string(lexer.Current.Character), &token)
+			token.Position.Index = uint32(len(result.Tokens))
 			result.Tokens = append(result.Tokens, token)
 			continue
 		}
-		if lexer.Current == '\'' {
+		if lexer.Current.Character == '\'' {
 			token, matchedString, err := CreateTokenChar(lexer)
 			if err != nil {
 				result.Error = err
 				break
 			}
 			PrintNewToken(&lexer.Settings, matchedString, &token)
+			token.Position.Index = uint32(len(result.Tokens))
 			result.Tokens = append(result.Tokens, token)
 			continue
 		}
-		if unicode.IsLetter(lexer.Current) {
+		if unicode.IsLetter(lexer.Current.Character) {
 			token, matchedString := CreateTokenLetter(lexer)
 			PrintNewToken(&lexer.Settings, matchedString, &token)
+			token.Position.Index = uint32(len(result.Tokens))
 			result.Tokens = append(result.Tokens, token)
 			continue
 		}
-		if unicode.IsNumber(lexer.Current) {
+		if unicode.IsNumber(lexer.Current.Character) {
 			token, matchedString, err := CreateTokenNumber(lexer)
 			if err != nil {
 				result.Error = err
 				break
 			}
 			PrintNewToken(&lexer.Settings, matchedString, &token)
+			token.Position.Index = uint32(len(result.Tokens))
 			result.Tokens = append(result.Tokens, token)
 			continue
 		}
 
 		token, matchedString, ok := CreateTokenCouple(lexer)
 		if !ok {
-			result.Error = fmt.Errorf("%w: %s", awerrors.ErrorIllegalCharacter, gchalk.Red((string)(lexer.Current)))
+			result.Error = fmt.Errorf("%w: %s", awerrors.ErrorIllegalCharacter, gchalk.Red((string)(lexer.Current.Character)))
 			break
 		}
 		PrintNewToken(&lexer.Settings, matchedString, &token)
+		token.Position.Index = uint32(len(result.Tokens))
 		result.Tokens = append(result.Tokens, token)
 		break
 	}

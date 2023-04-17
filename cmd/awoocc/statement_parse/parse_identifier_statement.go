@@ -45,5 +45,5 @@ func ConstructStatementIdentifier(cparser *parser.AwooParser, t lexer_token.Awoo
 
 	return statement.AwooParserStatement{}, parser_error.CreateParserErrorText(parser_error.AwooParserErrorExpectedToken,
 		fmt.Sprintf("%s: %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorExpectedToken], gchalk.Red("identifier")),
-		uint32(cparser.Current.Start), 1, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorExpectedToken])
+		cparser.Current.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorExpectedToken])
 }

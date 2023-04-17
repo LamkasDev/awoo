@@ -15,7 +15,7 @@ func ConstructExpressionEndStatement(cparser *parser.AwooParser, n node.AwooPars
 	if details.PendingBrackets > 0 {
 		return node.AwooParserNodeResult{}, parser_error.CreateParserErrorText(parser_error.AwooParserErrorExpectedToken,
 			fmt.Sprintf("%s: %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorExpectedToken], gchalk.Red(")")),
-			cparser.Position, 1, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorExpectedToken])
+			t.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorExpectedToken])
 	}
 	return node.AwooParserNodeResult{
 		Node: n.Node,
@@ -33,5 +33,5 @@ func ConstructExpressionEndBracket(cparser *parser.AwooParser, n node.AwooParser
 	}
 	return node.AwooParserNodeResult{}, parser_error.CreateParserErrorText(parser_error.AwooParserErrorUnexpectedToken,
 		fmt.Sprintf("%s: %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorUnexpectedToken], gchalk.Red(")")),
-		cparser.Position, 1, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorUnexpectedToken])
+		t.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorUnexpectedToken])
 }

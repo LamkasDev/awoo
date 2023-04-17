@@ -17,8 +17,10 @@ import (
 
 func CreateNodeIdentifierVariableSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
 	identifier := lexer_token.GetTokenIdentifierValue(&t)
-	if _, err := parser_context.GetParserScopeFunctionMemory(&cparser.Context, identifier); err != nil {
-		return node.AwooParserNodeResult{}, err
+	if _, ok := parser_context.GetParserScopeFunctionMemory(&cparser.Context, identifier); !ok {
+		return node.AwooParserNodeResult{}, parser_error.CreateParserErrorText(parser_error.AwooParserErrorUnknownVariable,
+			fmt.Sprintf("%s: %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorUnknownVariable], gchalk.Red(identifier)),
+			t.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorUnknownVariable])
 	}
 	if arrToken, _ := parser.ExpectTokenOptional(cparser, token.TokenTypeBracketSquareLeft); arrToken != nil {
 		arrIndexNode := node.CreateNodeArrayIndex(*arrToken, identifier)
@@ -54,7 +56,7 @@ func CreateNodeIdentifierCallSafe(cparser *parser.AwooParser, t lexer_token.Awoo
 	if !ok {
 		return node.AwooParserNodeResult{}, parser_error.CreateParserErrorText(parser_error.AwooParserErrorUnknownFunction,
 			fmt.Sprintf("%s: %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorUnknownFunction], gchalk.Red(callFunctionName)),
-			cparser.Position, 1, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorUnknownFunction])
+			t.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorUnknownFunction])
 	}
 
 	callNode := node.CreateNodeCall(t)

@@ -41,11 +41,11 @@ func ConstructStatementFunc(cparser *parser.AwooParser, _ lexer_token.AwooLexerT
 			Size: cparser.Context.Lexer.Types.All[argumentType].Size,
 			Type: argumentType,
 		}))
-		_, err = parser_context.PushParserScopeCurrentBlockMemory(&cparser.Context, parser_context.AwooParserMemoryEntry{
+		_, ok := parser_context.PushParserScopeCurrentBlockMemory(&cparser.Context, parser_context.AwooParserMemoryEntry{
 			Name: argumentName,
 			Type: argumentType,
 		})
-		if err != nil {
+		if !ok {
 			return functionStatement, err
 		}
 	}

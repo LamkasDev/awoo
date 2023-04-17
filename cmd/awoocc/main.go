@@ -63,7 +63,7 @@ func main() {
 			},
 		},
 	}
-	lex := lexer.SetupLexer(lexSettings)
+	lex := lexer.NewLexer(lexSettings)
 	lexer.LoadLexer(&lex, []rune(string(file)))
 	lexRes := lexer.RunLexer(&lex)
 

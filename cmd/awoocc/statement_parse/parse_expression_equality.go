@@ -9,7 +9,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
 )
 
-func ConstructExpressionEquality(cparser *parser.AwooParser, leftNode node.AwooParserNodeResult, _ lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
+func ConstructExpressionEquality(cparser *parser.AwooParser, leftNode node.AwooParserNodeResult, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
 	op, err := parser.ExpectToken(cparser, token.TokenOperatorEq)
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
@@ -20,13 +20,13 @@ func ConstructExpressionEquality(cparser *parser.AwooParser, leftNode node.AwooP
 	}
 	return node.AwooParserNodeResult{
 		Node: node.CreateNodeExpression(lexer_token.AwooLexerToken{
-			Type:  token.TokenOperatorEqEq,
-			Start: op.Start - 1,
+			Type:     token.TokenOperatorEqEq,
+			Position: lexer_token.ExtendAwooLexerTokenPosition(t.Position, op.Position),
 		}, leftNode.Node, rightNode.Node),
 	}, nil
 }
 
-func ConstructExpressionNotEquality(cparser *parser.AwooParser, leftNode node.AwooParserNodeResult, _ lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
+func ConstructExpressionNotEquality(cparser *parser.AwooParser, leftNode node.AwooParserNodeResult, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
 	op, err := parser.ExpectToken(cparser, token.TokenOperatorEq)
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
@@ -37,8 +37,8 @@ func ConstructExpressionNotEquality(cparser *parser.AwooParser, leftNode node.Aw
 	}
 	return node.AwooParserNodeResult{
 		Node: node.CreateNodeExpression(lexer_token.AwooLexerToken{
-			Type:  token.TokenOperatorNotEq,
-			Start: op.Start - 1,
+			Type:     token.TokenOperatorNotEq,
+			Position: lexer_token.ExtendAwooLexerTokenPosition(t.Position, op.Position),
 		}, leftNode.Node, rightNode.Node),
 	}, nil
 }

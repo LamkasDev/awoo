@@ -51,7 +51,8 @@ func LoadParser(parser *AwooParser, contents lexer.AwooLexerResult) {
 func AdvanceParserFor(parser *AwooParser, n int32) *parser_error.AwooParserError {
 	pos := (uint32)((int32)(parser.Position) + n)
 	if pos >= parser.Length {
-		return parser_error.CreateParserError(parser_error.AwooParserErrorNoMoreTokens, parser.Position, 1)
+		// TODO: finish this
+		return parser_error.CreateParserError(parser_error.AwooParserErrorNoMoreTokens, lexer_token.AwooLexerTokenPosition{})
 	}
 	parser.Position = pos
 	parser.Current = TransformToken(&parser.Context, parser.Contents.Tokens[parser.Position])
@@ -66,11 +67,17 @@ func StepbackParser(parser *AwooParser) *parser_error.AwooParserError {
 	return AdvanceParserFor(parser, -1)
 }
 
-func PeekToken(parser *AwooParser) (lexer_token.AwooLexerToken, *parser_error.AwooParserError) {
-	if parser.Position+1 >= parser.Length {
-		return lexer_token.AwooLexerToken{}, parser_error.CreateParserError(parser_error.AwooParserErrorNoMoreTokens, parser.Position, 1)
+func PeekTokenFor(parser *AwooParser, n int32) (lexer_token.AwooLexerToken, *parser_error.AwooParserError) {
+	pos := (uint32)((int32)(parser.Position) + n)
+	if pos >= parser.Length {
+		// TODO: finish this
+		return lexer_token.AwooLexerToken{}, parser_error.CreateParserError(parser_error.AwooParserErrorNoMoreTokens, lexer_token.AwooLexerTokenPosition{})
 	}
-	return parser.Contents.Tokens[parser.Position+1], nil
+	return parser.Contents.Tokens[pos], nil
+}
+
+func PeekToken(parser *AwooParser) (lexer_token.AwooLexerToken, *parser_error.AwooParserError) {
+	return PeekTokenFor(parser, 1)
 }
 
 func FetchToken(cparser *AwooParser) (lexer_token.AwooLexerToken, *parser_error.AwooParserError) {
@@ -89,7 +96,7 @@ func ExpectToken(cparser *AwooParser, tokenType uint16) (lexer_token.AwooLexerTo
 	if t.Type != tokenType {
 		return t, parser_error.CreateParserErrorText(parser_error.AwooParserErrorExpectedToken,
 			fmt.Sprintf("%s: %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorExpectedToken], gchalk.Red(cparser.Settings.Lexer.Tokens.All[tokenType].Key)),
-			uint32(cparser.Current.Start), 1, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorExpectedToken])
+			cparser.Current.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorExpectedToken])
 	}
 
 	return t, nil
@@ -116,7 +123,7 @@ func ExpectTokens(cparser *AwooParser, tokenTypes []uint16) (lexer_token.AwooLex
 	if !util.Contains(tokenTypes, t.Type) {
 		return t, parser_error.CreateParserErrorText(parser_error.AwooParserErrorExpectedToken,
 			fmt.Sprintf("%s: %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorExpectedToken], gchalk.Red(lexer.PrintTokenTypes(&cparser.Settings.Lexer, tokenTypes))),
-			uint32(cparser.Current.Start), 1, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorExpectedToken])
+			cparser.Current.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorExpectedToken])
 	}
 
 	return t, nil

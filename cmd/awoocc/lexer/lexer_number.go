@@ -11,14 +11,18 @@ import (
 )
 
 func CreateTokenNumber(lexer *AwooLexer) (lexer_token.AwooLexerToken, string, error) {
+	tokenPosition := lexer.Current.Position
 	base, baseMatchedString, baseSkipper, baseValidator := ResolveBase(lexer)
-	matchedString := ConstructChunk(lexer, string(lexer.Current), baseSkipper, baseValidator)
+	matchedString := ConstructChunk(lexer, string(lexer.Current.Character), baseSkipper, baseValidator)
+	tokenPosition = lexer_token.ExtendAwooLexerTokenPosition(tokenPosition, lexer_token.AwooLexerTokenPosition{
+		Length: uint32(len(baseMatchedString)+len(matchedString)) - tokenPosition.Length,
+	})
 	number, err := strconv.ParseInt(matchedString, base, 32)
 	if err != nil {
 		return lexer_token.AwooLexerToken{}, matchedString, fmt.Errorf("%w: %w", awerrors.ErrorFailedToCreateToken, err)
 	}
 
-	return lexer_token.CreateTokenPrimitive(lexer.Position, types.AwooTypeInt32, int32(number), base), (baseMatchedString + matchedString), nil
+	return lexer_token.CreateTokenPrimitive(tokenPosition, types.AwooTypeInt32, int32(number), base), (baseMatchedString + matchedString), nil
 }
 
 func BaseSkipper(c rune) bool {
@@ -34,7 +38,7 @@ func Base16Validator(c rune) bool {
 }
 
 func ResolveBase(lexer *AwooLexer) (int, string, ConstructChunkValidator, ConstructChunkValidator) {
-	if lexer.Current == '0' {
+	if lexer.Current.Character == '0' {
 		c, err := PeekLexer(lexer)
 		if err != nil {
 			return 10, "", ConstructChunkSkipperDefault, BaseValidator

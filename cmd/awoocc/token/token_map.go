@@ -43,8 +43,8 @@ func SetupTokenMap() AwooTokenMap {
 	}
 
 	// General
-	AddToken(m, "", "id", TokenTypeIdentifier)
-	AddToken(m, "", "prim", TokenTypePrimitive)
+	AddToken(m, "", "identifier", TokenTypeIdentifier)
+	AddToken(m, "", "primitive", TokenTypePrimitive)
 	AddToken(m, "", "type", TokenTypeType)
 	AddToken(m, ";", ";", TokenTypeEndStatement)
 	AddToken(m, "(", "(", TokenTypeBracketLeft)

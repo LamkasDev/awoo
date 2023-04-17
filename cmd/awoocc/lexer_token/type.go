@@ -17,10 +17,10 @@ func SetTokenTypeId(t *AwooLexerToken, id types.AwooTypeId) {
 	t.Data.(*AwooLexerTokenDataType).Id = id
 }
 
-func CreateTokenType(start uint32, value types.AwooTypeId) AwooLexerToken {
+func CreateTokenType(position AwooLexerTokenPosition, value types.AwooTypeId) AwooLexerToken {
 	return AwooLexerToken{
-		Type:  token.TokenTypeType,
-		Start: start,
+		Type:     token.TokenTypeType,
+		Position: position,
 		Data: AwooLexerTokenDataType{
 			Id: value,
 		},

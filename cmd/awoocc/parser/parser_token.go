@@ -12,7 +12,7 @@ func TransformToken(context *parser_context.AwooParserContext, t lexer_token.Awo
 	case token.TokenTypeIdentifier:
 		possibleType, ok := lexer_context.GetContextType(&context.Lexer, lexer_token.GetTokenIdentifierValue(&t))
 		if ok {
-			t = lexer_token.CreateTokenType(t.Start, possibleType.Id)
+			t = lexer_token.CreateTokenType(t.Position, possibleType.Id)
 		}
 	}
 

@@ -35,10 +35,10 @@ func SetTokenPrimitiveExtra(t *AwooLexerToken, value interface{}) {
 	t.Data.(*AwooLexerTokenDataPrimitive).Extra = value
 }
 
-func CreateTokenPrimitive(start uint32, primitiveType types.AwooTypePrimitiveId, value interface{}, extra interface{}) AwooLexerToken {
+func CreateTokenPrimitive(position AwooLexerTokenPosition, primitiveType types.AwooTypePrimitiveId, value interface{}, extra interface{}) AwooLexerToken {
 	return AwooLexerToken{
-		Type:  token.TokenTypePrimitive,
-		Start: start,
+		Type:     token.TokenTypePrimitive,
+		Position: position,
 		Data: AwooLexerTokenDataPrimitive{
 			Type:  primitiveType,
 			Value: value,

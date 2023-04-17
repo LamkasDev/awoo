@@ -1,14 +1,21 @@
 package util
 
-import "strings"
+import (
+	"strings"
 
-func SelectLine(text string, index int) string {
-	lineStart := strings.LastIndex(text[:index], "\n") + 1
-	lineEnd := index + strings.Index(text[index:], "\n")
-	if lineEnd < index {
-		lineEnd = len(text)
+	"github.com/jwalton/gchalk"
+)
+
+func SelectLine(text string, line int) string {
+	lines := strings.Split(text, "\n")
+	if line < 0 || line > len(lines)-1 {
+		return ""
 	}
-	return text[lineStart:lineEnd]
+	return lines[line]
+}
+
+func HighlightLine(line string, column int, length int) string {
+	return line[:column-1] + gchalk.Red(line[column-1:column+length]) + line[column+length:]
 }
 
 func FindLineNumber(text string, index int) int {

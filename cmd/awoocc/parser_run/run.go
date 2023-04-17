@@ -27,7 +27,7 @@ func RunParser(cparser *parser.AwooParser) parser.AwooParserResult {
 	}
 	logger.LogExtra(gchalk.Yellow("\n> Parser\n"))
 
-	globalFunctionIdentifier := node.CreateNodeIdentifier(lexer_token.CreateTokenIdentifier(0, cc.AwooCompilerGlobalFunctionName))
+	globalFunctionIdentifier := node.CreateNodeIdentifier(lexer_token.CreateTokenIdentifier(lexer_token.AwooLexerTokenPosition{}, cc.AwooCompilerGlobalFunctionName))
 	globalFunctionStatement := statement.CreateStatementFunc(globalFunctionIdentifier.Node)
 	parser_context.PushParserScopeFunction(&cparser.Context, parser_context.AwooParserScopeFunction{
 		Name: cc.AwooCompilerGlobalFunctionName,
@@ -63,17 +63,16 @@ func RunParser(cparser *parser.AwooParser) parser.AwooParserResult {
 
 func PrintParserError(cparser *parser.AwooParser, err *parser_error.AwooParserError) {
 	fmt.Printf("%s: %s\n", gchalk.Red(fmt.Sprintf("error[E%#3x]", err.Type)), err.Message)
+	text := strings.ReplaceAll(string(cparser.Contents.Contents.Text), "\t", strings.Repeat(" ", cc.AwooTabIndent))
 	for _, highlight := range err.Highlights {
-		lineNumber := util.FindLineNumber(string(cparser.Contents.Text), int(highlight.Start))
-		columnNumber := util.FindColumnNumber(string(cparser.Contents.Text), int(highlight.Start))
-		line := util.SelectLine(string(cparser.Contents.Text), int(highlight.Start))
-		fmt.Printf(" %s %s:%d:%d\n", gchalk.Blue("---->"), cparser.Settings.Lexer.Path, lineNumber, columnNumber)
+		line := util.HighlightLine(util.SelectLine(text, int(highlight.Position.Line-1)), int(highlight.Position.Column), int(highlight.Position.Length))
+		fmt.Printf(" %s %s:%d:%d\n", gchalk.Blue("---->"), cparser.Settings.Lexer.Path, highlight.Position.Line, highlight.Position.Column)
 		fmt.Printf("   %s \n", gchalk.Blue("|"))
-		fmt.Printf(" %3s %s %s\n", gchalk.Blue(fmt.Sprint(lineNumber)), gchalk.Blue("|"), line)
+		fmt.Printf(" %3s %s %s\n", gchalk.Blue(fmt.Sprint(highlight.Position.Line)), gchalk.Blue("|"), line)
 		fmt.Printf("   %s %s%s %s\n",
 			gchalk.Blue("|"),
-			strings.Repeat(" ", columnNumber),
-			gchalk.Red(strings.Repeat("^", int(highlight.Length))),
+			strings.Repeat(" ", int(highlight.Position.Column-1)),
+			gchalk.Red(strings.Repeat("^", int(highlight.Position.Length))),
 			gchalk.Red(highlight.Details),
 		)
 	}

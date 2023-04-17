@@ -66,12 +66,12 @@ func CreateNodePrimitiveSafe(cparser *parser.AwooParser, t lexer_token.AwooLexer
 	if primValue > primUp {
 		return node.AwooParserNodeResult{}, parser_error.CreateParserErrorText(parser_error.AwooParserErrorPrimitiveOverflow,
 			fmt.Sprintf("%s: %s > %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorPrimitiveOverflow], gchalk.Red(fmt.Sprint(primValue)), gchalk.Green(fmt.Sprint(primUp))),
-			uint32(cparser.Current.Start), 1, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorPrimitiveOverflow])
+			cparser.Current.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorPrimitiveOverflow])
 	}
 	if primValue < primDown {
 		return node.AwooParserNodeResult{}, parser_error.CreateParserErrorText(parser_error.AwooParserErrorPrimitiveUnderflow,
 			fmt.Sprintf("%s: %s < %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorPrimitiveUnderflow], gchalk.Red(fmt.Sprint(primValue)), gchalk.Green(fmt.Sprint(primDown))),
-			uint32(cparser.Current.Start), 1, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorPrimitiveUnderflow])
+			cparser.Current.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorPrimitiveUnderflow])
 	}
 
 	return node.CreateNodePrimitive(t), nil

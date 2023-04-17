@@ -30,7 +30,7 @@ func ConstructExpressionAccumulate(cparser *parser.AwooParser, leftNode node.Awo
 		}
 		return node.AwooParserNodeResult{}, parser_error.CreateParserErrorText(parser_error.AwooParserErrorExpectedToken,
 			fmt.Sprintf("%s: %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorExpectedToken], gchalk.Red(fmt.Sprintf("operator, %s", lexer.PrintTokenTypes(&cparser.Settings.Lexer, expectedTypes)))),
-			cparser.Position, 1, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorExpectedToken])
+			op.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorExpectedToken])
 	}
 
 	return entry(cparser, leftNode, op, details)

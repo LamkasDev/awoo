@@ -1,6 +1,8 @@
 package statement_parse
 
 import (
+	"fmt"
+
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_context"
@@ -8,18 +10,32 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_error"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
+	"github.com/jwalton/gchalk"
 )
 
 func GetVariableMemoryForAssignment(cparser *parser.AwooParser, identifierNode node.AwooParserNode) (parser_context.AwooParserMemoryEntry, *parser_error.AwooParserError) {
 	switch identifierNode.Type {
 	case node.ParserNodeTypePointer:
 		identifierNode = node.GetNodeSingleValue(&identifierNode)
-		return parser_context.GetParserScopeFunctionMemory(&cparser.Context, node.GetNodeIdentifierValue(&identifierNode))
 	case node.ParserNodeTypeArrayIndex:
-		return parser_context.GetParserScopeFunctionMemory(&cparser.Context, node.GetNodeArrayIndexIdentifier(&identifierNode))
+		identifier := node.GetNodeArrayIndexIdentifier(&identifierNode)
+		entry, ok := parser_context.GetParserScopeFunctionMemory(&cparser.Context, identifier)
+		if !ok {
+			return entry, parser_error.CreateParserErrorText(parser_error.AwooParserErrorUnknownVariable,
+				fmt.Sprintf("%s: %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorUnknownVariable], gchalk.Red(identifier)),
+				identifierNode.Token.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorUnknownVariable])
+		}
+		return entry, nil
 	}
 
-	return parser_context.GetParserScopeFunctionMemory(&cparser.Context, node.GetNodeIdentifierValue(&identifierNode))
+	identifier := node.GetNodeIdentifierValue(&identifierNode)
+	entry, ok := parser_context.GetParserScopeFunctionMemory(&cparser.Context, identifier)
+	if !ok {
+		return entry, parser_error.CreateParserErrorText(parser_error.AwooParserErrorUnknownVariable,
+			fmt.Sprintf("%s: %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorUnknownVariable], gchalk.Red(identifier)),
+			identifierNode.Token.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorUnknownVariable])
+	}
+	return entry, nil
 }
 
 func ConstructStatementAssignment(cparser *parser.AwooParser, identifierNode node.AwooParserNode, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, *parser_error.AwooParserError) {

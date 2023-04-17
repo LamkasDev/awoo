@@ -23,9 +23,9 @@ func PrintToken(settings *AwooLexerSettings, t *lexer_token.AwooLexerToken) stri
 }
 
 func PrintTokenTypes(settings *AwooLexerSettings, tokenTypes []uint16) string {
-	text := settings.Tokens.All[tokenTypes[0]].Key
+	text := settings.Tokens.All[tokenTypes[0]].Name
 	for i := 1; i < len(tokenTypes)-1; i++ {
-		text = fmt.Sprintf("%s, %s", text, settings.Tokens.All[tokenTypes[i]].Key)
+		text = fmt.Sprintf("%s, %s", text, settings.Tokens.All[tokenTypes[i]].Name)
 	}
 	return fmt.Sprintf("%s or %s", text, settings.Tokens.All[tokenTypes[len(tokenTypes)-1]].Key)
 }
