@@ -1,6 +1,9 @@
 package compiler_context
 
-import "github.com/LamkasDev/awoo-emu/cmd/common/arch"
+import (
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_memory"
+	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
+)
 
 type AwooCompilerScopeContainer struct {
 	Functions map[uint16]AwooCompilerScopeFunction
@@ -16,7 +19,7 @@ type AwooCompilerScopeFunction struct {
 type AwooCompilerScopeBlock struct {
 	Id     uint16
 	Name   string
-	Memory AwooCompilerMemory
+	Memory compiler_memory.AwooCompilerMemory
 }
 
 func PushCompilerScopeFunction(context *AwooCompilerContext, scopeFunction AwooCompilerScopeFunction) AwooCompilerScopeFunction {
@@ -37,8 +40,8 @@ func PushCompilerScopeBlock(context *AwooCompilerContext, funcId uint16, functio
 		functionBlockPosition = scopeFunction.Blocks[uint16(len(scopeFunction.Blocks)-1)].Memory.Position
 	}
 	functionBlock.Id = uint16(len(scopeFunction.Blocks))
-	functionBlock.Memory = AwooCompilerMemory{
-		Entries:  map[string]AwooCompilerMemoryEntry{},
+	functionBlock.Memory = compiler_memory.AwooCompilerMemory{
+		Entries:  map[string]compiler_memory.AwooCompilerMemoryEntry{},
 		Position: functionBlockPosition,
 	}
 	scopeFunction.Blocks[functionBlock.Id] = functionBlock

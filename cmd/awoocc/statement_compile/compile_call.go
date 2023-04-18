@@ -65,7 +65,6 @@ func CompileNodeCall(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node
 	jumpInstruction := instruction.AwooInstruction{
 		Definition:  instructions.AwooInstructionJALR,
 		Destination: cpu.AwooRegisterReturnAddress,
-		Immediate:   function.Symbol.Start,
 	}
 	elf.PushRelocationEntry(celf, function.Symbol.Name)
 	if err = encoder.Encode(celf, jumpInstruction); err != nil {

@@ -16,8 +16,11 @@ func CompileNodeArray(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n nod
 	addressAdjustmentInstruction := instruction.AwooInstruction{
 		Definition:  instructions.AwooInstructionADDI,
 		SourceOne:   details.Address.Register,
-		Immediate:   details.Address.Immediate,
+		Immediate:   details.Address.Memory.Symbol.Start,
 		Destination: details.Register,
+	}
+	if details.Address.Memory.Global {
+		elf.PushRelocationEntry(celf, details.Address.Memory.Symbol.Name)
 	}
 	if err := encoder.Encode(celf, addressAdjustmentInstruction); err != nil {
 		return err

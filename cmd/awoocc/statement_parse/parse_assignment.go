@@ -8,12 +8,13 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_error"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_memory"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
 	"github.com/jwalton/gchalk"
 )
 
-func GetVariableMemoryForAssignment(cparser *parser.AwooParser, identifierNode node.AwooParserNode) (parser_context.AwooParserMemoryEntry, *parser_error.AwooParserError) {
+func GetVariableMemoryForAssignment(cparser *parser.AwooParser, identifierNode node.AwooParserNode) (parser_memory.AwooParserMemoryEntry, *parser_error.AwooParserError) {
 	switch identifierNode.Type {
 	case node.ParserNodeTypePointer:
 		identifierNode = node.GetNodeSingleValue(&identifierNode)

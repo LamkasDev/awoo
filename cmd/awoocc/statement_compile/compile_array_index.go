@@ -57,7 +57,10 @@ func CompileNodeArrayIndex(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, 
 		Definition:  *instructions.AwooInstructionsLoad[ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Symbol.Type].Size],
 		SourceOne:   addressDetails.Register,
 		Destination: details.Register,
-		Immediate:   arch.AwooRegister(variableMemory.Symbol.Start),
+		Immediate:   variableMemory.Symbol.Start,
+	}
+	if variableMemory.Global {
+		elf.PushRelocationEntry(celf, variableMemory.Symbol.Name)
 	}
 	return encoder.Encode(celf, loadInstruction)
 }

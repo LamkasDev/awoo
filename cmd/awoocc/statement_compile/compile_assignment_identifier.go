@@ -26,7 +26,7 @@ func CompileStatementAssignmentIdentifier(ccompiler *compiler.AwooCompiler, celf
 		Type:     variableMemory.Symbol.Type,
 		Register: cpu.AwooRegisterTemporaryZero,
 		Address: compiler_details.CompileNodeValueDetailsAddress{
-			Immediate: variableMemory.Symbol.Start,
+			Memory: variableMemory,
 		},
 	}
 	if !variableMemory.Global {
@@ -43,7 +43,7 @@ func CompileStatementAssignmentIdentifier(ccompiler *compiler.AwooCompiler, celf
 		Definition: *instructions.AwooInstructionsSave[variableType.Size],
 		SourceOne:  valueDetails.Address.Register,
 		SourceTwo:  valueDetails.Register,
-		Immediate:  valueDetails.Address.Immediate,
+		Immediate:  variableMemory.Symbol.Start,
 	}
 	if variableMemory.Global {
 		elf.PushRelocationEntry(celf, variableMemory.Symbol.Name)

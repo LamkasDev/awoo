@@ -9,6 +9,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_error"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_memory"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
 	"github.com/jwalton/gchalk"
@@ -28,7 +29,7 @@ func ConstructStatementDefinitionVariable(cparser *parser.AwooParser, t lexer_to
 	}
 	variableNameNode := node.CreateNodeIdentifier(t)
 	variableName := node.GetNodeIdentifierValue(&variableNameNode.Node)
-	_, ok := parser_context.PushParserScopeCurrentBlockMemory(&cparser.Context, parser_context.AwooParserMemoryEntry{
+	_, ok := parser_context.PushParserScopeCurrentBlockMemory(&cparser.Context, parser_memory.AwooParserMemoryEntry{
 		Name: variableName,
 		Type: variableType.Id,
 	})

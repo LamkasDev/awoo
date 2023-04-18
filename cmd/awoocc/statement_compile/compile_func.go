@@ -3,6 +3,7 @@ package statement_compile
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_memory"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
@@ -30,7 +31,7 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s
 	functionArguments := statement.GetStatementFuncArguments(&s)
 	functionArgumentsOffset := arch.AwooRegister(0)
 	for _, argument := range functionArguments {
-		_, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, compiler_context.AwooCompilerMemoryEntry{
+		_, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, compiler_memory.AwooCompilerMemoryEntry{
 			Symbol: commonElf.AwooElfSymbolTableEntry{
 				Name:        argument.Name,
 				Size:        argument.Size,
@@ -45,7 +46,7 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s
 		functionArgumentsOffset += argument.Size
 	}
 
-	returnAddressMemory, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, compiler_context.AwooCompilerMemoryEntry{
+	returnAddressMemory, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, compiler_memory.AwooCompilerMemoryEntry{
 		Symbol: commonElf.AwooElfSymbolTableEntry{
 			Name: cc.AwooCompilerReturnAddressVariable,
 			Size: 4,

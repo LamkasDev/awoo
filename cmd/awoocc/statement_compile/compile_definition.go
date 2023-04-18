@@ -4,6 +4,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_memory"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
@@ -15,7 +16,7 @@ import (
 	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
-func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement) compiler_context.AwooCompilerMemoryEntry {
+func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement) compiler_memory.AwooCompilerMemoryEntry {
 	variableTypeNode := statement.GetStatementDefinitionVariableType(&s)
 	variableNameNode := statement.GetStatementDefinitionVariableIdentifier(&s)
 	variableName := node.GetNodeIdentifierValue(&variableNameNode)
@@ -24,7 +25,7 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 		// TODO: chaining pointers
 		pointedTypeNode := node.GetNodeSingleValue(&variableTypeNode)
 		pointedType := node.GetNodeTypeType(&pointedTypeNode)
-		return compiler_context.AwooCompilerMemoryEntry{
+		return compiler_memory.AwooCompilerMemoryEntry{
 			Symbol: elf.AwooElfSymbolTableEntry{
 				Name:        variableName,
 				Type:        commonTypes.AwooTypeId(types.AwooTypePointer),
@@ -37,7 +38,7 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 		arraySize := node.GetNodeTypeArraySize(&variableTypeNode)
 		arrayTypeNode := node.GetNodeTypeArrayType(&variableTypeNode)
 		arrayType := node.GetNodeTypeType(&arrayTypeNode)
-		return compiler_context.AwooCompilerMemoryEntry{
+		return compiler_memory.AwooCompilerMemoryEntry{
 			Symbol: elf.AwooElfSymbolTableEntry{
 				Name: variableName,
 				Type: arrayType,
@@ -48,7 +49,7 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 	}
 
 	variableType := node.GetNodeTypeType(&variableTypeNode)
-	return compiler_context.AwooCompilerMemoryEntry{
+	return compiler_memory.AwooCompilerMemoryEntry{
 		Symbol: elf.AwooElfSymbolTableEntry{
 			Name: variableName,
 			Type: variableType,
@@ -69,11 +70,12 @@ func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, celf *elf.Awoo
 	if valueNode == nil {
 		return nil
 	}
+	// TODO: immediate should change to symbol name for resolving
 	valueDetails := compiler_details.CompileNodeValueDetails{
 		Type:     variableMemory.Symbol.Type,
 		Register: cpu.AwooRegisterTemporaryZero,
 		Address: compiler_details.CompileNodeValueDetailsAddress{
-			Immediate: variableMemory.Symbol.Start,
+			Memory: variableMemory,
 		},
 	}
 	if !variableMemory.Global {
@@ -86,16 +88,16 @@ func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, celf *elf.Awoo
 		return nil
 	}
 
-	if variableMemory.Global {
-		elf.PushSymbol(celf, variableMemory.Symbol)
-		elf.PushSectionData(celf, celf.SectionList.DataIndex, make([]byte, variableMemory.Symbol.Size))
-		elf.PushRelocationEntry(celf, variableMemory.Symbol.Name)
-	}
 	saveInstruction := instruction.AwooInstruction{
 		Definition: *instructions.AwooInstructionsSave[variableType.Size],
 		SourceOne:  valueDetails.Address.Register,
 		SourceTwo:  valueDetails.Register,
-		Immediate:  valueDetails.Address.Immediate,
+		Immediate:  variableMemory.Symbol.Start,
+	}
+	if variableMemory.Global {
+		elf.PushSymbol(celf, variableMemory.Symbol)
+		elf.PushSectionData(celf, celf.SectionList.DataIndex, make([]byte, variableMemory.Symbol.Size))
+		elf.PushRelocationEntry(celf, variableMemory.Symbol.Name)
 	}
 	return encoder.Encode(celf, saveInstruction)
 }

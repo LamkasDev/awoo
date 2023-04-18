@@ -11,6 +11,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoold/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/awoold/linker"
+	"github.com/LamkasDev/awoo-emu/cmd/awoold/symbol"
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cc"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
@@ -20,7 +21,12 @@ import (
 )
 
 func RunLinker(clinker *linker.AwooLinker) {
-	elf.PrependProgramData(clinker, &clinker.Contents, make([]byte, 12))
+	if err := elf.PrependProgramData(clinker, &clinker.Contents, make([]byte, 12)); err != nil {
+		panic(err)
+	}
+	if err := symbol.ResolveSymbols(clinker, &clinker.Contents); err != nil {
+		panic(err)
+	}
 	commonElf.AlignSections(&clinker.Contents)
 
 	stackOffset := clinker.Contents.SectionList.Sections[clinker.Contents.SectionList.DataIndex].Address + arch.AwooRegister(len(clinker.Contents.SectionList.Sections[clinker.Contents.SectionList.DataIndex].Contents))

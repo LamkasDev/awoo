@@ -21,14 +21,15 @@ func CompileNodeReference(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n
 	}
 
 	// TODO: merge this logic with primitives
+	referenceIns := instruction.AwooInstruction{
+		Definition:  instructions.AwooInstructionADDI,
+		Destination: details.Register,
+		Immediate:   variableMemory.Symbol.Start,
+	}
 	if variableMemory.Global {
 		elf.PushRelocationEntry(celf, variableMemory.Symbol.Name)
 	}
-	return encoder.Encode(celf, instruction.AwooInstruction{
-		Definition:  instructions.AwooInstructionADDI,
-		Immediate:   variableMemory.Symbol.Start,
-		Destination: details.Register,
-	})
+	return encoder.Encode(celf, referenceIns)
 }
 
 func CompileNodeDereference(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {

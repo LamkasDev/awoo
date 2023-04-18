@@ -7,6 +7,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_error"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_memory"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
 	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
@@ -41,7 +42,7 @@ func ConstructStatementFunc(cparser *parser.AwooParser, _ lexer_token.AwooLexerT
 			Size: cparser.Context.Lexer.Types.All[argumentType].Size,
 			Type: argumentType,
 		}))
-		_, ok := parser_context.PushParserScopeCurrentBlockMemory(&cparser.Context, parser_context.AwooParserMemoryEntry{
+		_, ok := parser_context.PushParserScopeCurrentBlockMemory(&cparser.Context, parser_memory.AwooParserMemoryEntry{
 			Name: argumentName,
 			Type: argumentType,
 		})

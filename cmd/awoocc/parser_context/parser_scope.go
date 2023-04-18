@@ -1,5 +1,7 @@
 package parser_context
 
+import "github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_memory"
+
 type AwooParserScopeContainer struct {
 	Functions map[uint16]AwooParserScopeFunction
 }
@@ -13,7 +15,7 @@ type AwooParserScopeFunction struct {
 type AwooParserScopeBlock struct {
 	Id     uint16
 	Name   string
-	Memory AwooParserMemory
+	Memory parser_memory.AwooParserMemory
 }
 
 func PushParserScopeFunction(context *AwooParserContext, function AwooParserScopeFunction) AwooParserScopeFunction {
@@ -30,8 +32,8 @@ func PushParserScopeFunction(context *AwooParserContext, function AwooParserScop
 func PushParserScopeBlock(context *AwooParserContext, funcId uint16, functionBlock AwooParserScopeBlock) AwooParserScopeBlock {
 	scopeFunction := context.Scopes.Functions[funcId]
 	functionBlock.Id = uint16(len(scopeFunction.Blocks))
-	functionBlock.Memory = AwooParserMemory{
-		Entries: map[string]AwooParserMemoryEntry{},
+	functionBlock.Memory = parser_memory.AwooParserMemory{
+		Entries: map[string]parser_memory.AwooParserMemoryEntry{},
 	}
 	scopeFunction.Blocks[functionBlock.Id] = functionBlock
 	context.Scopes.Functions[funcId] = scopeFunction
