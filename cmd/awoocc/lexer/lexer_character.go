@@ -5,11 +5,11 @@ import (
 
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/lexer_token"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
+	"github.com/LamkasDev/awoo-emu/cmd/common/types"
 	"github.com/jwalton/gchalk"
 )
 
-func CreateTokenChar(lexer *AwooLexer) (lexer_token.AwooLexerToken, string, error) {
+func CreateTokenCharacter(lexer *AwooLexer) (lexer_token.AwooLexerToken, string, error) {
 	tokenPosition := lexer_token.ExtendAwooLexerTokenPosition(lexer.Current.Position, lexer_token.AwooLexerTokenPosition{
 		Length: 2,
 	})

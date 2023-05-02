@@ -12,7 +12,7 @@ import (
 	"github.com/jwalton/gchalk"
 )
 
-func ConstructStatement(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, *parser_error.AwooParserError) {
+func ConstructStatement(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (*statement.AwooParserStatement, *parser_error.AwooParserError) {
 	entry, ok := cparser.Settings.Mappings.Statement[t.Type]
 	if !ok {
 		panic(fmt.Errorf("%w: %s", awerrors.ErrorCantParseStatement, gchalk.Red(fmt.Sprintf("%#x", t.Type))))

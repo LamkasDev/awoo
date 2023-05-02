@@ -11,6 +11,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
+	"github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
 func CompileStatementAssignmentPointer(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s statement.AwooParserStatement) error {
@@ -20,7 +21,7 @@ func CompileStatementAssignmentPointer(ccompiler *compiler.AwooCompiler, celf *e
 	if err != nil {
 		return err
 	}
-	variableType := ccompiler.Context.Parser.Lexer.Types.All[*variableMemory.Symbol.TypeDetails]
+	variableType := ccompiler.Context.Parser.Lexer.Types.All[variableMemory.Symbol.Details.(types.AwooTypeId)]
 
 	valueNode := statement.GetStatementAssignmentValue(&s)
 	details := compiler_details.CompileNodeValueDetails{

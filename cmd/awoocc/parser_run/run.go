@@ -16,22 +16,32 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement_parse"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cc"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/LamkasDev/awoo-emu/cmd/common/util"
 	"github.com/jwalton/gchalk"
 )
 
-func RunParser(cparser *parser.AwooParser) parser.AwooParserResult {
-	result := parser.AwooParserResult{
-		Context: cparser.Context,
+// TODO: avoid empty global function
+
+func LoadParserSymbols(cparser *parser.AwooParser, celf *elf.AwooElf) {
+	parser_context.PushParserScopeFunction(&cparser.Context, parser_context.AwooParserScopeFunction{
+		Name: cc.AwooCompilerGlobalFunctionName,
+	})
+	for _, entry := range celf.SymbolTable.External {
+		_, ok := parser_context.PushParserScopeBlockSymbolExternal(&cparser.Context, parser_context.AwooCompilerGlobalFunctionId, parser_context.AwooCompilerGlobalBlockId, entry)
+		if !ok {
+			panic("nope")
+		}
 	}
+}
+
+func RunParser(cparser *parser.AwooParser) parser.AwooParserResult {
+	result := parser.AwooParserResult{}
 	logger.LogExtra(gchalk.Yellow("\n> Parser\n"))
 
 	globalFunctionIdentifier := node.CreateNodeIdentifier(lexer_token.CreateTokenIdentifier(lexer_token.AwooLexerTokenPosition{}, cc.AwooCompilerGlobalFunctionName))
 	globalFunctionStatement := statement.CreateStatementFunc(globalFunctionIdentifier.Node)
-	parser_context.PushParserScopeFunction(&cparser.Context, parser_context.AwooParserScopeFunction{
-		Name: cc.AwooCompilerGlobalFunctionName,
-	})
 
 	var err *parser_error.AwooParserError
 	for ; err == nil; err = parser.AdvanceParser(cparser) {
@@ -42,22 +52,19 @@ func RunParser(cparser *parser.AwooParser) parser.AwooParserResult {
 		if err != nil {
 			PrintParserError(cparser, err)
 		}
-		parser.PrintNewStatement(&cparser.Settings, &cparser.Context, &st)
+		if st == nil {
+			continue
+		}
+		parser.PrintNewStatement(&cparser.Settings, &cparser.Context, st)
 		if st.Type == statement.ParserStatementTypeFunc {
-			result.Statements = append(result.Statements, st)
+			result.Statements = append(result.Statements, *st)
 		} else {
-			statement.AppendStatementFuncBody(&globalFunctionStatement, st)
+			statement.AppendStatementFuncBody(&globalFunctionStatement, *st)
 		}
 	}
 
-	statement.AppendStatementFuncBody(&globalFunctionStatement, statement.CreateStatementReturn(nil))
-	parser_context.PopParserScopeCurrentFunction(&cparser.Context)
-	parser_context.PushParserFunction(&cparser.Context, parser_context.AwooParserFunction{
-		Name:      cc.AwooCompilerGlobalFunctionName,
-		Arguments: []statement.AwooParserStatementFuncArgument{},
-	})
+	result.Context = cparser.Context
 	result.Statements = append([]statement.AwooParserStatement{globalFunctionStatement}, result.Statements...)
-
 	return result
 }
 

@@ -26,19 +26,20 @@ func Load(emulator *emu.AwooEmulator, path string) {
 		panic(err)
 	}
 	var osElf elf.AwooElf
-	if err := gob.NewDecoder(bytes.NewBuffer(osFile)).Decode(&osElf); err != nil {
+	decoder := gob.NewDecoder(bytes.NewBuffer(osFile))
+	if err := decoder.Decode(&osElf); err != nil {
 		panic(err)
 	}
 
 	memoryLength := arch.AwooRegister(0)
 
-	copy(emulator.Internal.Memory.Data[memoryLength:], osElf.SectionList.Sections[osElf.SectionList.ProgramIndex].Contents)
-	programLenght := arch.AwooRegister(len(osElf.SectionList.Sections[osElf.SectionList.ProgramIndex].Contents))
+	copy(emulator.Internal.Memory.Data[memoryLength:], osElf.SectionList.Sections[elf.AwooElfSectionProgram].Contents)
+	programLenght := arch.AwooRegister(len(osElf.SectionList.Sections[elf.AwooElfSectionProgram].Contents))
 	memoryLength += programLenght
 	emulator.Internal.Memory.ProgramEnd = programLenght
 
-	copy(emulator.Internal.Memory.Data[memoryLength:], osElf.SectionList.Sections[osElf.SectionList.DataIndex].Contents)
-	dataLength := arch.AwooRegister(len(osElf.SectionList.Sections[osElf.SectionList.DataIndex].Contents))
+	copy(emulator.Internal.Memory.Data[memoryLength:], osElf.SectionList.Sections[elf.AwooElfSectionData].Contents)
+	dataLength := arch.AwooRegister(len(osElf.SectionList.Sections[elf.AwooElfSectionData].Contents))
 	// memoryLength += dataLength
 
 	emulator.Internal.CPU.Counter = osElf.Counter

@@ -106,7 +106,7 @@ func ProcessJAL(internal *internal.AwooEmulatorInternal, ins instruction.AwooIns
 	internal.CPU.Advance = false
 	if arch.AwooDebug {
 		fmt.Printf("%s = %s (%s = %s)",
-			gchalk.Yellow(cpu.AwooRegisterNames[cpu.AwooRegisterId(ins.Destination)]),
+			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
 			gchalk.Yellow("c"),
 			gchalk.Magenta(fmt.Sprintf("%#x", internal.CPU.Counter)),
@@ -122,7 +122,7 @@ func ProcessJALR(internal *internal.AwooEmulatorInternal, ins instruction.AwooIn
 	internal.CPU.Advance = false
 	if arch.AwooDebug {
 		fmt.Printf("%s = %s (%s = %s)",
-			gchalk.Yellow(cpu.AwooRegisterNames[cpu.AwooRegisterId(ins.Destination)]),
+			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
 			gchalk.Yellow("c"),
 			gchalk.Magenta(fmt.Sprintf("%#x", internal.CPU.Counter)),

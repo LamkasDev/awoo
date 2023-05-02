@@ -12,11 +12,13 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/flags"
 	"github.com/LamkasDev/awoo-emu/cmd/common/logger"
 	"github.com/LamkasDev/awoo-emu/cmd/common/paths"
+	"github.com/LamkasDev/awoo-emu/cmd/common/util"
 	"github.com/jwalton/gchalk"
 )
 
 func main() {
 	logger.Log(fmt.Sprintf("hi from %s :3\n", gchalk.Red(arch.AwooPlatform)))
+	util.RegisterGobTypes()
 	u, _ := user.Current()
 	defaultInput := path.Join(u.HomeDir, "Documents", "awoo", "data", "bin", "input.awooxe")
 
@@ -27,10 +29,10 @@ func main() {
 	flag.Parse()
 	logger.AwooLoggerEnabled = !quiet
 	flags.ResolveColor()
-	input = paths.ResolvePath(input, ".awooxe")
+	inputs := paths.CreatePathList(input, ".awooxe")
 
 	emulator := emu.SetupEmulator()
-	emu_run.Load(&emulator, input)
+	emu_run.Load(&emulator, inputs[0].Absolute)
 	emu_run.Run(&emulator)
 
 	logger.Log("bay! :33\n")

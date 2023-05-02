@@ -7,7 +7,7 @@ import (
 
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/lexer_token"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
+	"github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
 func CreateTokenNumber(lexer *AwooLexer) (lexer_token.AwooLexerToken, string, error) {

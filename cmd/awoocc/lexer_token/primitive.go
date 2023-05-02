@@ -6,16 +6,16 @@ import (
 )
 
 type AwooLexerTokenDataPrimitive struct {
-	Type  types.AwooTypePrimitiveId
+	Type  types.AwooTypeId
 	Value interface{}
 	Extra interface{}
 }
 
-func GetTokenPrimitiveType(t *AwooLexerToken) types.AwooTypePrimitiveId {
+func GetTokenPrimitiveType(t *AwooLexerToken) types.AwooTypeId {
 	return t.Data.(AwooLexerTokenDataPrimitive).Type
 }
 
-func SetTokenPrimitiveType(t *AwooLexerToken, primitiveType types.AwooTypePrimitiveId) {
+func SetTokenPrimitiveType(t *AwooLexerToken, primitiveType types.AwooTypeId) {
 	t.Data.(*AwooLexerTokenDataPrimitive).Type = primitiveType
 }
 
@@ -35,7 +35,7 @@ func SetTokenPrimitiveExtra(t *AwooLexerToken, value interface{}) {
 	t.Data.(*AwooLexerTokenDataPrimitive).Extra = value
 }
 
-func CreateTokenPrimitive(position AwooLexerTokenPosition, primitiveType types.AwooTypePrimitiveId, value interface{}, extra interface{}) AwooLexerToken {
+func CreateTokenPrimitive(position AwooLexerTokenPosition, primitiveType types.AwooTypeId, value interface{}, extra interface{}) AwooLexerToken {
 	return AwooLexerToken{
 		Type:     token.TokenTypePrimitive,
 		Position: position,

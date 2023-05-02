@@ -9,46 +9,46 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
 )
 
-func ConstructStatementIfOuter(cparser *parser.AwooParser, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, *parser_error.AwooParserError) {
+func ConstructStatementIfOuter(cparser *parser.AwooParser, details *parser_details.ConstructStatementDetails) (*statement.AwooParserStatement, *parser_error.AwooParserError) {
 	n, err := ConstructExpressionStart(cparser, &parser_details.ConstructExpressionDetails{
 		EndTokens: []uint16{token.TokenTypeBracketCurlyRight},
 	})
 	if err != nil {
-		return statement.AwooParserStatement{}, err
+		return nil, err
 	}
 	ifStatement := statement.CreateStatementIf(n.Node)
 	ifGroup, err := ConstructStatementGroup(cparser, details)
 	if err != nil {
-		return ifStatement, err
+		return &ifStatement, err
 	}
-	statement.SetStatementIfBody(&ifStatement, ifGroup)
+	statement.SetStatementIfBody(&ifStatement, *ifGroup)
 
-	return ifStatement, nil
+	return &ifStatement, nil
 }
 
-func ConstructStatementIf(cparser *parser.AwooParser, _ lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, *parser_error.AwooParserError) {
+func ConstructStatementIf(cparser *parser.AwooParser, _ lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (*statement.AwooParserStatement, *parser_error.AwooParserError) {
 	ifStatement, err := ConstructStatementIfOuter(cparser, details)
 	if err != nil {
 		return ifStatement, err
 	}
-	for elseToken, _ := parser.ExpectTokenOptional(cparser, token.TokenTypeElse); elseToken != nil; elseToken, _ = parser.ExpectTokenOptional(cparser, token.TokenTypeElse) {
-		t, err := parser.ExpectTokens(cparser, []uint16{token.TokenTypeIf, token.TokenTypeBracketCurlyLeft})
+	for elseToken, _ := parser.ExpectTokenOptional(cparser, token.TokenKeywordElse); elseToken != nil; elseToken, _ = parser.ExpectTokenOptional(cparser, token.TokenKeywordElse) {
+		t, err := parser.ExpectTokens(cparser, []uint16{token.TokenKeywordIf, token.TokenTypeBracketCurlyLeft})
 		if err != nil {
 			return ifStatement, err
 		}
 		switch t.Type {
-		case token.TokenTypeIf:
+		case token.TokenKeywordIf:
 			elifStatement, err := ConstructStatementIfOuter(cparser, details)
 			if err != nil {
 				return ifStatement, err
 			}
-			statement.SetStatementIfElse(&ifStatement, append(statement.GetStatementIfElse(&ifStatement), elifStatement))
+			statement.SetStatementIfElse(ifStatement, append(statement.GetStatementIfElse(ifStatement), *elifStatement))
 		case token.TokenTypeBracketCurlyLeft:
 			elseStatement, err := ConstructStatementGroup(cparser, details)
 			if err != nil {
 				return ifStatement, err
 			}
-			statement.SetStatementIfElse(&ifStatement, append(statement.GetStatementIfElse(&ifStatement), elseStatement))
+			statement.SetStatementIfElse(ifStatement, append(statement.GetStatementIfElse(ifStatement), *elseStatement))
 		}
 	}
 

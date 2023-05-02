@@ -2,22 +2,15 @@ package statement
 
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
-	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
 type AwooParserStatementDataFunc struct {
 	Identifier node.AwooParserNode
-	Arguments  []AwooParserStatementFuncArgument
+	Arguments  []elf.AwooElfSymbolTableEntry
 	ReturnType *node.AwooParserNode
 	Body       AwooParserStatement
-}
-
-type AwooParserStatementFuncArgument struct {
-	Name        string
-	Size        arch.AwooRegister
-	Type        types.AwooTypeId
-	TypeDetails *types.AwooTypeId
 }
 
 func GetStatementFuncIdentifier(s *AwooParserStatement) node.AwooParserNode {
@@ -30,11 +23,11 @@ func SetStatementFuncIdentifier(s *AwooParserStatement, identifier node.AwooPars
 	s.Data = d
 }
 
-func GetStatementFuncArguments(s *AwooParserStatement) []AwooParserStatementFuncArgument {
+func GetStatementFuncArguments(s *AwooParserStatement) []elf.AwooElfSymbolTableEntry {
 	return s.Data.(AwooParserStatementDataFunc).Arguments
 }
 
-func SetStatementFuncArguments(s *AwooParserStatement, arguments []AwooParserStatementFuncArgument) {
+func SetStatementFuncArguments(s *AwooParserStatement, arguments []elf.AwooElfSymbolTableEntry) {
 	d := s.Data.(AwooParserStatementDataFunc)
 	d.Arguments = arguments
 	s.Data = d
@@ -42,6 +35,16 @@ func SetStatementFuncArguments(s *AwooParserStatement, arguments []AwooParserSta
 
 func GetStatementFuncReturnType(s *AwooParserStatement) *node.AwooParserNode {
 	return s.Data.(AwooParserStatementDataFunc).ReturnType
+}
+
+func GetStatementFuncReturnTypePrecise(s *AwooParserStatement) *types.AwooTypeId {
+	tNode := GetStatementFuncReturnType(s)
+	if tNode != nil {
+		t := node.GetNodeTypeType(tNode)
+		return &t
+	}
+
+	return nil
 }
 
 func SetStatementFuncReturnType(s *AwooParserStatement, returnType *node.AwooParserNode) {
@@ -71,7 +74,7 @@ func CreateStatementFunc(identifier node.AwooParserNode) AwooParserStatement {
 		Type: ParserStatementTypeFunc,
 		Data: AwooParserStatementDataFunc{
 			Identifier: identifier,
-			Arguments:  []AwooParserStatementFuncArgument{},
+			Arguments:  []elf.AwooElfSymbolTableEntry{},
 			Body:       CreateStatementGroup([]AwooParserStatement{}),
 		},
 	}

@@ -9,7 +9,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 )
 
-type AwooParseStatement func(cparser *AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, *parser_error.AwooParserError)
+type AwooParseStatement func(cparser *AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (*statement.AwooParserStatement, *parser_error.AwooParserError)
 
 type AwooParseNodeExpression func(cparser *AwooParser, leftNode node.AwooParserNodeResult, op lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError)
 

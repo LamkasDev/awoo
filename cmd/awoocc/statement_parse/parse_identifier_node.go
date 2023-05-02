@@ -10,14 +10,15 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_error"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
-	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
+	"github.com/LamkasDev/awoo-emu/cmd/common/types"
 	"github.com/jwalton/gchalk"
 )
 
 func CreateNodeIdentifierVariableSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
 	identifier := lexer_token.GetTokenIdentifierValue(&t)
-	if _, ok := parser_context.GetParserScopeFunctionMemory(&cparser.Context, identifier); !ok {
+	symbol, ok := parser_context.GetParserScopeFunctionSymbol(&cparser.Context, identifier)
+	if !ok || symbol.Type == types.AwooTypeFunction {
 		return node.AwooParserNodeResult{}, parser_error.CreateParserErrorText(parser_error.AwooParserErrorUnknownVariable,
 			fmt.Sprintf("%s: %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorUnknownVariable], gchalk.Red(identifier)),
 			t.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorUnknownVariable])
@@ -25,7 +26,7 @@ func CreateNodeIdentifierVariableSafe(cparser *parser.AwooParser, t lexer_token.
 	if arrToken, _ := parser.ExpectTokenOptional(cparser, token.TokenTypeBracketSquareLeft); arrToken != nil {
 		arrIndexNode := node.CreateNodeArrayIndex(*arrToken, identifier)
 		indexNode, err := ConstructExpressionStart(cparser, &parser_details.ConstructExpressionDetails{
-			Type:      commonTypes.AwooTypeId(types.AwooTypeUInt16),
+			Type:      types.AwooTypeUInt16,
 			EndTokens: []uint16{token.TokenTypeBracketSquareRight},
 		})
 		if err != nil {
@@ -52,15 +53,16 @@ func CreateNodeIdentifierCallSafe(cparser *parser.AwooParser, t lexer_token.Awoo
 	if _, err := parser.ExpectTokens(cparser, []uint16{token.TokenTypeBracketLeft}); err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
-	callFunction, ok := parser_context.GetParserFunction(&cparser.Context, callFunctionName)
-	if !ok {
+	symbol, ok := parser_context.GetParserScopeFunctionSymbol(&cparser.Context, callFunctionName)
+	if !ok || symbol.Type != types.AwooTypeFunction {
 		return node.AwooParserNodeResult{}, parser_error.CreateParserErrorText(parser_error.AwooParserErrorUnknownFunction,
 			fmt.Sprintf("%s: %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorUnknownFunction], gchalk.Red(callFunctionName)),
 			t.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorUnknownFunction])
 	}
+	callFunctionArguments := symbol.Details.(elf.AwooElfSymbolTableEntryFunctionDetails).Arguments
 
 	callNode := node.CreateNodeCall(t)
-	for _, arg := range callFunction.Arguments {
+	for _, arg := range callFunctionArguments {
 		details := parser_details.ConstructExpressionDetails{
 			Type:      arg.Type,
 			EndTokens: []uint16{token.TokenTypeBracketRight, token.TokenTypeComma},
@@ -71,7 +73,7 @@ func CreateNodeIdentifierCallSafe(cparser *parser.AwooParser, t lexer_token.Awoo
 		}
 		node.SetNodeCallArguments(&callNode.Node, append(node.GetNodeCallArguments(&callNode.Node), argNode.Node))
 	}
-	if len(callFunction.Arguments) == 0 {
+	if len(callFunctionArguments) == 0 {
 		if _, err := parser.ExpectToken(cparser, token.TokenTypeBracketRight); err != nil {
 			return callNode, err
 		}

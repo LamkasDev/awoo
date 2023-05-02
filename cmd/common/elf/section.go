@@ -3,9 +3,7 @@ package elf
 import "github.com/LamkasDev/awoo-emu/cmd/common/arch"
 
 type AwooElfSectionList struct {
-	ProgramIndex AwooElfSectionId
-	DataIndex    AwooElfSectionId
-	Sections     []AwooElfSection
+	Sections []AwooElfSection
 }
 
 type AwooElfSectionId uint16
@@ -16,8 +14,11 @@ type AwooElfSection struct {
 	Contents []byte
 }
 
+const AwooElfSectionProgram = AwooElfSectionId(0x00)
+const AwooElfSectionData = AwooElfSectionId(0x01)
+
 func AlignSections(elf *AwooElf) {
-	elf.SectionList.Sections[elf.SectionList.DataIndex].Address = arch.AwooRegister(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents))
+	elf.SectionList.Sections[AwooElfSectionData].Address = arch.AwooRegister(len(elf.SectionList.Sections[AwooElfSectionProgram].Contents))
 }
 
 func PushSectionData(elf *AwooElf, id AwooElfSectionId, data []byte) {

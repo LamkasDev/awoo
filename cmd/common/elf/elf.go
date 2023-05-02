@@ -3,6 +3,7 @@ package elf
 import "github.com/LamkasDev/awoo-emu/cmd/common/arch"
 
 type AwooElf struct {
+	Name           string
 	Type           AwooElfTypeId
 	Counter        arch.AwooRegister
 	SectionList    AwooElfSectionList
@@ -10,15 +11,17 @@ type AwooElf struct {
 	RelocationList AwooElfRelocationList
 }
 
-func NewAwooElf(elfType AwooElfTypeId) AwooElf {
+func NewAwooElf(name string, elfType AwooElfTypeId) AwooElf {
 	return AwooElf{
+		Name: name,
 		Type: elfType,
 		SectionList: AwooElfSectionList{
-			ProgramIndex: 0,
-			DataIndex:    1,
-			Sections:     []AwooElfSection{{Id: 0, Contents: []byte{}}, {Id: 1, Contents: []byte{}}},
+			Sections: []AwooElfSection{{Id: AwooElfSectionProgram, Contents: []byte{}}, {Id: AwooElfSectionData, Contents: []byte{}}},
 		},
-		SymbolTable:    AwooElfSymbolTable{},
+		SymbolTable: AwooElfSymbolTable{
+			Internal: map[string]AwooElfSymbolTableEntry{},
+			External: map[string]AwooElfSymbolTableEntry{},
+		},
 		RelocationList: AwooElfRelocationList{},
 	}
 }

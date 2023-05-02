@@ -74,13 +74,14 @@ func SetupTokenMap() AwooTokenMap {
 	AddToken(m, "|", "|", TokenOperatorOr)
 
 	// Keywords
-	AddToken(m, "var", "var", TokenTypeVar)
-	AddToken(m, "type", "type", TokenTypeTypeDefinition)
-	AddToken(m, "if", "if", TokenTypeIf)
-	AddToken(m, "else", "else", TokenTypeElse)
-	AddToken(m, "func", "func", TokenTypeFunc)
-	AddToken(m, "return", "return", TokenTypeReturn)
-	AddToken(m, "for", "for", TokenTypeFor)
+	AddToken(m, "var", "var", TokenKeywordVar)
+	AddToken(m, "type", "type", TokenKeywordTypeDefinition)
+	AddToken(m, "if", "if", TokenKeywordIf)
+	AddToken(m, "else", "else", TokenKeywordElse)
+	AddToken(m, "func", "func", TokenKeywordFunc)
+	AddToken(m, "return", "return", TokenKeywordReturn)
+	AddToken(m, "for", "for", TokenKeywordFor)
+	AddToken(m, "import", "import", TokenKeywordImport)
 
 	return m
 }

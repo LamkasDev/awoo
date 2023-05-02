@@ -3,22 +3,25 @@ package statement_compile
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_memory"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_symbol"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cc"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
-	commonElf "github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
-	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
+	"github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
 func CompileStatementFunc(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s statement.AwooParserStatement) error {
+	functionBody := statement.GetStatementFuncBody(&s)
+	if len(statement.GetStatementGroupBody(&functionBody)) == 0 {
+		return nil
+	}
+
 	functionNameNode := statement.GetStatementFuncIdentifier(&s)
 	functionName := node.GetNodeIdentifierValue(&functionNameNode)
 
@@ -31,13 +34,8 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s
 	functionArguments := statement.GetStatementFuncArguments(&s)
 	functionArgumentsOffset := arch.AwooRegister(0)
 	for _, argument := range functionArguments {
-		_, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, compiler_memory.AwooCompilerMemoryEntry{
-			Symbol: commonElf.AwooElfSymbolTableEntry{
-				Name:        argument.Name,
-				Size:        argument.Size,
-				Type:        argument.Type,
-				TypeDetails: argument.TypeDetails,
-			},
+		_, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, compiler_symbol.AwooCompilerSymbolTableEntry{
+			Symbol: argument,
 			Global: compilerScopeFunction.Global,
 		})
 		if err != nil {
@@ -46,39 +44,32 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s
 		functionArgumentsOffset += argument.Size
 	}
 
-	returnAddressMemory, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, compiler_memory.AwooCompilerMemoryEntry{
-		Symbol: commonElf.AwooElfSymbolTableEntry{
+	returnAddressMemory, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, compiler_symbol.AwooCompilerSymbolTableEntry{
+		Symbol: elf.AwooElfSymbolTableEntry{
 			Name: cc.AwooCompilerReturnAddressVariable,
 			Size: 4,
-			Type: commonTypes.AwooTypeId(types.AwooTypePointer),
+			Type: types.AwooTypePointer,
 		},
 		Global: compilerScopeFunction.Global,
 	})
 	if compilerScopeFunction.Global {
-		commonElf.PushSymbol(celf, returnAddressMemory.Symbol)
-		elf.PushSectionData(celf, celf.SectionList.DataIndex, make([]byte, returnAddressMemory.Symbol.Size))
+		elf.SetSymbol(celf, returnAddressMemory.Symbol)
+		elf.PushSectionData(celf, elf.AwooElfSectionData, make([]byte, returnAddressMemory.Symbol.Size))
 	}
 	if err != nil {
 		return err
 	}
 
-	functionReturnTypeNode := statement.GetStatementFuncReturnType(&s)
-	var functionReturnType *commonTypes.AwooTypeId
-	if functionReturnTypeNode != nil {
-		returnType := node.GetNodeTypeType(functionReturnTypeNode)
-		functionReturnType = &returnType
-	}
-
-	compilerFunction := compiler_context.AwooCompilerFunction{
-		Symbol: commonElf.AwooElfSymbolTableEntry{
-			Name:        functionName,
-			Type:        commonTypes.AwooTypeId(types.AwooTypeFunction),
-			TypeDetails: functionReturnType,
-			Start:       arch.AwooRegister(len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents)),
+	compilerFunction := elf.AwooElfSymbolTableEntry{
+		Name: functionName,
+		Type: types.AwooTypeFunction,
+		Details: elf.AwooElfSymbolTableEntryFunctionDetails{
+			ReturnType: statement.GetStatementFuncReturnTypePrecise(&s),
+			Arguments:  statement.GetStatementFuncArguments(&s),
 		},
-		Arguments: statement.GetStatementFuncArguments(&s),
+		Start: arch.AwooRegister(len(celf.SectionList.Sections[elf.AwooElfSectionProgram].Contents)),
 	}
-	compiler_context.PushCompilerFunction(&ccompiler.Context, compilerFunction)
+	elf.SetSymbol(celf, compilerFunction)
 
 	stackAdjustmentInstruction := instruction.AwooInstruction{
 		Definition: instructions.AwooInstructionSW,
@@ -90,12 +81,11 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s
 		return err
 	}
 
-	if err = CompileStatementGroup(ccompiler, celf, statement.GetStatementFuncBody(&s)); err != nil {
+	if err = CompileStatementGroup(ccompiler, celf, functionBody); err != nil {
 		return err
 	}
-	compilerFunction.Symbol.Size = arch.AwooRegister(len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents)) - compilerFunction.Symbol.Start
-	compiler_context.SetSizeOfCompilerFunction(&ccompiler.Context, functionName, compilerFunction.Symbol.Size)
-	commonElf.PushSymbol(celf, compilerFunction.Symbol)
+	compilerFunction.Size = arch.AwooRegister(len(celf.SectionList.Sections[elf.AwooElfSectionProgram].Contents)) - compilerFunction.Start
+	elf.SetSymbol(celf, compilerFunction)
 
 	if !compilerScopeFunction.Global {
 		compiler_context.PopCompilerScopeCurrentFunction(&ccompiler.Context)

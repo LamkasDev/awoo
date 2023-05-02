@@ -5,7 +5,6 @@ import (
 )
 
 type AwooCompilerContext struct {
-	Parser    parser_context.AwooParserContext
-	Scopes    AwooCompilerScopeContainer
-	Functions AwooCompilerFunctionContainer
+	Parser parser_context.AwooParserContext
+	Scopes AwooCompilerScopeContainer
 }

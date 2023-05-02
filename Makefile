@@ -37,17 +37,17 @@ install: build
 runcc: buildcc
 	@if not exist "$(AWOODIR)\bin\dev" mkdir "$(AWOODIR)\bin\dev"
 	@copy "build\$(AWOOPLATFORM)\awoocc.exe" "$(AWOODIR)\bin\dev\awoocc.exe" >nul
-	@cd "build\$(AWOOPLATFORM)" && .\awoocc.exe -i "$(AWOODIR)\data\input.awoo" -o "$(AWOODIR)\data\obj\input.awoobj"
+	@cd "build\$(AWOOPLATFORM)" && .\awoocc.exe -i "$(AWOODIR)\data\src" -o "$(AWOODIR)\data\obj"
 
 rundump: builddump
 	@if not exist "$(AWOODIR)\bin\dev" mkdir "$(AWOODIR)\bin\dev"
 	@copy "build\$(AWOOPLATFORM)\awoodump.exe" "$(AWOODIR)\bin\dev\awoodump.exe" >nul
-	@cd "build\$(AWOOPLATFORM)" && .\awoodump.exe -i "$(AWOODIR)\data\obj\input.awoobj"
+	@cd "build\$(AWOOPLATFORM)" && .\awoodump.exe -i "$(AWOODIR)\data\obj"
 
 runld: buildld
 	@if not exist "$(AWOODIR)\bin\dev" mkdir "$(AWOODIR)\bin\dev"
 	@copy "build\$(AWOOPLATFORM)\awoold.exe" "$(AWOODIR)\bin\dev\awoold.exe" >nul
-	@cd "build\$(AWOOPLATFORM)" && .\awoold.exe -i "$(AWOODIR)\data\obj\input.awoobj" -o "$(AWOODIR)\data\bin\input.awooxe"
+	@cd "build\$(AWOOPLATFORM)" && .\awoold.exe -i "$(AWOODIR)\data\obj" -o "$(AWOODIR)\data\bin\input.awooxe"
 
 runmu: buildmu
 	@if not exist "$(AWOODIR)\bin\dev" mkdir "$(AWOODIR)\bin\dev"
@@ -57,8 +57,8 @@ runmu: buildmu
 run: build
 	@if exist "$(AWOODIR)\bin\dev" rmdir /S /Q "$(AWOODIR)\bin\dev"
 	@xcopy "build\$(AWOOPLATFORM)" "$(AWOODIR)\bin\dev\" /E /C /I >nul
-	@cd "build\$(AWOOPLATFORM)" && .\awoocc.exe -i "$(AWOODIR)\data\input.awoo" -o "$(AWOODIR)\data\obj\input.awoobj" -q
-	@cd "build\$(AWOOPLATFORM)" && .\awoold.exe -i "$(AWOODIR)\data\obj\input.awoobj" -o "$(AWOODIR)\data\bin\input.awooxe" -q
+	@cd "build\$(AWOOPLATFORM)" && .\awoocc.exe -i "$(AWOODIR)\data\src" -o "$(AWOODIR)\data\obj" -q
+	@cd "build\$(AWOOPLATFORM)" && .\awoold.exe -i "$(AWOODIR)\data\obj" -o "$(AWOODIR)\data\bin\input.awooxe" -q
 	@cd "build\$(AWOOPLATFORM)" && .\awoomu.exe -i "$(AWOODIR)\data\bin\input.awooxe"
 
 clean:

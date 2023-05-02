@@ -32,9 +32,6 @@ func SetupParser(settings AwooParserSettings, context lexer_context.AwooLexerCon
 		Context: parser_context.AwooParserContext{
 			Lexer:  context,
 			Scopes: parser_context.SetupParserScopeContainer(),
-			Functions: parser_context.AwooParserFunctionContainer{
-				Entries: map[string]parser_context.AwooParserFunction{},
-			},
 		},
 		Settings: settings,
 	}

@@ -14,7 +14,7 @@ type AwooElfRelocationListEntry struct {
 
 func PushRelocationEntry(elf *AwooElf, name string) {
 	elf.RelocationList = append(elf.RelocationList, AwooElfRelocationListEntry{
-		Offset: arch.AwooRegister(len(elf.SectionList.Sections[elf.SectionList.ProgramIndex].Contents)),
+		Offset: arch.AwooRegister(len(elf.SectionList.Sections[AwooElfSectionProgram].Contents)),
 		Name:   name,
 	})
 }

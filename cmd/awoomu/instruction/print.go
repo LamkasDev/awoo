@@ -14,8 +14,8 @@ func PrintDecodedInstruction(ins instruction.AwooInstruction) string {
 	return fmt.Sprintf(
 		"code: %-36s; src: %s; dst: %-15s; im: %s; ",
 		fmt.Sprintf("%s (%s)", gchalk.Green(fmt.Sprintf("%#4x", ins.Definition.Code)), gchalk.Blue(ins.Definition.Name)),
-		fmt.Sprintf("%-14s & %-15s", gchalk.Yellow(cpu.AwooRegisterNames[cpu.AwooRegisterId(ins.SourceOne)]), gchalk.Yellow(cpu.AwooRegisterNames[cpu.AwooRegisterId(ins.SourceTwo)])),
-		gchalk.Yellow(cpu.AwooRegisterNames[cpu.AwooRegisterId(ins.Destination)]),
+		fmt.Sprintf("%-14s & %-15s", gchalk.Yellow(cpu.AwooRegisterNames[ins.SourceOne]), gchalk.Yellow(cpu.AwooRegisterNames[ins.SourceTwo])),
+		gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 		gchalk.Magenta(fmt.Sprintf("%-8d", ins.Immediate)),
 	)
 }

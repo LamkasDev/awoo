@@ -40,16 +40,6 @@ func PrintStatementAssignment(settings *AwooParserSettings, context *parser_cont
 	)
 }
 
-func PrintStatementDefinitionType(settings *AwooParserSettings, context *parser_context.AwooParserContext, s *statement.AwooParserStatement) string {
-	id := statement.GetStatementDefinitionTypeIdentifier(s)
-	value := statement.GetStatementDefinitionTypeValue(s)
-	return fmt.Sprintf("type %s = %s (%s)",
-		lexer.PrintNode(&settings.Lexer, &context.Lexer, &id),
-		lexer.PrintNode(&settings.Lexer, &context.Lexer, &value),
-		gchalk.Green(fmt.Sprintf("%#x", s.Type)),
-	)
-}
-
 func PrintStatementIf(settings *AwooParserSettings, context *parser_context.AwooParserContext, s *statement.AwooParserStatement) string {
 	value := statement.GetStatementIfValue(s)
 	return fmt.Sprintf("if %s (%s)",

@@ -1,6 +1,8 @@
 package parser_context
 
-import "github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_memory"
+import (
+	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
+)
 
 type AwooParserScopeContainer struct {
 	Functions map[uint16]AwooParserScopeFunction
@@ -13,9 +15,9 @@ type AwooParserScopeFunction struct {
 }
 
 type AwooParserScopeBlock struct {
-	Id     uint16
-	Name   string
-	Memory parser_memory.AwooParserMemory
+	Id          uint16
+	Name        string
+	SymbolTable elf.AwooElfSymbolTable
 }
 
 func PushParserScopeFunction(context *AwooParserContext, function AwooParserScopeFunction) AwooParserScopeFunction {
@@ -24,6 +26,10 @@ func PushParserScopeFunction(context *AwooParserContext, function AwooParserScop
 	context.Scopes.Functions[function.Id] = function
 	PushParserScopeBlock(context, function.Id, AwooParserScopeBlock{
 		Name: "body",
+		SymbolTable: elf.AwooElfSymbolTable{
+			Internal: map[string]elf.AwooElfSymbolTableEntry{},
+			External: map[string]elf.AwooElfSymbolTableEntry{},
+		},
 	})
 
 	return function
@@ -32,9 +38,6 @@ func PushParserScopeFunction(context *AwooParserContext, function AwooParserScop
 func PushParserScopeBlock(context *AwooParserContext, funcId uint16, functionBlock AwooParserScopeBlock) AwooParserScopeBlock {
 	scopeFunction := context.Scopes.Functions[funcId]
 	functionBlock.Id = uint16(len(scopeFunction.Blocks))
-	functionBlock.Memory = parser_memory.AwooParserMemory{
-		Entries: map[string]parser_memory.AwooParserMemoryEntry{},
-	}
 	scopeFunction.Blocks[functionBlock.Id] = functionBlock
 	context.Scopes.Functions[funcId] = scopeFunction
 

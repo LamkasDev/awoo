@@ -8,7 +8,7 @@ import (
 type AwooType struct {
 	Key           string
 	Id            types.AwooTypeId
-	PrimitiveType types.AwooTypePrimitiveId
+	PrimitiveType types.AwooTypeId
 	Length        uint8
 	Size          arch.AwooRegister
 	Flags         uint64

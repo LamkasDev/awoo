@@ -34,60 +34,60 @@ func SetupTypeMap() AwooTypeMap {
 	m := AwooTypeMap{
 		All:           make(map[types.AwooTypeId]AwooType),
 		Lookup:        make(map[string]*AwooType),
-		UserDefinedId: AwooTypeUserDefinedStart,
+		UserDefinedId: types.AwooTypeUserDefinedStart,
 	}
 
 	AddTypeBuiltin(&m, AwooType{
-		Key: "bool", Id: types.AwooTypeId(AwooTypeBoolean), PrimitiveType: AwooTypeBoolean,
+		Key: "bool", Id: types.AwooTypeBoolean, PrimitiveType: types.AwooTypeBoolean,
 		Size: 1,
 	})
 	AddTypeBuiltin(&m, AwooType{
-		Key: "byte", Id: types.AwooTypeId(AwooTypeByte), PrimitiveType: AwooTypeByte,
+		Key: "byte", Id: types.AwooTypeByte, PrimitiveType: types.AwooTypeByte,
 		Size: 1,
 	})
 	AddTypeBuiltin(&m, AwooType{
-		Key: "char", Id: types.AwooTypeId(AwooTypeChar), PrimitiveType: AwooTypeChar,
-		Size: 4, Flags: AwooTypeFlagsSign,
+		Key: "char", Id: types.AwooTypeChar, PrimitiveType: types.AwooTypeChar,
+		Size: 4, Flags: types.AwooTypeFlagsSign,
 	})
 	AddTypeBuiltin(&m, AwooType{
-		Key: "ptr", Id: types.AwooTypeId(AwooTypePointer), PrimitiveType: AwooTypePointer,
+		Key: "ptr", Id: types.AwooTypePointer, PrimitiveType: types.AwooTypePointer,
 		Size: 4,
 	})
 	AddTypeBuiltin(&m, AwooType{
-		Key: "", Id: types.AwooTypeId(AwooTypeFunction), PrimitiveType: AwooTypeFunction,
+		Key: "", Id: types.AwooTypeFunction, PrimitiveType: types.AwooTypeFunction,
 	})
 
 	AddTypeBuiltin(&m, AwooType{
-		Key: "int8", Id: types.AwooTypeId(AwooTypeInt8), PrimitiveType: AwooTypeInt8,
-		Size: 1, Flags: AwooTypeFlagsSign,
+		Key: "int8", Id: types.AwooTypeInt8, PrimitiveType: types.AwooTypeInt8,
+		Size: 1, Flags: types.AwooTypeFlagsSign,
 	})
 	AddTypeBuiltin(&m, AwooType{
-		Key: "int16", Id: types.AwooTypeId(AwooTypeInt16), PrimitiveType: AwooTypeInt16,
-		Size: 2, Flags: AwooTypeFlagsSign,
+		Key: "int16", Id: types.AwooTypeInt16, PrimitiveType: types.AwooTypeInt16,
+		Size: 2, Flags: types.AwooTypeFlagsSign,
 	})
 	AddTypeBuiltin(&m, AwooType{
-		Key: "int32", Id: types.AwooTypeId(AwooTypeInt32), PrimitiveType: AwooTypeInt32,
-		Size: 4, Flags: AwooTypeFlagsSign,
+		Key: "int32", Id: types.AwooTypeInt32, PrimitiveType: types.AwooTypeInt32,
+		Size: 4, Flags: types.AwooTypeFlagsSign,
 	})
 	AddTypeBuiltin(&m, AwooType{
-		Key: "int64", Id: types.AwooTypeId(AwooTypeInt64), PrimitiveType: AwooTypeInt64,
-		Size: 8, Flags: AwooTypeFlagsSign,
+		Key: "int64", Id: types.AwooTypeInt64, PrimitiveType: types.AwooTypeInt64,
+		Size: 8, Flags: types.AwooTypeFlagsSign,
 	})
 
 	AddTypeBuiltin(&m, AwooType{
-		Key: "uint8", Id: types.AwooTypeId(AwooTypeUInt8), PrimitiveType: AwooTypeUInt8,
+		Key: "uint8", Id: types.AwooTypeUInt8, PrimitiveType: types.AwooTypeUInt8,
 		Size: 1,
 	})
 	AddTypeBuiltin(&m, AwooType{
-		Key: "uint16", Id: types.AwooTypeId(AwooTypeUInt16), PrimitiveType: AwooTypeUInt16,
+		Key: "uint16", Id: types.AwooTypeUInt16, PrimitiveType: types.AwooTypeUInt16,
 		Size: 2,
 	})
 	AddTypeBuiltin(&m, AwooType{
-		Key: "uint32", Id: types.AwooTypeId(AwooTypeUInt32), PrimitiveType: AwooTypeUInt32,
+		Key: "uint32", Id: types.AwooTypeUInt32, PrimitiveType: types.AwooTypeUInt32,
 		Size: 4,
 	})
 	AddTypeBuiltin(&m, AwooType{
-		Key: "uint64", Id: types.AwooTypeId(AwooTypeUInt64), PrimitiveType: AwooTypeUInt64,
+		Key: "uint64", Id: types.AwooTypeUInt64, PrimitiveType: types.AwooTypeUInt64,
 		Size: 8,
 	})
 

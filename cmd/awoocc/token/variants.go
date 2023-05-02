@@ -14,7 +14,7 @@ const TokenTypeComma = uint16(0x009)
 const TokenTypeBracketSquareLeft = uint16(0x00A)
 const TokenTypeBracketSquareRight = uint16(0x00B)
 
-func IsTokenTypeGeneral(t uint16) bool {
+func IsTokenGeneral(t uint16) bool {
 	return t < 0x100
 }
 
@@ -37,56 +37,57 @@ const TokenOperatorAnd = uint16(0x113)
 const TokenOperatorReference = uint16(0x113)
 const TokenOperatorOr = uint16(0x114)
 
-func IsTokenTypeOperator(t uint16) bool {
+func IsTokenOperator(t uint16) bool {
 	return t >= 0x100 && t < 0x200
 }
-func IsTokenTypeAddSub(t uint16) bool {
+func IsTokenOperatorAddSub(t uint16) bool {
 	return t >= TokenOperatorAddition && t <= TokenOperatorSubstraction
 }
-func IsTokenTypeMulDiv(t uint16) bool {
+func IsTokenOperatorMulDiv(t uint16) bool {
 	return t >= TokenOperatorMultiplication && t <= TokenOperatorDivision
 }
-func IsTokenTypeUnary(t uint16) bool {
+func IsTokenOperatorUnary(t uint16) bool {
 	return t >= TokenOperatorAddition && t <= TokenOperatorDivision
 }
-func IsTokenTypeEquality(t uint16) bool {
+func IsTokenOperatorEquality(t uint16) bool {
 	return t >= TokenOperatorEqEq && t <= TokenOperatorGTEQ
 }
 func DoesTokenTakePrecendence(op uint16, left uint16) bool {
 	switch op {
 	case TokenOperatorAddition,
 		TokenOperatorSubstraction:
-		return IsTokenTypeEquality(left)
+		return IsTokenOperatorEquality(left)
 	case TokenOperatorMultiplication,
 		TokenOperatorDivision:
-		return IsTokenTypeEquality(left) || IsTokenTypeAddSub(left)
+		return IsTokenOperatorEquality(left) || IsTokenOperatorAddSub(left)
 	}
 
 	return false
 }
 
 // Keywords.
-const TokenTypeVar = uint16(0x200)
-const TokenTypeTypeDefinition = uint16(0x201)
-const TokenTypeIf = uint16(0x202)
-const TokenTypeElse = uint16(0x203)
-const TokenTypeFunc = uint16(0x204)
-const TokenTypeReturn = uint16(0x205)
-const TokenTypeFor = uint16(0x206)
+const TokenKeywordVar = uint16(0x200)
+const TokenKeywordTypeDefinition = uint16(0x201)
+const TokenKeywordIf = uint16(0x202)
+const TokenKeywordElse = uint16(0x203)
+const TokenKeywordFunc = uint16(0x204)
+const TokenKeywordReturn = uint16(0x205)
+const TokenKeywordFor = uint16(0x206)
+const TokenKeywordImport = uint16(0x207)
 
-func IsTokenTypeKeyword(t uint16) bool {
+func IsTokenKeyword(t uint16) bool {
 	return t >= 0x200 && t < 0x300
 }
 
 // Print stuffs.
 func GetTokenTypeName(t uint16) string {
-	if IsTokenTypeGeneral(t) {
+	if IsTokenGeneral(t) {
 		return "token"
 	}
-	if IsTokenTypeOperator(t) {
+	if IsTokenOperator(t) {
 		return "op"
 	}
-	if IsTokenTypeKeyword(t) {
+	if IsTokenKeyword(t) {
 		return "keyword"
 	}
 

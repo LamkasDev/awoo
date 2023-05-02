@@ -5,13 +5,12 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
-	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
+	"github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
 func CompileStatementFor(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s statement.AwooParserStatement) error {
@@ -19,9 +18,9 @@ func CompileStatementFor(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s 
 		return err
 	}
 
-	conditionOffset := arch.AwooRegister(len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents))
+	conditionOffset := arch.AwooRegister(len(celf.SectionList.Sections[elf.AwooElfSectionProgram].Contents))
 	conditionDetails := compiler_details.CompileNodeValueDetails{
-		Type:     commonTypes.AwooTypeId(types.AwooTypeBoolean),
+		Type:     types.AwooTypeBoolean,
 		Register: cpu.AwooRegisterTemporaryZero,
 	}
 	if err := CompileNodeValue(ccompiler, celf, statement.GetStatementForCondition(&s), &conditionDetails); err != nil {
@@ -29,7 +28,7 @@ func CompileStatementFor(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s 
 	}
 
 	// Reserve instruction for condition.
-	jumpBeyondEndOffset := arch.AwooRegister(len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents))
+	jumpBeyondEndOffset := arch.AwooRegister(len(celf.SectionList.Sections[elf.AwooElfSectionProgram].Contents))
 	if err := encoder.Encode(celf, instruction.AwooInstruction{}); err != nil {
 		return err
 	}
@@ -42,7 +41,7 @@ func CompileStatementFor(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s 
 		return err
 	}
 
-	jumpToConditionOffset := arch.AwooRegister(len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents))
+	jumpToConditionOffset := arch.AwooRegister(len(celf.SectionList.Sections[elf.AwooElfSectionProgram].Contents))
 	jumpToConditionInstruction := instruction.AwooInstruction{
 		Definition: instructions.AwooInstructionJAL,
 		Immediate:  conditionOffset - jumpToConditionOffset,
@@ -51,7 +50,7 @@ func CompileStatementFor(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s 
 		return err
 	}
 
-	end := arch.AwooRegister(len(celf.SectionList.Sections[celf.SectionList.ProgramIndex].Contents))
+	end := arch.AwooRegister(len(celf.SectionList.Sections[elf.AwooElfSectionProgram].Contents))
 	jumpBeyondEndInstruction := instruction.AwooInstruction{
 		Definition: instructions.AwooInstructionBEQ,
 		SourceOne:  cpu.AwooRegisterTemporaryZero,
@@ -60,6 +59,8 @@ func CompileStatementFor(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s 
 	if err := encoder.EncodeAt(celf, jumpBeyondEndOffset, jumpBeyondEndInstruction); err != nil {
 		return err
 	}
+
+	// TODO: remove initialized variable
 
 	return nil
 }

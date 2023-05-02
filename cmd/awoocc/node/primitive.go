@@ -3,28 +3,27 @@ package node
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/lexer_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/lexer_token"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
-	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
+	"github.com/LamkasDev/awoo-emu/cmd/common/types"
 	"golang.org/x/exp/constraints"
 )
 
 type AwooParserNodeDataPrimitive struct {
-	Type  commonTypes.AwooTypePrimitiveId
+	Type  types.AwooTypeId
 	Value interface{}
 }
 
-func GetNodePrimitiveType(n *AwooParserNode) commonTypes.AwooTypePrimitiveId {
+func GetNodePrimitiveType(n *AwooParserNode) types.AwooTypeId {
 	return n.Data.(AwooParserNodeDataPrimitive).Type
 }
 
-func SetNodePrimitiveType(n *AwooParserNode, t commonTypes.AwooTypePrimitiveId) {
+func SetNodePrimitiveType(n *AwooParserNode, t types.AwooTypeId) {
 	d := n.Data.(AwooParserNodeDataPrimitive)
 	d.Type = t
 	n.Data = d
 }
 
 func GetNodePrimitiveValueFormat[K constraints.Integer](context lexer_context.AwooLexerContext, n *AwooParserNode) K {
-	primType := context.Types.All[commonTypes.AwooTypeId(GetNodePrimitiveType(n))]
+	primType := context.Types.All[GetNodePrimitiveType(n)]
 	switch primType.Size {
 	case 1:
 		if primType.Flags&types.AwooTypeFlagsSign == 1 {

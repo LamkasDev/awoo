@@ -4,19 +4,18 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_memory"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_symbol"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/types"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
-	commonTypes "github.com/LamkasDev/awoo-emu/cmd/common/types"
+	"github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
-func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement) compiler_memory.AwooCompilerMemoryEntry {
+func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement) compiler_symbol.AwooCompilerSymbolTableEntry {
 	variableTypeNode := statement.GetStatementDefinitionVariableType(&s)
 	variableNameNode := statement.GetStatementDefinitionVariableIdentifier(&s)
 	variableName := node.GetNodeIdentifierValue(&variableNameNode)
@@ -25,12 +24,12 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 		// TODO: chaining pointers
 		pointedTypeNode := node.GetNodeSingleValue(&variableTypeNode)
 		pointedType := node.GetNodeTypeType(&pointedTypeNode)
-		return compiler_memory.AwooCompilerMemoryEntry{
+		return compiler_symbol.AwooCompilerSymbolTableEntry{
 			Symbol: elf.AwooElfSymbolTableEntry{
-				Name:        variableName,
-				Type:        commonTypes.AwooTypeId(types.AwooTypePointer),
-				TypeDetails: &pointedType,
-				Size:        ccompiler.Context.Parser.Lexer.Types.All[commonTypes.AwooTypeId(types.AwooTypePointer)].Size,
+				Name:    variableName,
+				Type:    types.AwooTypePointer,
+				Details: pointedType,
+				Size:    ccompiler.Context.Parser.Lexer.Types.All[types.AwooTypePointer].Size,
 			},
 			Global: ccompiler.Context.Scopes.Functions[uint16(len(ccompiler.Context.Scopes.Functions)-1)].Global,
 		}
@@ -38,7 +37,7 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 		arraySize := node.GetNodeTypeArraySize(&variableTypeNode)
 		arrayTypeNode := node.GetNodeTypeArrayType(&variableTypeNode)
 		arrayType := node.GetNodeTypeType(&arrayTypeNode)
-		return compiler_memory.AwooCompilerMemoryEntry{
+		return compiler_symbol.AwooCompilerSymbolTableEntry{
 			Symbol: elf.AwooElfSymbolTableEntry{
 				Name: variableName,
 				Type: arrayType,
@@ -49,7 +48,7 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 	}
 
 	variableType := node.GetNodeTypeType(&variableTypeNode)
-	return compiler_memory.AwooCompilerMemoryEntry{
+	return compiler_symbol.AwooCompilerSymbolTableEntry{
 		Symbol: elf.AwooElfSymbolTableEntry{
 			Name: variableName,
 			Type: variableType,
@@ -95,8 +94,8 @@ func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, celf *elf.Awoo
 		Immediate:  variableMemory.Symbol.Start,
 	}
 	if variableMemory.Global {
-		elf.PushSymbol(celf, variableMemory.Symbol)
-		elf.PushSectionData(celf, celf.SectionList.DataIndex, make([]byte, variableMemory.Symbol.Size))
+		elf.SetSymbol(celf, variableMemory.Symbol)
+		elf.PushSectionData(celf, elf.AwooElfSectionData, make([]byte, variableMemory.Symbol.Size))
 		elf.PushRelocationEntry(celf, variableMemory.Symbol.Name)
 	}
 	return encoder.Encode(celf, saveInstruction)

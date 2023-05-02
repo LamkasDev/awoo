@@ -9,40 +9,40 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
 )
 
-func ConstructStatementFor(cparser *parser.AwooParser, _ lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (statement.AwooParserStatement, *parser_error.AwooParserError) {
+func ConstructStatementFor(cparser *parser.AwooParser, _ lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (*statement.AwooParserStatement, *parser_error.AwooParserError) {
 	if err := parser.AdvanceParser(cparser); err != nil {
-		return statement.AwooParserStatement{}, err
+		return nil, err
 	}
 	forInitializationStatement, err := ConstructStatement(cparser, cparser.Current, &parser_details.ConstructStatementDetails{
 		EndToken: token.TokenTypeEndStatement,
 	})
 	if err != nil {
-		return statement.AwooParserStatement{}, err
+		return nil, err
 	}
-	forStatement := statement.CreateStatementFor(forInitializationStatement)
+	forStatement := statement.CreateStatementFor(*forInitializationStatement)
 	forConditionExpression, err := ConstructExpressionStart(cparser, &parser_details.ConstructExpressionDetails{
 		EndTokens: []uint16{token.TokenTypeEndStatement},
 	})
 	if err != nil {
-		return forStatement, err
+		return &forStatement, err
 	}
 	statement.SetStatementForCondition(&forStatement, forConditionExpression.Node)
 	if err := parser.AdvanceParser(cparser); err != nil {
-		return statement.AwooParserStatement{}, err
+		return nil, err
 	}
 	forAdvancementStatement, err := ConstructStatement(cparser, cparser.Current, &parser_details.ConstructStatementDetails{
 		EndToken: token.TokenTypeBracketCurlyLeft,
 	})
 	if err != nil {
-		return forStatement, err
+		return &forStatement, err
 	}
-	statement.SetStatementForAdvancement(&forStatement, forAdvancementStatement)
+	statement.SetStatementForAdvancement(&forStatement, *forAdvancementStatement)
 
 	forGroup, err := ConstructStatementGroup(cparser, details)
 	if err != nil {
-		return forStatement, err
+		return &forStatement, err
 	}
-	statement.SetStatementForBody(&forStatement, forGroup)
+	statement.SetStatementForBody(&forStatement, *forGroup)
 
-	return forStatement, nil
+	return &forStatement, nil
 }

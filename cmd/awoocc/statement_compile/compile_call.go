@@ -8,7 +8,6 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
-	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
@@ -22,25 +21,26 @@ func CompileStatementCall(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s
 
 func CompileNodeCall(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
 	functionName := node.GetNodeCallValue(&n)
-	function, ok := compiler_context.GetCompilerFunction(&ccompiler.Context, functionName)
+	function, ok := elf.GetSymbol(celf, functionName)
 	if !ok {
 		return awerrors.ErrorFailedToGetFunctionFromScope
 	}
-	stackOffset := arch.AwooRegister(compiler_context.GetCompilerScopeCurrentFunctionSize(&ccompiler.Context))
+	stackOffset := compiler_context.GetCompilerScopeCurrentFunctionSize(&ccompiler.Context)
 
+	functionPrototypeArguments := function.Details.(elf.AwooElfSymbolTableEntryFunctionDetails).Arguments
 	functionArguments := node.GetNodeCallArguments(&n)
 	functionArgumentsOffset := stackOffset
 	var err error
-	for i := 0; i < len(function.Arguments); i++ {
+	for i := 0; i < len(functionPrototypeArguments); i++ {
 		argumentDetails := compiler_details.CompileNodeValueDetails{
-			Type:     function.Arguments[i].Type,
+			Type:     functionPrototypeArguments[i].Type,
 			Register: cpu.AwooRegisterTemporaryZero,
 		}
 		if err = CompileNodeValue(ccompiler, celf, functionArguments[i], &argumentDetails); err != nil {
 			return err
 		}
 		saveInstruction := instruction.AwooInstruction{
-			Definition: *instructions.AwooInstructionsSave[function.Arguments[i].Size],
+			Definition: *instructions.AwooInstructionsSave[functionPrototypeArguments[i].Size],
 			SourceOne:  cpu.AwooRegisterSavedZero,
 			SourceTwo:  argumentDetails.Register,
 			Immediate:  functionArgumentsOffset,
@@ -48,7 +48,7 @@ func CompileNodeCall(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node
 		if err = encoder.Encode(celf, saveInstruction); err != nil {
 			return err
 		}
-		functionArgumentsOffset += arch.AwooRegister(function.Arguments[i].Size)
+		functionArgumentsOffset += functionPrototypeArguments[i].Size
 	}
 
 	stackAdjustmentInstruction := instruction.AwooInstruction{
@@ -66,7 +66,7 @@ func CompileNodeCall(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node
 		Definition:  instructions.AwooInstructionJALR,
 		Destination: cpu.AwooRegisterReturnAddress,
 	}
-	elf.PushRelocationEntry(celf, function.Symbol.Name)
+	elf.PushRelocationEntry(celf, function.Name)
 	if err = encoder.Encode(celf, jumpInstruction); err != nil {
 		return err
 	}

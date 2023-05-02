@@ -5,7 +5,6 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
-	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
@@ -31,7 +30,7 @@ func CompileNodeArray(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n nod
 			addressAdjustmentInstruction = instruction.AwooInstruction{
 				Definition:  instructions.AwooInstructionADDI,
 				SourceOne:   details.Register,
-				Immediate:   arch.AwooRegister(ccompiler.Context.Parser.Lexer.Types.All[details.Type].Size),
+				Immediate:   ccompiler.Context.Parser.Lexer.Types.All[details.Type].Size,
 				Destination: details.Register,
 			}
 			if err := encoder.Encode(celf, addressAdjustmentInstruction); err != nil {

@@ -35,7 +35,7 @@ func SetupDriverVga(internal *internal.AwooEmulatorInternal) driver.AwooDriver {
 }
 
 func ReadCharacterDriverVga(internal *internal.AwooEmulatorInternal, data *AwooDriverDataVga, offset arch.AwooRegister) (*sdl.Surface, uint8, error) {
-	characterData := memory.ReadMemorySafe(&internal.Memory, arch.AwooRegister(AwooDriverVgaVector+offset), memory.ReadMemory16)
+	characterData := memory.ReadMemorySafe(&internal.Memory, AwooDriverVgaVector+offset, memory.ReadMemory16)
 	internal.Memory.TotalRead -= 2
 	if characterData == 0 {
 		return nil, 0, nil

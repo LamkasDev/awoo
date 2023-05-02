@@ -1,51 +1,102 @@
 package paths
 
 import (
-	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-func ResolvePath(input string, ext string) string {
-	if !filepath.IsAbs(input) {
+type AwooPath struct {
+	Absolute string
+	Anchor   *string
+}
+
+func CreatePath(path string) AwooPath {
+	path = filepath.Clean(path)
+	if !filepath.IsAbs(path) {
 		wd, err := os.Getwd()
 		if err != nil {
 			panic(err)
 		}
-		input = filepath.Join(wd, input)
+		return AwooPath{
+			Absolute: filepath.Join(wd, path),
+			Anchor:   &wd,
+		}
 	}
-	if filepath.Ext(input) == "" {
-		files, err := os.ReadDir(input)
+	if filepath.Ext(path) == "" {
+		return AwooPath{
+			Absolute: path,
+			Anchor:   &path,
+		}
+	}
+
+	return AwooPath{
+		Absolute: path,
+	}
+}
+
+func CreatePathList(path string, ext string) []AwooPath {
+	resultPath := CreatePath(path)
+
+	// If a path is folder, recursively create a list of files anchored from path
+	if filepath.Ext(resultPath.Absolute) == "" {
+		resultPaths := []AwooPath{}
+		err := filepath.WalkDir(resultPath.Absolute, func(cpath string, _ fs.DirEntry, cerr error) error {
+			if cerr != nil {
+				return cerr
+			}
+			if filepath.Ext(cpath) == ext {
+				resultPaths = append(resultPaths, AwooPath{
+					Absolute: cpath,
+					Anchor:   resultPath.Anchor,
+				})
+			}
+			return nil
+		})
 		if err != nil {
 			panic(err)
 		}
-		for _, file := range files {
-			if filepath.Ext(file.Name()) == ext {
-				input = filepath.Join(input, file.Name())
-				break
-			}
-		}
+
+		return resultPaths
 	}
-	if _, err := os.Stat(input); err != nil {
+
+	// If path is a file, return single path
+	if _, err := os.Stat(resultPath.Absolute); err != nil {
 		panic(err)
 	}
 
-	return input
+	return []AwooPath{resultPath}
 }
 
-func ResolvePaths(input string, inputExt string, output string, outputExt string) (string, string) {
-	input = ResolvePath(input, inputExt)
-	inputName := strings.TrimSuffix(filepath.Base(input), filepath.Ext(input))
-	if filepath.Ext(output) == "" {
-		if filepath.IsAbs(output) {
-			output = filepath.Join(output, fmt.Sprintf("%s%s", inputName, outputExt))
-		} else {
-			output = filepath.Join(filepath.Dir(input), output, fmt.Sprintf("%s%s", inputName, outputExt))
-		}
-	} else if !filepath.IsAbs(output) {
-		output = filepath.Join(filepath.Dir(input), output)
+func CreatePathListCombined(paths []string, ext string) []AwooPath {
+	resultPaths := []AwooPath{}
+	for _, path := range paths {
+		resultPaths = append(resultPaths, CreatePathList(path, ext)...)
 	}
 
-	return input, output
+	return resultPaths
+}
+
+func ResolveOutputPath(input AwooPath, output string, ext string) AwooPath {
+	resultPath := CreatePath(output)
+	unanchoredOutput := strings.TrimPrefix(input.Absolute, *input.Anchor)
+	unanchoredOutput = strings.ReplaceAll(unanchoredOutput, filepath.Ext(unanchoredOutput), ext)
+	resultPath.Absolute = filepath.Join(*resultPath.Anchor, unanchoredOutput)
+
+	return resultPath
+}
+
+func ResolveAllPaths(inputs []string, inputExt string, output string, outputExt string) ([]AwooPath, []AwooPath) {
+	resultInputs := CreatePathListCombined(inputs, inputExt)
+	resultOutputs := []AwooPath{}
+	if filepath.Ext(output) == "" {
+		for _, input := range resultInputs {
+			resultOutputs = append(resultOutputs, ResolveOutputPath(input, output, outputExt))
+		}
+	} else {
+		resultOutputs = append(resultOutputs, CreatePath(output))
+	}
+
+	return resultInputs, resultOutputs
 }

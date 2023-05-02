@@ -27,9 +27,6 @@ func SetupCompiler(settings AwooCompilerSettings, context parser_context.AwooPar
 		Context: compiler_context.AwooCompilerContext{
 			Parser: context,
 			Scopes: compiler_context.SetupCompilerScopeContainer(),
-			Functions: compiler_context.AwooCompilerFunctionContainer{
-				Entries: map[string]compiler_context.AwooCompilerFunction{},
-			},
 		},
 		Settings: settings,
 	}

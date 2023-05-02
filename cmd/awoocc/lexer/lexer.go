@@ -113,17 +113,8 @@ func RunLexer(lexer *AwooLexer) AwooLexerResult {
 			}
 			continue
 		}
-
-		single, ok := lexer.Settings.Tokens.Single[lexer.Current.Character]
-		if ok {
-			token := lexer_token.NewAwooLexerToken(NewAwooLexerTokenPosition(lexer, 1), single)
-			PrintNewToken(&lexer.Settings, string(lexer.Current.Character), &token)
-			token.Position.Index = uint32(len(result.Tokens))
-			result.Tokens = append(result.Tokens, token)
-			continue
-		}
 		if lexer.Current.Character == '\'' {
-			token, matchedString, err := CreateTokenChar(lexer)
+			token, matchedString, err := CreateTokenCharacter(lexer)
 			if err != nil {
 				result.Error = err
 				break
@@ -133,8 +124,31 @@ func RunLexer(lexer *AwooLexer) AwooLexerResult {
 			result.Tokens = append(result.Tokens, token)
 			continue
 		}
+		if lexer.Current.Character == '"' {
+			token, matchedString, err := CreateTokenString(lexer)
+			if err != nil {
+				result.Error = err
+				break
+			}
+			PrintNewToken(&lexer.Settings, matchedString, &token)
+			token.Position.Index = uint32(len(result.Tokens))
+			result.Tokens = append(result.Tokens, token)
+			continue
+		}
+
+		single, ok := lexer.Settings.Tokens.Single[lexer.Current.Character]
+		if ok {
+			token := lexer_token.NewAwooLexerToken(NewAwooLexerTokenPosition(lexer, 1), single)
+			PrintNewToken(&lexer.Settings, string(lexer.Current.Character), &token)
+			token.Position.Index = uint32(len(result.Tokens))
+			result.Tokens = append(result.Tokens, token)
+			continue
+		}
 		if unicode.IsLetter(lexer.Current.Character) {
-			token, matchedString := CreateTokenLetter(lexer)
+			token, matchedString, ok := CreateTokenKeyword(lexer)
+			if !ok {
+				token, matchedString = CreateTokenIdentifier(lexer)
+			}
 			PrintNewToken(&lexer.Settings, matchedString, &token)
 			token.Position.Index = uint32(len(result.Tokens))
 			result.Tokens = append(result.Tokens, token)
@@ -152,14 +166,7 @@ func RunLexer(lexer *AwooLexer) AwooLexerResult {
 			continue
 		}
 
-		token, matchedString, ok := CreateTokenCouple(lexer)
-		if !ok {
-			result.Error = fmt.Errorf("%w: %s", awerrors.ErrorIllegalCharacter, gchalk.Red((string)(lexer.Current.Character)))
-			break
-		}
-		PrintNewToken(&lexer.Settings, matchedString, &token)
-		token.Position.Index = uint32(len(result.Tokens))
-		result.Tokens = append(result.Tokens, token)
+		result.Error = fmt.Errorf("%w: %s", awerrors.ErrorIllegalCharacter, gchalk.Red((string)(lexer.Current.Character)))
 		break
 	}
 	if result.Error != nil {
