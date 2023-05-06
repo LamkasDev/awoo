@@ -3,7 +3,7 @@ package linker
 import "github.com/LamkasDev/awoo-emu/cmd/common/elf"
 
 type AwooLinker struct {
-	Contents []elf.AwooElf
+	Contents map[string]elf.AwooElf
 	Settings AwooLinkerSettings
 }
 
@@ -18,6 +18,6 @@ func SetupLinker(settings AwooLinkerSettings) AwooLinker {
 	}
 }
 
-func LoadLinker(linker *AwooLinker, contents []elf.AwooElf) {
+func LoadLinker(linker *AwooLinker, contents map[string]elf.AwooElf) {
 	linker.Contents = contents
 }

@@ -9,7 +9,6 @@ import (
 
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/dependency"
-	awooElf "github.com/LamkasDev/awoo-emu/cmd/awoocc/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/lexer"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser"
@@ -64,7 +63,8 @@ func RunCompilerFull(context map[string]elf.AwooElf, input paths.AwooPath, outpu
 
 	celf := elf.NewAwooElf(filepath.Base(input.Absolute), elf.AwooElfTypeObject)
 	for _, dependency := range dependencyContext {
-		elf.MergeSimpleSymbolTable(celf.SymbolTable.External, dependency.SymbolTable.Internal, 0)
+		elf.MergeSymbolTableVariable(celf.SymbolTable.External, dependency.SymbolTable.Internal, 0)
+		elf.MergeSymbolTableFunction(celf.SymbolTable.External, dependency.SymbolTable.Internal, 0)
 	}
 
 	parSettings := parser.AwooParserSettings{
@@ -203,6 +203,7 @@ func RunCompiler(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf) {
 func RunCompilerDry(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf) {
 	logger.LogExtra(gchalk.Yellow("\n> Compiler\n"))
 
+	// TODO: compiler global scope does not include tokens from dependencies (they're in external symbol table though)
 	for ok := true; ok; ok = compiler.AdvanceCompiler(ccompiler) {
 		start := len(celf.SectionList.Sections[elf.AwooElfSectionProgram].Contents)
 		parser.PrintStatement(&ccompiler.Settings.Parser, &ccompiler.Context.Parser, &ccompiler.Current)
@@ -213,7 +214,4 @@ func RunCompilerDry(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf) {
 		compiler.PrintNewCompile(ccompiler, &ccompiler.Current, celf.SectionList.Sections[elf.AwooElfSectionProgram].Contents[start:end])
 	}
 	elf.AlignSections(celf)
-	if err := awooElf.AlignSymbols(ccompiler, celf); err != nil {
-		panic(err)
-	}
 }

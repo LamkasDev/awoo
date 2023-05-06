@@ -1,17 +1,23 @@
 package instruction_helper
 
 import (
-	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
-func ConstructInstructionLoadReturnAddress(immediate arch.AwooRegister) instruction.AwooInstruction {
+func ConstructInstructionSaveReturnAddress() instruction.AwooInstruction {
+	return instruction.AwooInstruction{
+		Definition: instructions.AwooInstructionSW,
+		SourceOne:  cpu.AwooRegisterSavedZero,
+		SourceTwo:  cpu.AwooRegisterReturnAddress,
+	}
+}
+
+func ConstructInstructionLoadReturnAddress() instruction.AwooInstruction {
 	return instruction.AwooInstruction{
 		Definition:  instructions.AwooInstructionLW,
 		SourceOne:   cpu.AwooRegisterSavedZero,
-		Immediate:   immediate,
 		Destination: cpu.AwooRegisterReturnAddress,
 	}
 }

@@ -16,6 +16,7 @@ import (
 )
 
 func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement) compiler_symbol.AwooCompilerSymbolTableEntry {
+	currentFunction := ccompiler.Context.Scopes.Functions[uint16(len(ccompiler.Context.Scopes.Functions)-1)]
 	variableTypeNode := statement.GetStatementDefinitionVariableType(&s)
 	variableNameNode := statement.GetStatementDefinitionVariableIdentifier(&s)
 	variableName := node.GetNodeIdentifierValue(&variableNameNode)
@@ -31,7 +32,7 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 				Details: pointedType,
 				Size:    ccompiler.Context.Parser.Lexer.Types.All[types.AwooTypePointer].Size,
 			},
-			Global: ccompiler.Context.Scopes.Functions[uint16(len(ccompiler.Context.Scopes.Functions)-1)].Global,
+			Global: compiler_context.IsCompilerScopeFunctionGlobal(currentFunction),
 		}
 	case node.ParserNodeTypeTypeArray:
 		arraySize := node.GetNodeTypeArraySize(&variableTypeNode)
@@ -43,7 +44,7 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 				Type: arrayType,
 				Size: arraySize * ccompiler.Context.Parser.Lexer.Types.All[arrayType].Size,
 			},
-			Global: ccompiler.Context.Scopes.Functions[uint16(len(ccompiler.Context.Scopes.Functions)-1)].Global,
+			Global: compiler_context.IsCompilerScopeFunctionGlobal(currentFunction),
 		}
 	}
 
@@ -54,7 +55,7 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 			Type: variableType,
 			Size: ccompiler.Context.Parser.Lexer.Types.All[variableType].Size,
 		},
-		Global: ccompiler.Context.Scopes.Functions[uint16(len(ccompiler.Context.Scopes.Functions)-1)].Global,
+		Global: compiler_context.IsCompilerScopeFunctionGlobal(currentFunction),
 	}
 }
 
@@ -83,6 +84,10 @@ func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, celf *elf.Awoo
 	if err = CompileNodeValue(ccompiler, celf, *valueNode, &valueDetails); err != nil {
 		return err
 	}
+	if variableMemory.Global {
+		elf.SetSymbol(celf, variableMemory.Symbol)
+		elf.PushSectionData(celf, elf.AwooElfSectionData, make([]byte, variableMemory.Symbol.Size))
+	}
 	if valueDetails.Address.Used {
 		return nil
 	}
@@ -94,8 +99,6 @@ func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, celf *elf.Awoo
 		Immediate:  variableMemory.Symbol.Start,
 	}
 	if variableMemory.Global {
-		elf.SetSymbol(celf, variableMemory.Symbol)
-		elf.PushSectionData(celf, elf.AwooElfSectionData, make([]byte, variableMemory.Symbol.Size))
 		elf.PushRelocationEntry(celf, variableMemory.Symbol.Name)
 	}
 	return encoder.Encode(celf, saveInstruction)

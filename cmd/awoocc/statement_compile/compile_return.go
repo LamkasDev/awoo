@@ -30,7 +30,7 @@ func CompileStatementReturn(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf,
 		}
 	}
 
-	loadReturnAddressInstruction := instruction_helper.ConstructInstructionLoadReturnAddress(elf.GetSymbolFunctionArgumentsSize(currentPrototypeFunction))
+	loadReturnAddressInstruction := instruction_helper.ConstructInstructionLoadReturnAddress()
 	if err := encoder.Encode(celf, loadReturnAddressInstruction); err != nil {
 		return err
 	}

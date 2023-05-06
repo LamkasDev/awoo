@@ -34,9 +34,9 @@ func Load(emulator *emu.AwooEmulator, path string) {
 	memoryLength := arch.AwooRegister(0)
 
 	copy(emulator.Internal.Memory.Data[memoryLength:], osElf.SectionList.Sections[elf.AwooElfSectionProgram].Contents)
-	programLenght := arch.AwooRegister(len(osElf.SectionList.Sections[elf.AwooElfSectionProgram].Contents))
-	memoryLength += programLenght
-	emulator.Internal.Memory.ProgramEnd = programLenght
+	programLength := arch.AwooRegister(len(osElf.SectionList.Sections[elf.AwooElfSectionProgram].Contents))
+	memoryLength += programLength
+	emulator.Internal.Memory.ProgramEnd = programLength
 
 	copy(emulator.Internal.Memory.Data[memoryLength:], osElf.SectionList.Sections[elf.AwooElfSectionData].Contents)
 	dataLength := arch.AwooRegister(len(osElf.SectionList.Sections[elf.AwooElfSectionData].Contents))
@@ -46,7 +46,7 @@ func Load(emulator *emu.AwooEmulator, path string) {
 
 	logger.Log("loaded %s; program: %s; data: %s\n",
 		gchalk.Red(path),
-		gchalk.Green(fmt.Sprint(programLenght)),
+		gchalk.Green(fmt.Sprint(programLength)),
 		gchalk.Blue(fmt.Sprint(dataLength)),
 	)
 }
@@ -64,7 +64,10 @@ func Run(emulator *emu.AwooEmulator) {
 					emulator.Drivers[id] = emulator.Drivers[id].Tick(&emulator.Internal, emulator.Drivers[id])
 				}
 				emulator.Internal.CPU.TotalCycles++
-				emulator.Internal.Executing = emulator.Internal.CPU.Counter < emulator.Internal.Memory.ProgramEnd
+				if memory.ReadMemory32(&emulator.Internal.Memory, cpu.AwooCrsMstatus)&cpu.AwooCrsMstatusHalt == cpu.AwooCrsMstatusHalt {
+					emulator.Internal.Executing = false
+					logger.Log(fmt.Sprintf("received %s, stopping execution o/\n", gchalk.Red("mstatus halt")))
+				}
 			}
 			time.Sleep(time.Millisecond)
 		}

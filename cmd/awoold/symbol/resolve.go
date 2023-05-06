@@ -15,6 +15,7 @@ func ShiftImmediate(clinker *linker.AwooLinker, elf *commonElf.AwooElf, offset a
 	if err != nil {
 		return err
 	}
+	// TODO: support shifts over 2047
 	ins.Immediate = shift
 	encoder.EncodeAt(elf, offset, ins)
 

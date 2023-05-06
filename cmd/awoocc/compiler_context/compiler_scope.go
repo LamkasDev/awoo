@@ -3,23 +3,40 @@ package compiler_context
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_symbol"
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
+	"github.com/LamkasDev/awoo-emu/cmd/common/cc"
 )
 
 type AwooCompilerScopeContainer struct {
 	Functions map[uint16]AwooCompilerScopeFunction
 }
 
+func NewCompilerScopeContainer() AwooCompilerScopeContainer {
+	return AwooCompilerScopeContainer{
+		Functions: map[uint16]AwooCompilerScopeFunction{},
+	}
+}
+
 type AwooCompilerScopeFunction struct {
 	Id     uint16
 	Name   string
 	Blocks map[uint16]AwooCompilerScopeBlock
-	Global bool
+}
+
+func NewCompilerScopeFunction(name string) AwooCompilerScopeFunction {
+	return AwooCompilerScopeFunction{
+		Name:   name,
+		Blocks: map[uint16]AwooCompilerScopeBlock{},
+	}
 }
 
 type AwooCompilerScopeBlock struct {
 	Id     uint16
 	Name   string
 	Memory compiler_symbol.AwooCompilerSymbolTable
+}
+
+func IsCompilerScopeFunctionGlobal(scopeFunction AwooCompilerScopeFunction) bool {
+	return scopeFunction.Name == cc.AwooCompilerGlobalFunctionName
 }
 
 func PushCompilerScopeFunction(context *AwooCompilerContext, scopeFunction AwooCompilerScopeFunction) AwooCompilerScopeFunction {
@@ -72,12 +89,4 @@ func GetCompilerScopeCurrentFunction(context *AwooCompilerContext) AwooCompilerS
 func GetCompilerScopeCurrentFunctionSize(context *AwooCompilerContext) arch.AwooRegister {
 	scopeFunction := context.Scopes.Functions[uint16(len(context.Scopes.Functions)-1)]
 	return scopeFunction.Blocks[uint16(len(scopeFunction.Blocks)-1)].Memory.Position
-}
-
-func SetupCompilerScopeContainer() AwooCompilerScopeContainer {
-	container := AwooCompilerScopeContainer{
-		Functions: map[uint16]AwooCompilerScopeFunction{},
-	}
-
-	return container
 }

@@ -45,7 +45,7 @@ func main() {
 	logger.AwooLoggerEnabled = !quiet
 	inputs, outputs := paths.ResolveAllPaths(passedInputs, ".awoobj", passedOutputs[0], ".awooxe")
 
-	elfs := []elf.AwooElf{}
+	elfs := map[string]elf.AwooElf{}
 	for _, input := range inputs {
 		inputFile, err := os.ReadFile(input.Absolute)
 		if err != nil {
@@ -57,7 +57,7 @@ func main() {
 		if err := decoder.Decode(&elf); err != nil {
 			panic(err)
 		}
-		elfs = append(elfs, elf)
+		elfs[input.Absolute] = elf
 	}
 
 	linkerSettings := linker.AwooLinkerSettings{

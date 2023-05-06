@@ -40,12 +40,22 @@ func GetSymbol(elf *AwooElf, name string) (AwooElfSymbolTableEntry, bool) {
 	return AwooElfSymbolTableEntry{}, false
 }
 
-func MergeSimpleSymbolTable(target map[string]AwooElfSymbolTableEntry, source map[string]AwooElfSymbolTableEntry, offset arch.AwooRegister) {
+func MergeSymbolTableFunction(target map[string]AwooElfSymbolTableEntry, source map[string]AwooElfSymbolTableEntry, offset arch.AwooRegister) {
 	for name, symbol := range source {
-		switch name {
-		case cc.AwooCompilerGlobalFunctionName:
-		case cc.AwooCompilerReturnAddressVariable:
-		default:
+		if IsSymbolFunction(symbol) && symbol.Name != cc.AwooCompilerGlobalFunctionName {
+			_, ok := target[name]
+			if ok {
+				panic("already exists")
+			}
+			symbol.Start += offset
+			target[name] = symbol
+		}
+	}
+}
+
+func MergeSymbolTableVariable(target map[string]AwooElfSymbolTableEntry, source map[string]AwooElfSymbolTableEntry, offset arch.AwooRegister) {
+	for name, symbol := range source {
+		if !IsSymbolFunction(symbol) {
 			_, ok := target[name]
 			if ok {
 				panic("already exists")

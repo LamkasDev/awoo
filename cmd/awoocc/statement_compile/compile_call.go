@@ -8,9 +8,11 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
+	"github.com/LamkasDev/awoo-emu/cmd/common/cc"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
+	"github.com/LamkasDev/awoo-emu/cmd/common/instruction_helper"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instructions"
 )
 
@@ -29,14 +31,13 @@ func CompileNodeCall(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node
 
 	functionPrototypeArguments := function.Details.(elf.AwooElfSymbolTableEntryFunctionDetails).Arguments
 	functionArguments := node.GetNodeCallArguments(&n)
-	functionArgumentsOffset := stackOffset
-	var err error
+	functionArgumentsOffset := stackOffset + cc.AwooCompilerReturnAddressSize
 	for i := 0; i < len(functionPrototypeArguments); i++ {
 		argumentDetails := compiler_details.CompileNodeValueDetails{
 			Type:     functionPrototypeArguments[i].Type,
 			Register: cpu.AwooRegisterTemporaryZero,
 		}
-		if err = CompileNodeValue(ccompiler, celf, functionArguments[i], &argumentDetails); err != nil {
+		if err := CompileNodeValue(ccompiler, celf, functionArguments[i], &argumentDetails); err != nil {
 			return err
 		}
 		saveInstruction := instruction.AwooInstruction{
@@ -45,19 +46,13 @@ func CompileNodeCall(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node
 			SourceTwo:  argumentDetails.Register,
 			Immediate:  functionArgumentsOffset,
 		}
-		if err = encoder.Encode(celf, saveInstruction); err != nil {
+		if err := encoder.Encode(celf, saveInstruction); err != nil {
 			return err
 		}
 		functionArgumentsOffset += functionPrototypeArguments[i].Size
 	}
 
-	stackAdjustmentInstruction := instruction.AwooInstruction{
-		Definition:  instructions.AwooInstructionADDI,
-		SourceOne:   cpu.AwooRegisterSavedZero,
-		Destination: cpu.AwooRegisterSavedZero,
-		Immediate:   stackOffset,
-	}
-	if err = encoder.Encode(celf, stackAdjustmentInstruction); err != nil {
+	if err := encoder.Encode(celf, instruction_helper.ConstructInstructionAdjustStack(stackOffset)); err != nil {
 		return err
 	}
 
@@ -67,15 +62,9 @@ func CompileNodeCall(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node
 		Destination: cpu.AwooRegisterReturnAddress,
 	}
 	elf.PushRelocationEntry(celf, function.Name)
-	if err = encoder.Encode(celf, jumpInstruction); err != nil {
+	if err := encoder.Encode(celf, jumpInstruction); err != nil {
 		return err
 	}
 
-	stackAdjustmentInstruction = instruction.AwooInstruction{
-		Definition:  instructions.AwooInstructionADDI,
-		SourceOne:   cpu.AwooRegisterSavedZero,
-		Destination: cpu.AwooRegisterSavedZero,
-		Immediate:   -stackOffset,
-	}
-	return encoder.Encode(celf, stackAdjustmentInstruction)
+	return encoder.Encode(celf, instruction_helper.ConstructInstructionAdjustStack(-stackOffset))
 }

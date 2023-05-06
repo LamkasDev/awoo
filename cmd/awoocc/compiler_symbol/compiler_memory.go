@@ -10,6 +10,12 @@ type AwooCompilerSymbolTable struct {
 	Position arch.AwooRegister
 }
 
+func NewCompilerSymbolTable() AwooCompilerSymbolTable {
+	return AwooCompilerSymbolTable{
+		Entries: map[string]AwooCompilerSymbolTableEntry{},
+	}
+}
+
 type AwooCompilerSymbolTableEntry struct {
 	Symbol elf.AwooElfSymbolTableEntry
 	Global bool
