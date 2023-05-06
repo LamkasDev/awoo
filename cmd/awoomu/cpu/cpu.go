@@ -4,8 +4,11 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 )
 
+type AwooCPURegisters [31]arch.AwooRegister
+
 type AwooCPU struct {
-	Registers   [31]arch.AwooRegister
+	Snapshot    AwooCPURegisters
+	Registers   AwooCPURegisters
 	Counter     arch.AwooRegister
 	Advance     bool
 	TotalCycles uint64

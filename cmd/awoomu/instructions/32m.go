@@ -16,8 +16,8 @@ func ProcessMUL(internal *internal.AwooEmulatorInternal, ins instruction.AwooIns
 		fmt.Printf("%s = %s (%s * %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceTwo])),
 		)
 	}
 }
@@ -28,8 +28,8 @@ func ProcessDIV(internal *internal.AwooEmulatorInternal, ins instruction.AwooIns
 		fmt.Printf("%s = %s (%s / %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceTwo])),
 		)
 	}
 }

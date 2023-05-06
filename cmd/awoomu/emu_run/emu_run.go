@@ -56,6 +56,9 @@ func Run(emulator *emu.AwooEmulator) {
 		cycles := emulator.Config.CPU.Speed / 1000
 		for emulator.Internal.Executing {
 			for i := uint32(0); i < cycles && emulator.Internal.Executing; i++ {
+				if arch.AwooDebug {
+					emulator.Internal.CPU.Snapshot = emulator.Internal.CPU.Registers
+				}
 				ProcessCycle(emulator)
 				for _, id := range emulator.TickDrivers {
 					emulator.Drivers[id] = emulator.Drivers[id].Tick(&emulator.Internal, emulator.Drivers[id])

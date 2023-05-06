@@ -16,8 +16,8 @@ func ProcessADD(internal *internal.AwooEmulatorInternal, ins instruction.AwooIns
 		fmt.Printf("%s = %s (%s + %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceTwo])),
 		)
 	}
 }
@@ -28,8 +28,8 @@ func ProcessSUB(internal *internal.AwooEmulatorInternal, ins instruction.AwooIns
 		fmt.Printf("%s = %s (%s - %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceTwo])),
 		)
 	}
 }
@@ -41,7 +41,7 @@ func ProcessADDI(internal *internal.AwooEmulatorInternal, ins instruction.AwooIn
 		fmt.Printf("%s = %s (%s + %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(ins.Immediate)),
 		)
 	}
@@ -57,8 +57,8 @@ func ProcessSLT(internal *internal.AwooEmulatorInternal, ins instruction.AwooIns
 		fmt.Printf("%s = %s (%s < %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceTwo])),
 		)
 	}
 }
@@ -73,8 +73,8 @@ func ProcessSLTU(internal *internal.AwooEmulatorInternal, ins instruction.AwooIn
 		fmt.Printf("%s = %s (%s < %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint((arch.AwooRegisterU)(internal.CPU.Registers[ins.SourceOne]))),
-			gchalk.Magenta(fmt.Sprint((arch.AwooRegisterU)(internal.CPU.Registers[ins.SourceTwo]))),
+			gchalk.Magenta(fmt.Sprint((arch.AwooRegisterU)(internal.CPU.Snapshot[ins.SourceOne]))),
+			gchalk.Magenta(fmt.Sprint((arch.AwooRegisterU)(internal.CPU.Snapshot[ins.SourceTwo]))),
 		)
 	}
 }
@@ -89,7 +89,7 @@ func ProcessSLTI(internal *internal.AwooEmulatorInternal, ins instruction.AwooIn
 		fmt.Printf("%s = %s (%s < %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(ins.Immediate)),
 		)
 	}
@@ -105,7 +105,7 @@ func ProcessSLTIU(internal *internal.AwooEmulatorInternal, ins instruction.AwooI
 		fmt.Printf("%s = %s (%s < %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint((arch.AwooRegisterU)(internal.CPU.Registers[ins.SourceOne]))),
+			gchalk.Magenta(fmt.Sprint((arch.AwooRegisterU)(internal.CPU.Snapshot[ins.SourceOne]))),
 			gchalk.Magenta(fmt.Sprint((arch.AwooRegisterU)(ins.Immediate))),
 		)
 	}

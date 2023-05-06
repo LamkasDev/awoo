@@ -16,8 +16,8 @@ func ProcessAND(internal *internal.AwooEmulatorInternal, ins instruction.AwooIns
 		fmt.Printf("%s = %s (%s & %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceTwo])),
 		)
 	}
 }
@@ -28,8 +28,8 @@ func ProcessOR(internal *internal.AwooEmulatorInternal, ins instruction.AwooInst
 		fmt.Printf("%s = %s (%s | %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceTwo])),
 		)
 	}
 }
@@ -40,8 +40,8 @@ func ProcessXOR(internal *internal.AwooEmulatorInternal, ins instruction.AwooIns
 		fmt.Printf("%s = %s (%s ^ %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceTwo])),
 		)
 	}
 }
@@ -52,7 +52,7 @@ func ProcessANDI(internal *internal.AwooEmulatorInternal, ins instruction.AwooIn
 		fmt.Printf("%s = %s (%s & %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(ins.Immediate)),
 		)
 	}
@@ -64,7 +64,7 @@ func ProcessORI(internal *internal.AwooEmulatorInternal, ins instruction.AwooIns
 		fmt.Printf("%s = %s (%s | %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(ins.Immediate)),
 		)
 	}
@@ -76,7 +76,7 @@ func ProcessXORI(internal *internal.AwooEmulatorInternal, ins instruction.AwooIn
 		fmt.Printf("%s = %s (%s ^ %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(ins.Immediate)),
 		)
 	}
@@ -88,8 +88,8 @@ func ProcessSLL(internal *internal.AwooEmulatorInternal, ins instruction.AwooIns
 		fmt.Printf("%s = %s (%s << %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceTwo])),
 		)
 	}
 }
@@ -100,8 +100,8 @@ func ProcessSRL(internal *internal.AwooEmulatorInternal, ins instruction.AwooIns
 		fmt.Printf("%s = %s (%s >> %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceTwo])),
 		)
 	}
 }
@@ -112,8 +112,8 @@ func ProcessSRA(internal *internal.AwooEmulatorInternal, ins instruction.AwooIns
 		fmt.Printf("%s = %s (%s >> %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceTwo])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceTwo])),
 		)
 	}
 }
@@ -124,7 +124,7 @@ func ProcessSLLI(internal *internal.AwooEmulatorInternal, ins instruction.AwooIn
 		fmt.Printf("%s = %s (%s << %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(ins.Immediate)),
 		)
 	}
@@ -136,7 +136,7 @@ func ProcessSRLI(internal *internal.AwooEmulatorInternal, ins instruction.AwooIn
 		fmt.Printf("%s = %s (%s >> %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(ins.Immediate)),
 		)
 	}
@@ -148,7 +148,7 @@ func ProcessSRAI(internal *internal.AwooEmulatorInternal, ins instruction.AwooIn
 		fmt.Printf("%s = %s (%s >> %s)",
 			gchalk.Yellow(cpu.AwooRegisterNames[ins.Destination]),
 			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.Destination])),
-			gchalk.Magenta(fmt.Sprint(internal.CPU.Registers[ins.SourceOne])),
+			gchalk.Magenta(fmt.Sprint(internal.CPU.Snapshot[ins.SourceOne])),
 			gchalk.Magenta(fmt.Sprint(ins.Immediate)),
 		)
 	}
