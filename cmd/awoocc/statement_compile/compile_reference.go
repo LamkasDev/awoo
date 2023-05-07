@@ -15,7 +15,7 @@ func CompileNodeReference(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n
 	// TODO: chaining references (only identifiers can be references anyways)
 	variableNameNode := node.GetNodeSingleValue(&n)
 	variableName := node.GetNodeIdentifierValue(&variableNameNode)
-	variableMemory, err := compiler_context.GetCompilerScopeFunctionMemory(&ccompiler.Context, variableName)
+	variableMemory, err := compiler_context.GetCompilerScopeFunctionSymbol(&ccompiler.Context, variableName)
 	if err != nil {
 		return err
 	}

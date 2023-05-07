@@ -14,7 +14,7 @@ import (
 
 func CompileNodeIdentifier(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
 	identifier := node.GetNodeIdentifierValue(&n)
-	variableMemory, err := compiler_context.GetCompilerScopeFunctionMemory(&ccompiler.Context, identifier)
+	variableMemory, err := compiler_context.GetCompilerScopeFunctionSymbol(&ccompiler.Context, identifier)
 	if err != nil {
 		return err
 	}

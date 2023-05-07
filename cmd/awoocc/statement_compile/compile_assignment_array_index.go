@@ -15,7 +15,7 @@ import (
 
 func CompileStatementAssignmentArrayIndex(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s statement.AwooParserStatement) error {
 	identifierNode := statement.GetStatementAssignmentIdentifier(&s)
-	variableMemory, err := compiler_context.GetCompilerScopeFunctionMemory(&ccompiler.Context, node.GetNodeArrayIndexIdentifier(&identifierNode))
+	variableMemory, err := compiler_context.GetCompilerScopeFunctionSymbol(&ccompiler.Context, node.GetNodeArrayIndexIdentifier(&identifierNode))
 	if err != nil {
 		return err
 	}

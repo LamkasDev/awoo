@@ -2,6 +2,7 @@ package compiler_context
 
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_symbol"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_context"
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cc"
 )
@@ -30,9 +31,9 @@ func NewCompilerScopeFunction(name string) AwooCompilerScopeFunction {
 }
 
 type AwooCompilerScopeBlock struct {
-	Id     uint16
-	Name   string
-	Memory compiler_symbol.AwooCompilerSymbolTable
+	Id          uint16
+	Name        string
+	SymbolTable compiler_symbol.AwooCompilerSymbolTable
 }
 
 func IsCompilerScopeFunctionGlobal(scopeFunction AwooCompilerScopeFunction) bool {
@@ -46,6 +47,14 @@ func PushCompilerScopeFunction(context *AwooCompilerContext, scopeFunction AwooC
 	PushCompilerScopeBlock(context, scopeFunction.Id, AwooCompilerScopeBlock{
 		Name: "body",
 	})
+	if IsCompilerScopeFunctionGlobal(scopeFunction) {
+		for _, symbol := range context.Parser.Scopes.Functions[parser_context.AwooCompilerGlobalFunctionId].Blocks[parser_context.AwooCompilerGlobalBlockId].SymbolTable.External {
+			PushCompilerScopeBlockSymbolExternal(context, parser_context.AwooCompilerGlobalFunctionId, parser_context.AwooCompilerGlobalBlockId, compiler_symbol.AwooCompilerSymbolTableEntry{
+				Symbol: symbol,
+				Global: true,
+			})
+		}
+	}
 
 	return scopeFunction
 }
@@ -54,11 +63,12 @@ func PushCompilerScopeBlock(context *AwooCompilerContext, funcId uint16, functio
 	scopeFunction := context.Scopes.Functions[funcId]
 	functionBlockPosition := arch.AwooRegister(0)
 	if len(scopeFunction.Blocks) > 0 {
-		functionBlockPosition = scopeFunction.Blocks[uint16(len(scopeFunction.Blocks)-1)].Memory.Position
+		functionBlockPosition = scopeFunction.Blocks[uint16(len(scopeFunction.Blocks)-1)].SymbolTable.Position
 	}
 	functionBlock.Id = uint16(len(scopeFunction.Blocks))
-	functionBlock.Memory = compiler_symbol.AwooCompilerSymbolTable{
-		Entries:  map[string]compiler_symbol.AwooCompilerSymbolTableEntry{},
+	functionBlock.SymbolTable = compiler_symbol.AwooCompilerSymbolTable{
+		Internal: map[string]compiler_symbol.AwooCompilerSymbolTableEntry{},
+		External: map[string]compiler_symbol.AwooCompilerSymbolTableEntry{},
 		Position: functionBlockPosition,
 	}
 	scopeFunction.Blocks[functionBlock.Id] = functionBlock
@@ -88,5 +98,5 @@ func GetCompilerScopeCurrentFunction(context *AwooCompilerContext) AwooCompilerS
 
 func GetCompilerScopeCurrentFunctionSize(context *AwooCompilerContext) arch.AwooRegister {
 	scopeFunction := context.Scopes.Functions[uint16(len(context.Scopes.Functions)-1)]
-	return scopeFunction.Blocks[uint16(len(scopeFunction.Blocks)-1)].Memory.Position
+	return scopeFunction.Blocks[uint16(len(scopeFunction.Blocks)-1)].SymbolTable.Position
 }

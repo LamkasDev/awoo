@@ -6,13 +6,15 @@ import (
 )
 
 type AwooCompilerSymbolTable struct {
-	Entries  map[string]AwooCompilerSymbolTableEntry
+	Internal map[string]AwooCompilerSymbolTableEntry
+	External map[string]AwooCompilerSymbolTableEntry
 	Position arch.AwooRegister
 }
 
 func NewCompilerSymbolTable() AwooCompilerSymbolTable {
 	return AwooCompilerSymbolTable{
-		Entries: map[string]AwooCompilerSymbolTableEntry{},
+		Internal: map[string]AwooCompilerSymbolTableEntry{},
+		External: map[string]AwooCompilerSymbolTableEntry{},
 	}
 }
 

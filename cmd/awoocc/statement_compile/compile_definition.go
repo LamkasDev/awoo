@@ -60,7 +60,7 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 }
 
 func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s statement.AwooParserStatement) error {
-	variableMemory, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, GetCompilerMemoryEntry(ccompiler, s))
+	variableMemory, err := compiler_context.PushCompilerScopeCurrentBlockSymbol(&ccompiler.Context, GetCompilerMemoryEntry(ccompiler, s))
 	if err != nil {
 		return err
 	}

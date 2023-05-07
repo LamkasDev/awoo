@@ -37,7 +37,7 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s
 		functionArguments = append(functionArguments, statement.GetStatementFuncArguments(&s)...)
 		functionArgumentsOffset := arch.AwooRegister(0)
 		for _, argument := range functionArguments {
-			_, err := compiler_context.PushCompilerScopeCurrentBlockMemory(&ccompiler.Context, compiler_symbol.AwooCompilerSymbolTableEntry{
+			_, err := compiler_context.PushCompilerScopeCurrentBlockSymbol(&ccompiler.Context, compiler_symbol.AwooCompilerSymbolTableEntry{
 				Symbol: argument,
 				Global: false,
 			})

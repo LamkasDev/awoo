@@ -29,7 +29,7 @@ func CompileArrayIndexAddress(ccompiler *compiler.AwooCompiler, celf *elf.AwooEl
 }
 
 func CompileNodeArrayIndex(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
-	variableMemory, err := compiler_context.GetCompilerScopeFunctionMemory(&ccompiler.Context, node.GetNodeArrayIndexIdentifier(&n))
+	variableMemory, err := compiler_context.GetCompilerScopeFunctionSymbol(&ccompiler.Context, node.GetNodeArrayIndexIdentifier(&n))
 	if err != nil {
 		return err
 	}
