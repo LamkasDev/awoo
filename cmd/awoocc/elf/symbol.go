@@ -23,7 +23,9 @@ func AlignSymbols(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf) error {
 			return err
 		}
 		ins.Immediate = celf.SymbolTable.Internal[relocEntry.Name].Start
-		encoder.EncodeAt(celf, relocEntry.Offset, ins)
+		if err = encoder.EncodeAt(celf, relocEntry.Offset, ins); err != nil {
+			return err
+		}
 	}
 
 	return nil

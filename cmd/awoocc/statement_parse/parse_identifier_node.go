@@ -6,9 +6,9 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_error"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/scope"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/token"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/types"
@@ -17,13 +17,13 @@ import (
 
 func CreateNodeIdentifierVariableSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
 	identifier := lexer_token.GetTokenIdentifierValue(&t)
-	symbol, ok := parser_context.GetParserScopeFunctionSymbol(&cparser.Context, identifier)
-	if !ok || symbol.Type == types.AwooTypeFunction {
+	symbol, err := scope.GetCurrentFunctionSymbol(&cparser.Context.Scopes, identifier)
+	if err != nil || symbol.Symbol.Type == types.AwooTypeFunction {
 		return node.AwooParserNodeResult{}, parser_error.CreateParserErrorText(parser_error.AwooParserErrorUnknownVariable,
 			fmt.Sprintf("%s: %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorUnknownVariable], gchalk.Red(identifier)),
 			t.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorUnknownVariable])
 	}
-	if arrToken, _ := parser.ExpectTokenOptional(cparser, token.TokenTypeBracketSquareLeft); arrToken != nil {
+	if arrToken := parser.ExpectTokenOptional(cparser, token.TokenTypeBracketSquareLeft); arrToken != nil {
 		arrIndexNode := node.CreateNodeArrayIndex(*arrToken, identifier)
 		indexNode, err := ConstructExpressionStart(cparser, &parser_details.ConstructExpressionDetails{
 			Type:      types.AwooTypeUInt16,
@@ -45,7 +45,7 @@ func CreateNodeIdentifierVariableSafeFast(cparser *parser.AwooParser) (node.Awoo
 		return node.AwooParserNodeResult{}, err
 	}
 
-	return CreateNodeIdentifierVariableSafe(cparser, t)
+	return CreateNodeIdentifierVariableSafe(cparser, *t)
 }
 
 func CreateNodeIdentifierCallSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
@@ -53,13 +53,13 @@ func CreateNodeIdentifierCallSafe(cparser *parser.AwooParser, t lexer_token.Awoo
 	if _, err := parser.ExpectTokens(cparser, []uint16{token.TokenTypeBracketLeft}); err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
-	symbol, ok := parser_context.GetParserScopeFunctionSymbol(&cparser.Context, callFunctionName)
-	if !ok || symbol.Type != types.AwooTypeFunction {
+	symbol, err := scope.GetCurrentFunctionSymbol(&cparser.Context.Scopes, callFunctionName)
+	if err != nil || symbol.Symbol.Type != types.AwooTypeFunction {
 		return node.AwooParserNodeResult{}, parser_error.CreateParserErrorText(parser_error.AwooParserErrorUnknownFunction,
 			fmt.Sprintf("%s: %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorUnknownFunction], gchalk.Red(callFunctionName)),
 			t.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorUnknownFunction])
 	}
-	callFunctionArguments := symbol.Details.(elf.AwooElfSymbolTableEntryFunctionDetails).Arguments
+	callFunctionArguments := symbol.Symbol.Details.(elf.AwooElfSymbolTableEntryFunctionDetails).Arguments
 
 	callNode := node.CreateNodeCall(t)
 	for _, arg := range callFunctionArguments {
@@ -88,7 +88,7 @@ func CreateNodeIdentifierCallSafeFast(cparser *parser.AwooParser) (node.AwooPars
 		return node.AwooParserNodeResult{}, err
 	}
 
-	return CreateNodeIdentifierCallSafe(cparser, t)
+	return CreateNodeIdentifierCallSafe(cparser, *t)
 }
 
 func CreateNodeIdentifierSafe(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, _ *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
@@ -110,5 +110,5 @@ func CreateNodeIdentifierSafeFast(cparser *parser.AwooParser, details *parser_de
 		return node.AwooParserNodeResult{}, err
 	}
 
-	return CreateNodeIdentifierSafe(cparser, t, details)
+	return CreateNodeIdentifierSafe(cparser, *t, details)
 }

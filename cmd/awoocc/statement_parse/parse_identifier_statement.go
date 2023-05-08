@@ -20,11 +20,11 @@ func ConstructStatementIdentifier(cparser *parser.AwooParser, t lexer_token.Awoo
 		if err != nil {
 			return nil, err
 		}
-		identifierNode, err := CreateNodeIdentifierSafe(cparser, t, &parser_details.ConstructExpressionDetails{})
+		identifierNode, err := CreateNodeIdentifierSafe(cparser, *t, &parser_details.ConstructExpressionDetails{})
 		if err != nil {
 			return nil, err
 		}
-		identifierNode = node.CreateNodePointer(t, identifierNode.Node)
+		identifierNode = node.CreateNodePointer(*t, identifierNode.Node)
 
 		return ConstructStatementAssignment(cparser, identifierNode.Node, details)
 	case token.TokenTypeIdentifier:
@@ -45,5 +45,5 @@ func ConstructStatementIdentifier(cparser *parser.AwooParser, t lexer_token.Awoo
 
 	return nil, parser_error.CreateParserErrorText(parser_error.AwooParserErrorExpectedToken,
 		fmt.Sprintf("%s: %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorExpectedToken], gchalk.Red("identifier")),
-		cparser.Current.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorExpectedToken])
+		t.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorExpectedToken])
 }

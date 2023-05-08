@@ -32,5 +32,5 @@ func ConstructExpressionReferenceFast(cparser *parser.AwooParser, details *parse
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
-	return ConstructExpressionReference(cparser, t, details)
+	return ConstructExpressionReference(cparser, *t, details)
 }

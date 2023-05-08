@@ -18,7 +18,7 @@ func ConstructStatementImport(cparser *parser.AwooParser, _ lexer_token.AwooLexe
 	if err != nil {
 		return nil, err
 	}
-	if lexer_token.GetTokenPrimitiveType(&t) != types.AwooTypeString {
+	if lexer_token.GetTokenPrimitiveType(t) != types.AwooTypeString {
 		return nil, parser_error.CreateParserErrorText(parser_error.AwooParserErrorExpectedToken,
 			fmt.Sprintf("%s: %s", parser_error.AwooParserErrorMessages[parser_error.AwooParserErrorExpectedToken], gchalk.Red("string")),
 			t.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorExpectedToken])

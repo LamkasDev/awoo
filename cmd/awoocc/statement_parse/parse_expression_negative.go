@@ -25,5 +25,5 @@ func ConstructExpressionNegativeFast(cparser *parser.AwooParser, details *parser
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
-	return ConstructExpressionNegative(cparser, t, details)
+	return ConstructExpressionNegative(cparser, *t, details)
 }

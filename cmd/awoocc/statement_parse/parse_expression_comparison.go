@@ -10,7 +10,7 @@ import (
 )
 
 func ConstructExpressionComparison(cparser *parser.AwooParser, leftNode node.AwooParserNodeResult, op lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
-	if t, _ := parser.ExpectTokensOptional(cparser, []uint16{token.TokenOperatorEq, op.Type}); t != nil {
+	if t := parser.ExpectTokensOptional(cparser, []uint16{token.TokenOperatorEq, op.Type}); t != nil {
 		switch op.Type {
 		case token.TokenOperatorLT:
 			switch t.Type {

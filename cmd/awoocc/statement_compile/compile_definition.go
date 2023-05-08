@@ -2,11 +2,10 @@ package statement_compile
 
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_symbol"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/scope"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
@@ -15,8 +14,7 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
-func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement) compiler_symbol.AwooCompilerSymbolTableEntry {
-	currentFunction := ccompiler.Context.Scopes.Functions[uint16(len(ccompiler.Context.Scopes.Functions)-1)]
+func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooParserStatement) elf.AwooElfSymbolTableEntry {
 	variableTypeNode := statement.GetStatementDefinitionVariableType(&s)
 	variableNameNode := statement.GetStatementDefinitionVariableIdentifier(&s)
 	variableName := node.GetNodeIdentifierValue(&variableNameNode)
@@ -25,42 +23,33 @@ func GetCompilerMemoryEntry(ccompiler *compiler.AwooCompiler, s statement.AwooPa
 		// TODO: chaining pointers
 		pointedTypeNode := node.GetNodeSingleValue(&variableTypeNode)
 		pointedType := node.GetNodeTypeType(&pointedTypeNode)
-		return compiler_symbol.AwooCompilerSymbolTableEntry{
-			Symbol: elf.AwooElfSymbolTableEntry{
-				Name:    variableName,
-				Type:    types.AwooTypePointer,
-				Details: pointedType,
-				Size:    ccompiler.Context.Parser.Lexer.Types.All[types.AwooTypePointer].Size,
-			},
-			Global: compiler_context.IsCompilerScopeFunctionGlobal(currentFunction),
+		return elf.AwooElfSymbolTableEntry{
+			Name:    variableName,
+			Type:    types.AwooTypePointer,
+			Details: pointedType,
+			Size:    ccompiler.Context.Parser.Lexer.Types.All[types.AwooTypePointer].Size,
 		}
 	case node.ParserNodeTypeTypeArray:
 		arraySize := node.GetNodeTypeArraySize(&variableTypeNode)
 		arrayTypeNode := node.GetNodeTypeArrayType(&variableTypeNode)
 		arrayType := node.GetNodeTypeType(&arrayTypeNode)
-		return compiler_symbol.AwooCompilerSymbolTableEntry{
-			Symbol: elf.AwooElfSymbolTableEntry{
-				Name: variableName,
-				Type: arrayType,
-				Size: arraySize * ccompiler.Context.Parser.Lexer.Types.All[arrayType].Size,
-			},
-			Global: compiler_context.IsCompilerScopeFunctionGlobal(currentFunction),
+		return elf.AwooElfSymbolTableEntry{
+			Name: variableName,
+			Type: arrayType,
+			Size: arraySize * ccompiler.Context.Parser.Lexer.Types.All[arrayType].Size,
 		}
 	}
 
 	variableType := node.GetNodeTypeType(&variableTypeNode)
-	return compiler_symbol.AwooCompilerSymbolTableEntry{
-		Symbol: elf.AwooElfSymbolTableEntry{
-			Name: variableName,
-			Type: variableType,
-			Size: ccompiler.Context.Parser.Lexer.Types.All[variableType].Size,
-		},
-		Global: compiler_context.IsCompilerScopeFunctionGlobal(currentFunction),
+	return elf.AwooElfSymbolTableEntry{
+		Name: variableName,
+		Type: variableType,
+		Size: ccompiler.Context.Parser.Lexer.Types.All[variableType].Size,
 	}
 }
 
 func CompileStatementDefinition(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s statement.AwooParserStatement) error {
-	variableMemory, err := compiler_context.PushCompilerScopeCurrentBlockSymbol(&ccompiler.Context, GetCompilerMemoryEntry(ccompiler, s))
+	variableMemory, err := scope.PushCurrentFunctionSymbol(&ccompiler.Context.Scopes, GetCompilerMemoryEntry(ccompiler, s))
 	if err != nil {
 		return err
 	}

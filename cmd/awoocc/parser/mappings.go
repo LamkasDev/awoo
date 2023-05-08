@@ -3,7 +3,6 @@ package parser
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/lexer_token"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_error"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
@@ -15,7 +14,7 @@ type AwooParseNodeExpression func(cparser *AwooParser, leftNode node.AwooParserN
 
 type AwooParseNodeValue func(cparser *AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError)
 
-type AwooPrintStatement func(settings *AwooParserSettings, context *parser_context.AwooParserContext, s *statement.AwooParserStatement) string
+type AwooPrintStatement func(settings *AwooParserSettings, context *AwooParserContext, s *statement.AwooParserStatement) string
 
 type AwooParserMappings struct {
 	Statement      map[uint16]AwooParseStatement

@@ -2,10 +2,10 @@ package statement_compile
 
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/scope"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
 	"github.com/LamkasDev/awoo-emu/cmd/common/instruction"
@@ -14,7 +14,7 @@ import (
 
 func CompileNodeIdentifier(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
 	identifier := node.GetNodeIdentifierValue(&n)
-	variableMemory, err := compiler_context.GetCompilerScopeFunctionSymbol(&ccompiler.Context, identifier)
+	variableMemory, err := scope.GetCurrentFunctionSymbol(&ccompiler.Context.Scopes, identifier)
 	if err != nil {
 		return err
 	}

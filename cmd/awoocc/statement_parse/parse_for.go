@@ -10,10 +10,11 @@ import (
 )
 
 func ConstructStatementFor(cparser *parser.AwooParser, _ lexer_token.AwooLexerToken, details *parser_details.ConstructStatementDetails) (*statement.AwooParserStatement, *parser_error.AwooParserError) {
-	if err := parser.AdvanceParser(cparser); err != nil {
+	t, err := parser.AdvanceParser(cparser)
+	if err != nil {
 		return nil, err
 	}
-	forInitializationStatement, err := ConstructStatement(cparser, cparser.Current, &parser_details.ConstructStatementDetails{
+	forInitializationStatement, err := ConstructStatement(cparser, *t, &parser_details.ConstructStatementDetails{
 		EndToken: token.TokenTypeEndStatement,
 	})
 	if err != nil {
@@ -27,10 +28,10 @@ func ConstructStatementFor(cparser *parser.AwooParser, _ lexer_token.AwooLexerTo
 		return &forStatement, err
 	}
 	statement.SetStatementForCondition(&forStatement, forConditionExpression.Node)
-	if err := parser.AdvanceParser(cparser); err != nil {
+	if t, err = parser.AdvanceParser(cparser); err != nil {
 		return nil, err
 	}
-	forAdvancementStatement, err := ConstructStatement(cparser, cparser.Current, &parser_details.ConstructStatementDetails{
+	forAdvancementStatement, err := ConstructStatement(cparser, *t, &parser_details.ConstructStatementDetails{
 		EndToken: token.TokenTypeBracketCurlyLeft,
 	})
 	if err != nil {

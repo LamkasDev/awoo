@@ -11,16 +11,16 @@ import (
 
 func ConstructNodeType(cparser *parser.AwooParser, t lexer_token.AwooLexerToken) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
 	n := node.CreateNodeType(t)
-	for dereferenceToken, _ := parser.ExpectTokenOptional(cparser, token.TokenOperatorDereference); dereferenceToken != nil; dereferenceToken, _ = parser.ExpectTokenOptional(cparser, token.TokenOperatorDereference) {
+	for dereferenceToken := parser.ExpectTokenOptional(cparser, token.TokenOperatorDereference); dereferenceToken != nil; dereferenceToken = parser.ExpectTokenOptional(cparser, token.TokenOperatorDereference) {
 		n = node.CreateNodePointer(t, n.Node)
 	}
-	if arrToken, _ := parser.ExpectTokenOptional(cparser, token.TokenTypeBracketSquareLeft); arrToken != nil {
+	if arrToken := parser.ExpectTokenOptional(cparser, token.TokenTypeBracketSquareLeft); arrToken != nil {
 		n = node.CreateNodeTypeArray(t, n.Node)
 		sizeToken, err := parser.ExpectToken(cparser, token.TokenTypePrimitive)
 		if err != nil {
 			return node.AwooParserNodeResult{}, err
 		}
-		node.SetNodeTypeArraySize(&n.Node, GetPrimitiveValue[arch.AwooRegister](cparser.Context.Lexer, sizeToken))
+		node.SetNodeTypeArraySize(&n.Node, GetPrimitiveValue[arch.AwooRegister](cparser.Context.Lexer, *sizeToken))
 		if _, err := parser.ExpectToken(cparser, token.TokenTypeBracketSquareRight); err != nil {
 			return node.AwooParserNodeResult{}, err
 		}
@@ -34,5 +34,5 @@ func ConstructNodeTypeFast(cparser *parser.AwooParser) (node.AwooParserNodeResul
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
-	return ConstructNodeType(cparser, t)
+	return ConstructNodeType(cparser, *t)
 }

@@ -3,10 +3,10 @@ package statement_compile
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/scope"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cc"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
@@ -27,7 +27,7 @@ func CompileNodeCall(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node
 	if !ok {
 		return awerrors.ErrorFailedToGetFunctionFromScope
 	}
-	stackOffset := compiler_context.GetCompilerScopeCurrentFunctionSize(&ccompiler.Context)
+	stackOffset := scope.GetCurrentFunctionSize(&ccompiler.Context.Scopes)
 
 	functionPrototypeArguments := function.Details.(elf.AwooElfSymbolTableEntryFunctionDetails).Arguments
 	functionArguments := node.GetNodeCallArguments(&n)

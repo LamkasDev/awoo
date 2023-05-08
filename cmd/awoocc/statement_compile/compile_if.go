@@ -2,9 +2,9 @@ package statement_compile
 
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/scope"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
@@ -45,13 +45,11 @@ func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf,
 		}
 
 		// Compile the body to determine comparison jump address.
-		compiler_context.PushCompilerScopeCurrentBlock(&ccompiler.Context, compiler_context.AwooCompilerScopeBlock{
-			Name: "if",
-		})
+		scope.PushCurrentFunctionBlock(&ccompiler.Context.Scopes, scope.NewScopeBlock("if"))
 		if err := CompileStatementGroup(ccompiler, celf, statement.GetStatementIfBody(&s)); err != nil {
 			return err
 		}
-		compiler_context.PopCompilerScopeCurrentBlock(&ccompiler.Context)
+		scope.PopCurrentFunctionBlock(&ccompiler.Context.Scopes)
 		bodyEnd := arch.AwooRegister(len(celf.SectionList.Sections[elf.AwooElfSectionProgram].Contents))
 		bodyLength := bodyEnd - jumpToNextBlockStart
 
@@ -65,13 +63,11 @@ func CompileStatementIfNode(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf,
 			return err
 		}
 	case statement.ParserStatementTypeGroup:
-		compiler_context.PushCompilerScopeCurrentBlock(&ccompiler.Context, compiler_context.AwooCompilerScopeBlock{
-			Name: "else",
-		})
+		scope.PushCurrentFunctionBlock(&ccompiler.Context.Scopes, scope.NewScopeBlock("else"))
 		if err := CompileStatementGroup(ccompiler, celf, s); err != nil {
 			return err
 		}
-		compiler_context.PopCompilerScopeCurrentBlock(&ccompiler.Context)
+		scope.PopCurrentFunctionBlock(&ccompiler.Context.Scopes)
 	}
 
 	// Reserve instruction for jump beyond subsequent blocks.

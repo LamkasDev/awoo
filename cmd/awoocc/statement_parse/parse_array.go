@@ -11,7 +11,7 @@ import (
 
 func CreateNodeArray(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
 	elements := []node.AwooParserNode{}
-	if t, _ := parser.ExpectTokenOptional(cparser, token.TokenTypeBracketCurlyLeft); t == nil {
+	if t := parser.ExpectTokenOptional(cparser, token.TokenTypeBracketCurlyLeft); t == nil {
 		elementDetails := &parser_details.ConstructExpressionDetails{
 			Type:      details.Type,
 			EndTokens: []uint16{token.TokenTypeBracketCurlyRight, token.TokenTypeComma},

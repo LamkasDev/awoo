@@ -25,7 +25,7 @@ const AwooParserErrorAlreadyDefinedFunction = AwooParserErrorType(0x006)
 const AwooParserErrorPrimitiveOverflow = AwooParserErrorType(0x007)
 const AwooParserErrorPrimitiveUnderflow = AwooParserErrorType(0x008)
 
-var AwooParserErrorMessages map[AwooParserErrorType]string = map[AwooParserErrorType]string{
+var AwooParserErrorMessages = map[AwooParserErrorType]string{
 	AwooParserErrorNoMoreTokens:           "no more tokens",
 	AwooParserErrorExpectedToken:          "expected one of",
 	AwooParserErrorUnexpectedToken:        "unexpected",
@@ -37,7 +37,7 @@ var AwooParserErrorMessages map[AwooParserErrorType]string = map[AwooParserError
 	AwooParserErrorPrimitiveUnderflow:     "primitive underflow",
 }
 
-var AwooParserErrorDetails map[AwooParserErrorType]string = map[AwooParserErrorType]string{
+var AwooParserErrorDetails = map[AwooParserErrorType]string{
 	AwooParserErrorNoMoreTokens:           "last here",
 	AwooParserErrorExpectedToken:          "found instead",
 	AwooParserErrorUnexpectedToken:        "not applicable",

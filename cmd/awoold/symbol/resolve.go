@@ -1,8 +1,7 @@
 package symbol
 
 import (
-	"errors"
-
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/awerrors"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoold/linker"
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
@@ -17,7 +16,9 @@ func ShiftImmediate(clinker *linker.AwooLinker, elf *commonElf.AwooElf, offset a
 	}
 	// TODO: support shifts over 2047
 	ins.Immediate = shift
-	encoder.EncodeAt(elf, offset, ins)
+	if err = encoder.EncodeAt(elf, offset, ins); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -26,7 +27,7 @@ func ResolveSymbols(clinker *linker.AwooLinker, elf *commonElf.AwooElf) error {
 	for _, relocEntry := range elf.RelocationList {
 		symbol, ok := elf.SymbolTable.Internal[relocEntry.Name]
 		if !ok {
-			return errors.New("not found")
+			return awerrors.ErrorUnknownVariable
 		}
 		if err := ShiftImmediate(clinker, elf, relocEntry.Offset, symbol.Start); err != nil {
 			return err

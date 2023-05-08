@@ -4,10 +4,10 @@ import (
 	"math"
 
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_details"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/scope"
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cpu"
 	"github.com/LamkasDev/awoo-emu/cmd/common/elf"
@@ -29,7 +29,7 @@ func CompileArrayIndexAddress(ccompiler *compiler.AwooCompiler, celf *elf.AwooEl
 }
 
 func CompileNodeArrayIndex(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, n node.AwooParserNode, details *compiler_details.CompileNodeValueDetails) error {
-	variableMemory, err := compiler_context.GetCompilerScopeFunctionSymbol(&ccompiler.Context, node.GetNodeArrayIndexIdentifier(&n))
+	variableMemory, err := scope.GetCurrentFunctionSymbol(&ccompiler.Context.Scopes, node.GetNodeArrayIndexIdentifier(&n))
 	if err != nil {
 		return err
 	}

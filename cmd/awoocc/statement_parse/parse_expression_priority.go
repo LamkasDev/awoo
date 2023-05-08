@@ -22,5 +22,5 @@ func ConstructExpressionPriorityFast(cparser *parser.AwooParser, details *parser
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
-	return ConstructExpressionPriority(cparser, t, details)
+	return ConstructExpressionPriority(cparser, *t, details)
 }

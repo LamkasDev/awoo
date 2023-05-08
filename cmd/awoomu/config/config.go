@@ -28,8 +28,12 @@ func ReadConfig(config AwooConfig) (AwooConfig, error) {
 	path := filepath.Join(u.HomeDir, "Documents", "awoo", "config", "emu.json")
 	raw, err := os.ReadFile(path)
 	if err != nil {
-		raw, _ = json.Marshal(config)
-		os.WriteFile(path, raw, 0755)
+		if raw, err = json.Marshal(config); err != nil {
+			return AwooConfig{}, err
+		}
+		if err = os.WriteFile(path, raw, 0755); err != nil {
+			return AwooConfig{}, err
+		}
 	}
 	err = json.Unmarshal(raw, &config)
 	if err != nil {

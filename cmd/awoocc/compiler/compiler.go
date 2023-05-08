@@ -1,19 +1,26 @@
 package compiler
 
 import (
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/parser_context"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/scope"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 )
 
 type AwooCompiler struct {
-	Contents parser.AwooParserResult
-	Length   uint16
-	Position uint16
-	Current  statement.AwooParserStatement
-	Context  compiler_context.AwooCompilerContext
+	Contents AwooCompilerContents
+	Context  AwooCompilerContext
 	Settings AwooCompilerSettings
+}
+
+type AwooCompilerContents struct {
+	Data     parser.AwooParserResult
+	Length   uint32
+	Position uint32
+}
+
+type AwooCompilerContext struct {
+	Parser parser.AwooParserContext
+	Scopes scope.AwooScopeContainer
 }
 
 type AwooCompilerSettings struct {
@@ -22,37 +29,37 @@ type AwooCompilerSettings struct {
 	Mappings AwooCompilerMappings
 }
 
-func SetupCompiler(settings AwooCompilerSettings, context parser_context.AwooParserContext) AwooCompiler {
-	compiler := AwooCompiler{
-		Context: compiler_context.AwooCompilerContext{
+func NewCompiler(settings AwooCompilerSettings, context parser.AwooParserContext, data parser.AwooParserResult) AwooCompiler {
+	return AwooCompiler{
+		Contents: AwooCompilerContents{
+			Data:   data,
+			Length: (uint32)(len(data.Statements)),
+		},
+		Context: AwooCompilerContext{
 			Parser: context,
-			Scopes: compiler_context.NewCompilerScopeContainer(),
+			Scopes: scope.NewScopeContainer(),
 		},
 		Settings: settings,
 	}
-	return compiler
 }
 
-func LoadCompiler(compiler *AwooCompiler, contents parser.AwooParserResult) {
-	compiler.Contents = contents
-	compiler.Length = (uint16)(len(contents.Statements))
-	compiler.Position = 0
-	compiler.Current = compiler.Contents.Statements[compiler.Position]
+func GetCompilerStatement(ccompiler *AwooCompiler) statement.AwooParserStatement {
+	return ccompiler.Contents.Data.Statements[ccompiler.Contents.Position]
 }
 
-func AdvanceCompilerFor(compiler *AwooCompiler, n int16) bool {
-	compiler.Position = (uint16)((int16)(compiler.Position) + n)
-	if compiler.Position >= compiler.Length {
-		return false
+func AdvanceCompilerFor(compiler *AwooCompiler, n int32) *statement.AwooParserStatement {
+	compiler.Contents.Position = (uint32)((int32)(compiler.Contents.Position) + n)
+	if compiler.Contents.Position >= compiler.Contents.Length {
+		return nil
 	}
-	compiler.Current = compiler.Contents.Statements[compiler.Position]
-	return true
+	statement := GetCompilerStatement(compiler)
+	return &statement
 }
 
-func AdvanceCompiler(compiler *AwooCompiler) bool {
+func AdvanceCompiler(compiler *AwooCompiler) *statement.AwooParserStatement {
 	return AdvanceCompilerFor(compiler, 1)
 }
 
-func StepbackCompiler(compiler *AwooCompiler) bool {
+func StepbackCompiler(compiler *AwooCompiler) *statement.AwooParserStatement {
 	return AdvanceCompilerFor(compiler, -1)
 }

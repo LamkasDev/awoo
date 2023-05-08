@@ -107,9 +107,10 @@ func RunCompilerFull(context map[string]elf.AwooElf, input paths.AwooPath, outpu
 			},
 		},
 	}
-	par := parser.SetupParser(parSettings, lex.Context)
-	parser.LoadParser(&par, lexRes)
-	parser_run.LoadParserSymbols(&par, &celf)
+	par := parser.NewParser(parSettings, lex.Context, lexRes)
+	if err := parser_run.LoadParserSymbols(&par, &celf); err != nil {
+		panic(err)
+	}
 	parRes := parser_run.RunParser(&par)
 
 	compSettings := compiler.AwooCompilerSettings{
@@ -156,8 +157,7 @@ func RunCompilerFull(context map[string]elf.AwooElf, input paths.AwooPath, outpu
 			InstructionTable: instructions.SetupInstructionTable(),
 		},
 	}
-	comp := compiler.SetupCompiler(compSettings, par.Context)
-	compiler.LoadCompiler(&comp, parRes)
+	comp := compiler.NewCompiler(compSettings, par.Context, parRes)
 	RunCompiler(&comp, &celf)
 
 	context[input.Absolute] = celf
@@ -203,15 +203,15 @@ func RunCompiler(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf) {
 func RunCompilerDry(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf) {
 	logger.LogExtra(gchalk.Yellow("\n> Compiler\n"))
 
-	// TODO: compiler global scope does not include tokens from dependencies (they're in external symbol table though)
-	for ok := true; ok; ok = compiler.AdvanceCompiler(ccompiler) {
+	cstatement := compiler.GetCompilerStatement(ccompiler)
+	for statement := &cstatement; statement != nil; statement = compiler.AdvanceCompiler(ccompiler) {
 		start := len(celf.SectionList.Sections[elf.AwooElfSectionProgram].Contents)
-		parser.PrintStatement(&ccompiler.Settings.Parser, &ccompiler.Context.Parser, &ccompiler.Current)
-		if err := statement_compile.CompileStatement(ccompiler, celf, ccompiler.Current); err != nil {
+		parser.PrintStatement(&ccompiler.Settings.Parser, &ccompiler.Context.Parser, statement)
+		if err := statement_compile.CompileStatement(ccompiler, celf, *statement); err != nil {
 			panic(err)
 		}
 		end := len(celf.SectionList.Sections[elf.AwooElfSectionProgram].Contents)
-		compiler.PrintNewCompile(ccompiler, &ccompiler.Current, celf.SectionList.Sections[elf.AwooElfSectionProgram].Contents[start:end])
+		compiler.PrintNewCompile(ccompiler, statement, celf.SectionList.Sections[elf.AwooElfSectionProgram].Contents[start:end])
 	}
 	elf.AlignSections(celf)
 }

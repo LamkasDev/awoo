@@ -2,10 +2,9 @@ package statement_compile
 
 import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_context"
-	"github.com/LamkasDev/awoo-emu/cmd/awoocc/compiler_symbol"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/encoder"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/node"
+	"github.com/LamkasDev/awoo-emu/cmd/awoocc/scope"
 	"github.com/LamkasDev/awoo-emu/cmd/awoocc/statement"
 	"github.com/LamkasDev/awoo-emu/cmd/common/arch"
 	"github.com/LamkasDev/awoo-emu/cmd/common/cc"
@@ -14,19 +13,30 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/common/types"
 )
 
-func CompileStatementFunc(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s statement.AwooParserStatement) error {
-	functionBody := statement.GetStatementFuncBody(&s)
-	if len(statement.GetStatementGroupBody(&functionBody)) == 0 {
-		return nil
+func LoadExternalSymbols(ccompiler *compiler.AwooCompiler) error {
+	for _, symbol := range ccompiler.Context.Parser.Scopes.Functions[scope.AwooScopeGlobalFunctionId].Blocks[scope.AwooScopeGlobalBlockId].SymbolTable.External {
+		if _, err := scope.PushFunctionBlockSymbolExternal(&ccompiler.Context.Scopes, symbol.Symbol); err != nil {
+			return err
+		}
 	}
 
+	return nil
+}
+
+func CompileStatementFunc(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s statement.AwooParserStatement) error {
+	functionBody := statement.GetStatementFuncBody(&s)
 	functionNameNode := statement.GetStatementFuncIdentifier(&s)
 	functionName := node.GetNodeIdentifierValue(&functionNameNode)
 
-	compilerScopeFunction := compiler_context.NewCompilerScopeFunction(functionName)
-	compiler_context.PushCompilerScopeFunction(&ccompiler.Context, compilerScopeFunction)
+	compilerScopeFunction := scope.NewScopeFunction(functionName)
+	scope.PushFunction(&ccompiler.Context.Scopes, compilerScopeFunction)
+	if scope.IsFunctionGlobal(compilerScopeFunction) {
+		if err := LoadExternalSymbols(ccompiler); err != nil {
+			return err
+		}
+	}
 
-	if !compiler_context.IsCompilerScopeFunctionGlobal(compilerScopeFunction) {
+	if !scope.IsFunctionGlobal(compilerScopeFunction) {
 		functionArguments := []elf.AwooElfSymbolTableEntry{
 			{
 				Name: cc.AwooCompilerReturnAddressVariable,
@@ -37,11 +47,7 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s
 		functionArguments = append(functionArguments, statement.GetStatementFuncArguments(&s)...)
 		functionArgumentsOffset := arch.AwooRegister(0)
 		for _, argument := range functionArguments {
-			_, err := compiler_context.PushCompilerScopeCurrentBlockSymbol(&ccompiler.Context, compiler_symbol.AwooCompilerSymbolTableEntry{
-				Symbol: argument,
-				Global: false,
-			})
-			if err != nil {
+			if _, err := scope.PushCurrentFunctionSymbol(&ccompiler.Context.Scopes, argument); err != nil {
 				return err
 			}
 			functionArgumentsOffset += argument.Size
@@ -59,7 +65,7 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s
 	}
 	elf.SetSymbol(celf, compilerFunction)
 
-	if !compiler_context.IsCompilerScopeFunctionGlobal(compilerScopeFunction) {
+	if !scope.IsFunctionGlobal(compilerScopeFunction) {
 		if err := encoder.Encode(celf, instruction_helper.ConstructInstructionSaveReturnAddress()); err != nil {
 			return err
 		}
@@ -71,8 +77,8 @@ func CompileStatementFunc(ccompiler *compiler.AwooCompiler, celf *elf.AwooElf, s
 	compilerFunction.Size = arch.AwooRegister(len(celf.SectionList.Sections[elf.AwooElfSectionProgram].Contents)) - compilerFunction.Start
 	elf.SetSymbol(celf, compilerFunction)
 
-	if !compiler_context.IsCompilerScopeFunctionGlobal(compilerScopeFunction) {
-		compiler_context.PopCompilerScopeCurrentFunction(&ccompiler.Context)
+	if !scope.IsFunctionGlobal(compilerScopeFunction) {
+		scope.PopCurrentFunction(&ccompiler.Context.Scopes)
 	}
 	return nil
 }

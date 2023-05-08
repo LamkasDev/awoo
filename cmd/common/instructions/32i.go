@@ -81,7 +81,7 @@ var AwooInstructionLB = instruction.AwooInstructionDefinition{
 	Code: 0b0000011, Argument: 0x0, Format: instruction.AwooInstructionFormatI, Name: "LB", Advance: true,
 }
 
-// SetupInstructionTableEntry(table, 0b0000011, 0x6, instruction.AwooInstructionFormatI, "LWU", nil)
+// SetupInstructionTableEntry(table, 0b0000011, 0x6, instruction.AwooInstructionFormatI, "LWU", nil).
 var AwooInstructionLHU = instruction.AwooInstructionDefinition{
 	Code: 0b0000011, Argument: 0x5, Format: instruction.AwooInstructionFormatI, Name: "LHU", Advance: true,
 }
@@ -89,7 +89,7 @@ var AwooInstructionLBU = instruction.AwooInstructionDefinition{
 	Code: 0b0000011, Argument: 0x4, Format: instruction.AwooInstructionFormatI, Name: "LBU", Advance: true,
 }
 
-// SetupInstructionTableEntry(table, 0b0100011, 0x3, instruction.AwooInstructionFormatS, "SD", nil)
+// SetupInstructionTableEntry(table, 0b0100011, 0x3, instruction.AwooInstructionFormatS, "SD", nil).
 var AwooInstructionSW = instruction.AwooInstructionDefinition{
 	Code: 0b0100011, Argument: 0x2, Format: instruction.AwooInstructionFormatS, Name: "SW", Advance: true,
 }
@@ -100,7 +100,7 @@ var AwooInstructionSB = instruction.AwooInstructionDefinition{
 	Code: 0b0100011, Argument: 0x0, Format: instruction.AwooInstructionFormatS, Name: "SB", Advance: true,
 }
 
-// Branching (8 instructions)
+// Branching (8 instructions).
 var AwooInstructionBEQ = instruction.AwooInstructionDefinition{
 	Code: 0b1100011, Argument: 0x0, Format: instruction.AwooInstructionFormatB, Name: "BEQ", Advance: true,
 }

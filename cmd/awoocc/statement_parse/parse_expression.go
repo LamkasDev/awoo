@@ -15,12 +15,12 @@ import (
 )
 
 func ConstructExpressionAccumulate(cparser *parser.AwooParser, leftNode node.AwooParserNodeResult, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
-	op, err := parser.FetchToken(cparser)
+	op, err := parser.AdvanceParser(cparser)
 	if err != nil {
 		return leftNode, err
 	}
 	if util.Contains(details.EndTokens, op.Type) {
-		return ConstructExpressionEndStatement(cparser, leftNode, op, details)
+		return ConstructExpressionEndStatement(cparser, leftNode, *op, details)
 	}
 	entry, ok := cparser.Settings.Mappings.NodeExpression[op.Type]
 	if !ok {
@@ -33,7 +33,7 @@ func ConstructExpressionAccumulate(cparser *parser.AwooParser, leftNode node.Awo
 			op.Position, parser_error.AwooParserErrorDetails[parser_error.AwooParserErrorExpectedToken])
 	}
 
-	return entry(cparser, leftNode, op, details)
+	return entry(cparser, leftNode, *op, details)
 }
 
 func ConstructExpressionBracket(cparser *parser.AwooParser, t lexer_token.AwooLexerToken, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
@@ -53,12 +53,12 @@ func ConstructExpressionBracket(cparser *parser.AwooParser, t lexer_token.AwooLe
 }
 
 func ConstructExpressionBracketFast(cparser *parser.AwooParser, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError) {
-	t, err := parser.FetchToken(cparser)
+	t, err := parser.AdvanceParser(cparser)
 	if err != nil {
 		return node.AwooParserNodeResult{}, err
 	}
 
-	return ConstructExpressionBracket(cparser, t, details)
+	return ConstructExpressionBracket(cparser, *t, details)
 }
 
 func ConstructExpressionStart(cparser *parser.AwooParser, details *parser_details.ConstructExpressionDetails) (node.AwooParserNodeResult, *parser_error.AwooParserError) {

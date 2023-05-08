@@ -31,7 +31,7 @@ func ConstructStatementIf(cparser *parser.AwooParser, _ lexer_token.AwooLexerTok
 	if err != nil {
 		return ifStatement, err
 	}
-	for elseToken, _ := parser.ExpectTokenOptional(cparser, token.TokenKeywordElse); elseToken != nil; elseToken, _ = parser.ExpectTokenOptional(cparser, token.TokenKeywordElse) {
+	for elseToken := parser.ExpectTokenOptional(cparser, token.TokenKeywordElse); elseToken != nil; elseToken = parser.ExpectTokenOptional(cparser, token.TokenKeywordElse) {
 		t, err := parser.ExpectTokens(cparser, []uint16{token.TokenKeywordIf, token.TokenTypeBracketCurlyLeft})
 		if err != nil {
 			return ifStatement, err

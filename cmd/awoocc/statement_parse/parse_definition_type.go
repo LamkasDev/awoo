@@ -16,7 +16,7 @@ func ConstructStatementDefinitionType(cparser *parser.AwooParser, _ lexer_token.
 	if err != nil {
 		return nil, err
 	}
-	newIdentifier := lexer_token.GetTokenIdentifierValue(&t)
+	newIdentifier := lexer_token.GetTokenIdentifierValue(t)
 	newType := types.AwooType{
 		Key: newIdentifier,
 	}
@@ -26,7 +26,7 @@ func ConstructStatementDefinitionType(cparser *parser.AwooParser, _ lexer_token.
 	if err != nil {
 		return nil, err
 	}
-	originalIdentifier := lexer_token.GetTokenTypeId(&t)
+	originalIdentifier := lexer_token.GetTokenTypeId(t)
 	originalType, _ := lexer_context.GetContextTypeId(&cparser.Context.Lexer, originalIdentifier)
 
 	lexer_context.AddContextTypeAlias(&cparser.Context.Lexer, originalType, newType)
