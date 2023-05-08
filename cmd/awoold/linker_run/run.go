@@ -12,7 +12,6 @@ import (
 	"github.com/LamkasDev/awoo-emu/cmd/awoold/linker"
 	"github.com/LamkasDev/awoo-emu/cmd/awoold/symbol"
 	commonElf "github.com/LamkasDev/awoo-emu/cmd/common/elf"
-	"github.com/davecgh/go-spew/spew"
 )
 
 func RunLinker(clinker *linker.AwooLinker) {
@@ -28,7 +27,6 @@ func RunLinker(clinker *linker.AwooLinker) {
 	if err := header.PopulateHeader(clinker, &celf); err != nil {
 		panic(err)
 	}
-	spew.Dump(celf)
 
 	if err := os.MkdirAll(filepath.Dir(clinker.Settings.Path), 0644); err != nil {
 		panic(err)

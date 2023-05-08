@@ -29,9 +29,7 @@ type AwooEmulator struct {
 }
 
 func SetupEmulator() AwooEmulator {
-	if _, _, err := procTimeBeginPeriod.Call(uintptr(1)); err != nil {
-		panic(err)
-	}
+	procTimeBeginPeriod.Call(uintptr(1))
 	emulator := AwooEmulator{
 		Config:          config.NewAwooConfig(),
 		Internal:        internal.SetupInternal(),
